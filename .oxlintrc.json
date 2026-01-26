@@ -1,0 +1,96 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+
+  "categories": { "correctness": "error", "suspicious": "warn", "pedantic": "warn", "perf": "warn", "style": "warn" },
+  "env": { "builtin": true, "browser": true, "node": true, "es2024": true },
+  "ignorePatterns": ["dist/*", "node_modules/**", "test/**"],
+  "overrides": [
+    {
+      "files": ["**/*.tsx"],
+      "rules": {
+        /* Suspicious */
+        "no-absolute-path": "off",
+
+        /* Perf */
+        "jsx-no-jsx-as-prop": "off",
+
+        /* Restriction */
+        "explicit-function-return-type": "off",
+
+        /* Pedantic */
+        "strict-boolean-expressions": ["warn", { "allowNullableString": true }],
+
+        /* Style */
+        "jsx-props-no-spreading": "off"
+      }
+    },
+    {
+      "files": ["src/components/ui/**/*.tsx"],
+      "rules": {
+        /* Style */
+        "no-namespace": "off"
+      }
+    }
+  ],
+  "plugins": [
+    "eslint",
+    "typescript",
+    "unicorn",
+    "react",
+    "react-perf",
+    "oxc",
+    "import",
+    "jsdoc",
+    "jsx-a11y",
+    "node",
+    "promise"
+  ],
+  "rules": {
+    /* Suspicious */
+    "no-unassigned-import": ["warn", { "allow": ["**/*.css"] }],
+    "react-in-jsx-scope": "off",
+
+    /* Restriction */
+    "explicit-function-return-type": "error",
+
+    /* Pedantic */
+    "eqeqeq": ["warn", "always", { "null": "ignore" }],
+    "max-classes-per-file": "off",
+    "max-depth": "off",
+    "max-lines": "off",
+    "max-lines-per-function": "off",
+    "no-fallthrough": "off",
+    "max-dependencies": "off",
+
+    /* Style */
+    "jsx-max-depth": "off",
+    "func-style": ["warn", "declaration", { "allowArrowFunctions": true }],
+    "id-length": "off",
+    "init-declarations": "off",
+    "max-params": "off",
+    "no-continue": "off",
+    "no-labels": "off",
+    "no-magic-numbers": [
+      "warn",
+      {
+        "ignore": [0, 1],
+        "ignoreArrayIndexes": true,
+        "ignoreClassFieldInitialValues": true,
+        "ignoreDefaultValues": true,
+        "ignoreNumericLiteralTypes": true,
+        "ignoreReadonlyClassProperties": true,
+        "ignoreTypeIndexes": true
+      }
+    ],
+    "no-ternary": "off",
+    "sort-imports": "off",
+    "sort-keys": "off",
+    "consistent-type-specifier-style": "off",
+    "exports-last": "off",
+    "group-exports": "off",
+    "no-named-export": "off",
+    "prefer-default-export": "off",
+    "no-null": "off",
+    "switch-case-braces": ["warn", "avoid"]
+  }
+}

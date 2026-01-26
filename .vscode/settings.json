@@ -1,0 +1,16 @@
+{
+  "files.associations": { "*.css": "tailwindcss" },
+
+  "oxc.configPath": ".oxlintrc.json",
+  "oxc.tsConfigPath": "tsconfig.json",
+  "oxc.unusedDisableDirectives": "warn",
+  "oxc.typeAware": true,
+  "oxc.disableNestedConfig": true,
+
+  "prettier.configPath": ".prettierrc.json",
+  "prettier.ignorePath": ".prettierignore",
+
+  "[css][html][json][jsonc][markdown][typescript][typescriptreact][yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
