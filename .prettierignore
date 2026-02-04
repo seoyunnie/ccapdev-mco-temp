@@ -1,2 +1,5 @@
-# Dependency Lock File
+# pnpm
 pnpm-lock.yaml
+
+# TanStack Router
+src/routeTree.gen.ts

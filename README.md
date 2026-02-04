@@ -1,8 +1,5 @@
 > [!IMPORTANT]
 > DO NOT DIRECTLY TOUCH THE FOLLOWING:
 >
-> - [./src/components/ui](./src/components/ui)
-> - [./src/lib/utils.ts](./src/lib/utils.ts)
-> - [./src/index.css](./src/index.css)
-> - [./src/main.tsx](./src/main.tsx)
-> - [./index.html](./index.html)
+> - [./src/routeTree.gen.ts](./src/routeTree.gen.ts)
+> - All root files.

@@ -2,33 +2,28 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
 
   "categories": { "correctness": "error", "suspicious": "warn", "pedantic": "warn", "perf": "warn", "style": "warn" },
-  "env": { "builtin": true, "browser": true, "node": true, "es2024": true },
-  "ignorePatterns": ["dist/*", "node_modules/**", "test/**"],
+  "env": { "builtin": true, "browser": true, "es2023": true },
+  "ignorePatterns": ["dist/*", "node_modules/**", "src/routeTree.gen.ts"],
+  "jsPlugins": [
+    { "name": "@tanstack/router", "specifier": "@tanstack/eslint-plugin-router" },
+    "eslint-plugin-react-refresh"
+  ],
   "overrides": [
     {
-      "files": ["**/*.tsx"],
+      "files": ["*.config.[jt]s"],
       "rules": {
-        /* Suspicious */
-        "no-absolute-path": "off",
-
-        /* Perf */
-        "jsx-no-jsx-as-prop": "off",
-
-        /* Restriction */
-        "explicit-function-return-type": "off",
-
-        /* Pedantic */
-        "strict-boolean-expressions": ["warn", { "allowNullableString": true }],
-
         /* Style */
-        "jsx-props-no-spreading": "off"
+        "no-anonymous-default-export": ["warn", { "allowObject": true }]
       }
     },
     {
-      "files": ["src/components/ui/**/*.tsx"],
+      "files": ["**/*.[jt]sx"],
       "rules": {
-        /* Style */
-        "no-namespace": "off"
+        /* Restriction */
+        "explicit-function-return-type": "off",
+
+        /* Suspicious */
+        "no-absolute-path": "off"
       }
     }
   ],
@@ -46,29 +41,43 @@
     "promise"
   ],
   "rules": {
-    /* Suspicious */
-    "no-unassigned-import": ["warn", { "allow": ["**/*.css"] }],
-    "react-in-jsx-scope": "off",
+    /* @tanstack/eslint-plugin-router */
+    "@tanstack/router/create-route-property-order": "warn",
 
-    /* Restriction */
-    "explicit-function-return-type": "error",
+    /* eslint-plugin-react-refresh */
+    "react-refresh/only-export-components": ["error", { "allowConstantExport": true }],
 
     /* Pedantic */
     "eqeqeq": ["warn", "always", { "null": "ignore" }],
     "max-classes-per-file": "off",
-    "max-depth": "off",
-    "max-lines": "off",
-    "max-lines-per-function": "off",
-    "no-fallthrough": "off",
     "max-dependencies": "off",
+    "max-depth": "off",
+    "max-lines-per-function": "off",
+    "max-lines": "off",
+    "no-fallthrough": "off",
+    "only-throw-error": [
+      "warn",
+      { "allow": [{ "from": "package", "package": "@tanstack/router-core", "name": "Redirect" }] }
+    ],
+
+    /* Perf */
+    "jsx-no-jsx-as-prop": "off",
+
+    /* Restriction */
+    "explicit-function-return-type": "error",
 
     /* Style */
-    "jsx-max-depth": "off",
+    "consistent-type-specifier-style": "off",
+    "exports-last": "off",
     "func-style": ["warn", "declaration", { "allowArrowFunctions": true }],
+    "group-exports": "off",
     "id-length": "off",
     "init-declarations": "off",
+    "jsx-max-depth": "off",
+    "jsx-props-no-spreading": "off",
     "max-params": "off",
     "no-continue": "off",
+    "no-empty-interface": ["warn", { "allowSingleExtends": true }],
     "no-labels": "off",
     "no-magic-numbers": [
       "warn",
@@ -82,15 +91,16 @@
         "ignoreTypeIndexes": true
       }
     ],
+    "no-named-export": "off",
+    "no-null": "off",
     "no-ternary": "off",
+    "prefer-default-export": "off",
     "sort-imports": "off",
     "sort-keys": "off",
-    "consistent-type-specifier-style": "off",
-    "exports-last": "off",
-    "group-exports": "off",
-    "no-named-export": "off",
-    "prefer-default-export": "off",
-    "no-null": "off",
-    "switch-case-braces": ["warn", "avoid"]
+    "switch-case-braces": ["warn", "avoid"],
+
+    /* Suspicious */
+    "no-unassigned-import": ["warn", { "allow": ["**/*.css"] }],
+    "react-in-jsx-scope": "off"
   }
 }

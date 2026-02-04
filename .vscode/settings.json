@@ -1,5 +1,5 @@
 {
-  "files.associations": { "*.css": "tailwindcss" },
+  "cssVariables.lookupFiles": ["**/*.css", "node_modules/@mantine/core/styles.css"],
 
   "oxc.configPath": ".oxlintrc.json",
   "oxc.tsConfigPath": "tsconfig.json",

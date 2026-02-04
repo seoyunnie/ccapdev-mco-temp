@@ -2,8 +2,12 @@
   "recommendations": [
     "editorconfig.editorconfig",
 
+    /* CSS */
+    "clinyong.vscode-css-modules",
+    "vunguyentuan.vscode-css-variables",
+    "vunguyentuan.vscode-postcss",
+
     /* JavaScript */
-    "bradlc.vscode-tailwindcss",
     "oxc.oxc-vscode",
     "esbenp.prettier-vscode",
 
