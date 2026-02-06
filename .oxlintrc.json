@@ -4,10 +4,6 @@
   "categories": { "correctness": "error", "suspicious": "warn", "pedantic": "warn", "perf": "warn", "style": "warn" },
   "env": { "builtin": true, "browser": true, "es2023": true },
   "ignorePatterns": ["dist/*", "node_modules/**", "src/routeTree.gen.ts"],
-  "jsPlugins": [
-    { "name": "@tanstack/router", "specifier": "@tanstack/eslint-plugin-router" },
-    "eslint-plugin-react-refresh"
-  ],
   "overrides": [
     {
       "files": ["*.config.[jt]s"],
@@ -18,35 +14,58 @@
     },
     {
       "files": ["**/*.[jt]sx"],
+      "jsPlugins": [
+        { "name": "@tanstack/router", "specifier": "@tanstack/eslint-plugin-router" },
+        { "name": "react-compiler", "specifier": "eslint-plugin-react-hooks" },
+        "eslint-plugin-react-refresh"
+      ],
+      "plugins": ["react", "jsx-a11y"],
       "rules": {
+        /* @tanstack/eslint-plugin-router */
+        "@tanstack/router/create-route-property-order": "warn",
+
+        /* eslint-plugin-react-hooks */
+        "react-compiler/config": "error",
+        "react-compiler/error-boundaries": "error",
+        "react-compiler/component-hook-factories": "error",
+        "react-compiler/gating": "error",
+        "react-compiler/globals": "error",
+        "react-compiler/immutability": "error",
+        "react-compiler/preserve-manual-memoization": "error",
+        "react-compiler/purity": "error",
+        "react-compiler/refs": "error",
+        "react-compiler/set-state-in-effect": "error",
+        "react-compiler/set-state-in-render": "error",
+        "react-compiler/static-components": "error",
+        "react-compiler/unsupported-syntax": "warn",
+        "react-compiler/use-memo": "error",
+        "react-compiler/incompatible-library": "warn",
+
+        /* eslint-plugin-react-refresh */
+        "react-refresh/only-export-components": ["error", { "allowConstantExport": true }],
+
         /* Restriction */
         "explicit-function-return-type": "off",
 
+        /* Style */
+        "jsx-max-depth": "off",
+        "jsx-props-no-spreading": "off",
+
         /* Suspicious */
-        "no-absolute-path": "off"
+        "no-absolute-path": "off",
+        "react-in-jsx-scope": "off"
+      }
+    },
+    {
+      "files": ["src/routes/__root.tsx", "src/routes/**/index.[jt]sx", "src/routes/**/route.[jt]sx"],
+      "rules": {
+        /* eslint-plugin-react-refresh */
+        "react-refresh/only-export-components": "off"
       }
     }
   ],
-  "plugins": [
-    "eslint",
-    "typescript",
-    "unicorn",
-    "react",
-    "react-perf",
-    "oxc",
-    "import",
-    "jsdoc",
-    "jsx-a11y",
-    "node",
-    "promise"
-  ],
+  "plugins": ["eslint", "typescript", "unicorn", "react", "oxc", "import", "jsdoc", "jsx-a11y", "node", "promise"],
   "rules": {
-    /* @tanstack/eslint-plugin-router */
-    "@tanstack/router/create-route-property-order": "warn",
-
-    /* eslint-plugin-react-refresh */
-    "react-refresh/only-export-components": ["error", { "allowConstantExport": true }],
-
     /* Pedantic */
     "eqeqeq": ["warn", "always", { "null": "ignore" }],
     "max-classes-per-file": "off",
@@ -60,9 +79,6 @@
       { "allow": [{ "from": "package", "package": "@tanstack/router-core", "name": "Redirect" }] }
     ],
 
-    /* Perf */
-    "jsx-no-jsx-as-prop": "off",
-
     /* Restriction */
     "explicit-function-return-type": "error",
 
@@ -73,8 +89,6 @@
     "group-exports": "off",
     "id-length": "off",
     "init-declarations": "off",
-    "jsx-max-depth": "off",
-    "jsx-props-no-spreading": "off",
     "max-params": "off",
     "no-continue": "off",
     "no-empty-interface": ["warn", { "allowSingleExtends": true }],
@@ -100,7 +114,6 @@
     "switch-case-braces": ["warn", "avoid"],
 
     /* Suspicious */
-    "no-unassigned-import": ["warn", { "allow": ["**/*.css"] }],
-    "react-in-jsx-scope": "off"
+    "no-unassigned-import": ["warn", { "allow": ["**/*.css"] }]
   }
 }
