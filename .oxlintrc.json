@@ -64,7 +64,7 @@
       }
     }
   ],
-  "plugins": ["eslint", "typescript", "unicorn", "react", "oxc", "import", "jsdoc", "jsx-a11y", "node", "promise"],
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "jsdoc", "node", "promise"],
   "rules": {
     /* Pedantic */
     "eqeqeq": ["warn", "always", { "null": "ignore" }],
