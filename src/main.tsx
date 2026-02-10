@@ -3,21 +3,24 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "@mantine/core/styles.css";
+import "@mantine/carousel/styles.css";
 import "./globals.css";
 
-import { createTheme, MantineProvider } from "@mantine/core";
+import { MantineProvider } from "@mantine/core";
 import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { AuthProvider } from "./context/AuthContext.tsx";
 import { router } from "./router.ts";
-
-const theme = createTheme({ fontFamily: "Roboto, sans-serif", primaryColor: "pink" });
+import { adormableTheme } from "./theme.ts";
 
 // oxlint-disable-next-line unicorn/prefer-query-selector
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MantineProvider theme={theme} defaultColorScheme="auto">
-      <RouterProvider router={router} />
+    <MantineProvider theme={adormableTheme}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </MantineProvider>
   </StrictMode>,
 );
