@@ -54,7 +54,7 @@ function AdminControlPanelPage() {
 
       <SimpleGrid cols={{ base: 2, md: 4 }} mb="xl">
         {stats.map((stat) => (
-          <Paper key={stat.label} shadow="md" p="md" radius="md" className={classes.card}>
+          <Paper key={stat.label} shadow="md" p="md" radius="md" className={classes.contentCard}>
             <Group justify="space-between">
               <Stack gap={4}>
                 <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
@@ -75,7 +75,7 @@ function AdminControlPanelPage() {
         ))}
       </SimpleGrid>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.card} mb="xl">
+      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="xl">
         <Group justify="space-between" mb="md">
           <Title order={4}>User Management</Title>
           <TextInput placeholder="Search users..." leftSection={<IconSearch size={16} />} size="sm" />
@@ -125,7 +125,7 @@ function AdminControlPanelPage() {
         </Table>
       </Paper>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.card}>
+      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard}>
         <Title order={4} mb="md">
           Site Diagnostics
         </Title>

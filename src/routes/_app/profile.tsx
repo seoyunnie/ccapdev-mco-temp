@@ -41,7 +41,7 @@ function UserProfilePage() {
         My Profile
       </Title>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.card} mb="xl">
+      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="xl">
         <Group wrap="wrap">
           <Stack align="center">
             <Avatar size={100} radius="xl" color="pink">
@@ -135,7 +135,7 @@ function UserProfilePage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="settings" pt="md">
-          <Paper shadow="md" p="lg" radius="md" className={classes.card}>
+          <Paper shadow="md" p="lg" radius="md" className={classes.contentCard}>
             <Stack>
               <Title order={4} c="red">
                 Danger Zone

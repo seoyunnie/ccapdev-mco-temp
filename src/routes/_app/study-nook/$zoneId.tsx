@@ -76,7 +76,7 @@ function ReservationPage() {
 
       <Grid>
         <Grid.Col span={{ base: 12, md: 7 }}>
-          <Paper shadow="md" p="md" radius="md" className={classes.card}>
+          <Paper shadow="md" p="md" radius="md" className={classes.contentCard}>
             <Text fw={600} mb="sm" ta="center">
               Seat Map
             </Text>
@@ -132,7 +132,7 @@ function ReservationPage() {
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 5 }}>
-          <Paper shadow="md" p="md" radius="md" className={classes.card}>
+          <Paper shadow="md" p="md" radius="md" className={classes.contentCard}>
             <Stack>
               <Text fw={600}>Booking Options</Text>
               <Group justify="space-between">

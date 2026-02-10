@@ -108,7 +108,7 @@ function ForumFeedPage() {
             shadow="md"
             padding="lg"
             radius="md"
-            className={classes.card}
+            className={classes.contentCard}
             component={AppLink}
             to={`/lobby/${post.id}`}
             style={{ textDecoration: "none", color: "inherit" }}

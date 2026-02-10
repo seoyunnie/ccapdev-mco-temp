@@ -34,7 +34,7 @@ import {
 import { Link, Outlet, createFileRoute, useLocation } from "@tanstack/react-router";
 import { AppLink } from "../components/app-link.tsx";
 import { useAuth } from "../context/AuthContext.tsx";
-import classes from "../styles/app-shell.module.css";
+import classes from "./_app.module.css";
 
 const mainLinks = [
   { label: "Home", to: "/" },
@@ -102,8 +102,8 @@ function AppLayout() {
 
   return (
     <AppShell header={{ height: 70 }} padding={0}>
-      <AppShell.Header className={classes.header}>
-        <Container size="xl" className={classes.headerInner}>
+      <AppShell.Header className={classes.applicationHeader}>
+        <Container size="xl" className={classes.headerInnerLayout}>
           <Group gap="xs">
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" aria-label="Toggle navigation" />
             <Link to="/" style={{ textDecoration: "none" }}>
@@ -120,7 +120,7 @@ function AppLayout() {
               <Link
                 key={link.to}
                 to={link.to}
-                className={classes.navLink}
+                className={classes.navigationLink}
                 data-active={location.pathname === link.to || undefined}
               >
                 {link.label}
@@ -131,7 +131,7 @@ function AppLayout() {
               <Menu trigger="hover" openDelay={100} closeDelay={200}>
                 <Menu.Target>
                   <button
-                    className={classes.navLink}
+                    className={classes.navigationLink}
                     style={{
                       border: "none",
                       background: "none",
@@ -159,7 +159,7 @@ function AppLayout() {
               <Menu trigger="hover" openDelay={100} closeDelay={200}>
                 <Menu.Target>
                   <button
-                    className={classes.navLink}
+                    className={classes.navigationLink}
                     style={{
                       border: "none",
                       background: "none",
@@ -337,24 +337,24 @@ function AppLayout() {
         </Box>
       </AppShell.Main>
 
-      <footer className={classes.footer}>
+      <footer className={classes.applicationFooter}>
         <Container size="xl">
-          <div className={classes.footerInner}>
-            <div className={classes.footerLogo}>
+          <div className={classes.footerInnerLayout}>
+            <div className={classes.footerLogoSection}>
               <Title order={3} c="pink" style={{ letterSpacing: "-0.02em" }}>
                 logo.exe
               </Title>
-              <Text size="sm" c="dimmed" className={classes.footerDescription}>
+              <Text size="sm" c="dimmed" className={classes.footerDescriptionText}>
                 Your all-in-one dormitory companion since 2026.
               </Text>
             </div>
-            <div className={classes.footerGroups}>{footerGroups}</div>
+            <div className={classes.footerLinkGroups}>{footerGroups}</div>
           </div>
-          <div className={classes.afterFooter}>
+          <div className={classes.footerBottomBar}>
             <Text c="dimmed" size="sm">
               &copy; 2026 logo.exe All rights reserved.
             </Text>
-            <Group gap={0} className={classes.social} justify="flex-end" wrap="nowrap">
+            <Group gap={0} className={classes.socialIconGroup} justify="flex-end" wrap="nowrap">
               <ActionIcon size="lg" color="gray" variant="subtle">
                 <IconBrandTwitter size={18} stroke={1.5} />
               </ActionIcon>

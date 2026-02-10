@@ -41,7 +41,7 @@ function EstablishmentManagerPage() {
 
       <TextInput placeholder="Search establishments..." leftSection={<IconSearch size={16} />} mb="lg" />
 
-      <Paper shadow="md" radius="md" className={classes.card}>
+      <Paper shadow="md" radius="md" className={classes.contentCard}>
         <Table>
           <Table.Thead>
             <Table.Tr>
@@ -91,7 +91,7 @@ function EstablishmentManagerPage() {
         </Table>
       </Paper>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.card} mt="xl">
+      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mt="xl">
         <Title order={4} mb="md">
           Add New Establishment
         </Title>

@@ -36,7 +36,7 @@ function ConciergeDashboardPage() {
         Manage walk-in bookings and handle no-show reservations.
       </Text>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.card} mb="xl">
+      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="xl">
         <Title order={4} mb="md">
           <Group gap="xs">
             <IconPlus size={18} />
@@ -69,7 +69,7 @@ function ConciergeDashboardPage() {
         </Stack>
       </Paper>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.card}>
+      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard}>
         <Title order={4} mb="md">
           No-Show Manager
         </Title>

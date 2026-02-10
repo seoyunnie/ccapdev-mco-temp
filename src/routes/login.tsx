@@ -15,7 +15,7 @@ import {
 } from "@mantine/core";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "../context/AuthContext.tsx";
-import classes from "../styles/login.module.css";
+import classes from "./login.module.css";
 
 interface LoginSearch {
   register?: string;
@@ -40,15 +40,15 @@ function LoginRegisterPage() {
   };
 
   return (
-    <div className={classes.wrapper}>
+    <div className={classes.authenticationPageWrapper}>
       <Container size={420} my={40}>
         <Text ta="center" size="lg" fw={800} c="pink" mb={4}>
           HELLO KUROMI.
         </Text>
-        <Title ta="center" className={classes.title}>
+        <Title ta="center" className={classes.authenticationTitle}>
           {isRegister ? "Create your account" : "Welcome back!"}
         </Title>
-        <Text className={classes.subtitle}>
+        <Text className={classes.authenticationSubtitle}>
           {isRegister ? "Already have an account? " : "Don't have an account? "}
           <Anchor component="button" size="sm" c="pink" onClick={() => setIsRegister(!isRegister)}>
             {isRegister ? "Login" : "Register"}

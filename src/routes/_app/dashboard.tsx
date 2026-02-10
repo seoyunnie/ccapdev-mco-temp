@@ -16,7 +16,7 @@ import { IconBook, IconMessageCircle, IconStar, IconCalendar } from "@tabler/ico
 import { createFileRoute } from "@tanstack/react-router";
 import { AppLink } from "../../components/app-link.tsx";
 import { useAuth } from "../../context/AuthContext.tsx";
-import classes from "../../styles/dashboard.module.css";
+import classes from "./dashboard.module.css";
 
 const quickActions = [
   { icon: IconBook, title: "Book a Slot", description: "Reserve your study space", to: "/study-nook", color: "pink" },

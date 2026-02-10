@@ -45,7 +45,7 @@ function SystemLogsPage() {
         </Tabs.List>
 
         <Tabs.Panel value="activity" pt="md">
-          <Paper shadow="md" radius="md" className={classes.card}>
+          <Paper shadow="md" radius="md" className={classes.contentCard}>
             <Group p="md" justify="space-between">
               <TextInput placeholder="Search logs..." leftSection={<IconSearch size={16} />} size="sm" />
               <Select
@@ -89,7 +89,7 @@ function SystemLogsPage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="errors" pt="md">
-          <Paper shadow="md" radius="md" className={classes.card}>
+          <Paper shadow="md" radius="md" className={classes.contentCard}>
             <Group p="md" justify="space-between">
               <TextInput placeholder="Search errors..." leftSection={<IconSearch size={16} />} size="sm" />
               <Select

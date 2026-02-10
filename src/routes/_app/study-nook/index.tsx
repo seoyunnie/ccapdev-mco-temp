@@ -57,7 +57,7 @@ function ZoneSelectionPage() {
         {filtered.map((zone) => {
           const pct = ((zone.capacity - zone.available) / zone.capacity) * 100;
           return (
-            <Card key={zone.id} shadow="md" padding="lg" radius="md" className={classes.card}>
+            <Card key={zone.id} shadow="md" padding="lg" radius="md" className={classes.contentCard}>
               <Stack gap="sm">
                 <Group justify="space-between">
                   <Text fw={600} size="lg">

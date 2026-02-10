@@ -95,7 +95,7 @@ function DirectoryListPage() {
 
       <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
         {filtered.map((est) => (
-          <Card key={est.id} shadow="md" padding="lg" radius="md" className={classes.card}>
+          <Card key={est.id} shadow="md" padding="lg" radius="md" className={classes.contentCard}>
             <Stack gap="sm">
               <Group justify="space-between">
                 <Text fw={700} size="lg">

@@ -35,7 +35,7 @@ function ForumModerationPage() {
         Review flagged content and manage user behavior.
       </Text>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.card} mb="xl">
+      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="xl">
         <Title order={4} mb="md">
           Report Queue ({flaggedPosts.length})
         </Title>
@@ -72,7 +72,7 @@ function ForumModerationPage() {
         </Stack>
       </Paper>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.card}>
+      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard}>
         <Title order={4} mb="md">
           <Group gap="xs">
             <IconBan size={18} />

@@ -20,21 +20,6 @@
   }
 }
 
-.card {
+.contentCard {
   border: 1px solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
-}
-
-.searchBar {
-  flex: 1;
-  max-width: 400px;
-
-  @media (max-width: $mantine-breakpoint-sm) {
-    max-width: 100%;
-  }
-}
-
-.tableWrapper {
-  border: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
-  border-radius: var(--mantine-radius-md);
-  overflow: hidden;
 }

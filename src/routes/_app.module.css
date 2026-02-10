@@ -1,18 +1,18 @@
-.header {
+.applicationHeader {
   background-color: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
 }
 
-.headerInner {
+.headerInnerLayout {
   height: 70px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.navLink {
+.navigationLink {
   display: block;
   line-height: 1;
   padding: 8px 14px;
@@ -35,14 +35,14 @@
   }
 }
 
-.footer {
+.applicationFooter {
   padding-top: calc(var(--mantine-spacing-xl) * 2);
   padding-bottom: calc(var(--mantine-spacing-xl) * 2);
   background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
   border-top: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
 }
 
-.footerInner {
+.footerInnerLayout {
   display: flex;
   justify-content: space-between;
 
@@ -52,7 +52,7 @@
   }
 }
 
-.footerLogo {
+.footerLogoSection {
   max-width: 260px;
 
   @media (max-width: $mantine-breakpoint-sm) {
@@ -62,7 +62,7 @@
   }
 }
 
-.footerDescription {
+.footerDescriptionText {
   margin-top: 5px;
 
   @media (max-width: $mantine-breakpoint-sm) {
@@ -71,7 +71,7 @@
   }
 }
 
-.footerGroups {
+.footerLinkGroups {
   display: flex;
   flex-wrap: wrap;
   gap: calc(var(--mantine-spacing-xl) * 2);
@@ -105,7 +105,7 @@
   }
 }
 
-.afterFooter {
+.footerBottomBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -119,7 +119,7 @@
   }
 }
 
-.social {
+.socialIconGroup {
   @media (max-width: $mantine-breakpoint-sm) {
     margin-top: var(--mantine-spacing-xs);
   }

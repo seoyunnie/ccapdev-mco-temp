@@ -69,7 +69,7 @@ function EstablishmentDetailsPage() {
         </Button>
       </Link>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.card} mb="lg">
+      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="lg">
         <Group justify="space-between" wrap="wrap">
           <Stack gap="xs">
             <Group>
@@ -92,7 +92,7 @@ function EstablishmentDetailsPage() {
         </Group>
       </Paper>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.card} mb="lg">
+      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="lg">
         <Title order={4} mb="md">
           Write a Review
         </Title>

@@ -1,4 +1,4 @@
-.wrapper {
+.authenticationPageWrapper {
   min-height: 100vh;
   background: linear-gradient(160deg, #fff0f6 0%, #fafafa 50%, #f3e5f5 100%);
   display: flex;
@@ -6,11 +6,11 @@
   justify-content: center;
 }
 
-.title {
+.authenticationTitle {
   font-weight: 800;
 }
 
-.subtitle {
+.authenticationSubtitle {
   color: var(--mantine-color-dimmed);
   font-size: var(--mantine-font-size-sm);
   text-align: center;

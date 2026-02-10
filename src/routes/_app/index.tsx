@@ -17,7 +17,7 @@ import { Carousel } from "@mantine/carousel";
 import { IconBook, IconMessageCircle, IconCompass, IconCheck, IconArrowRight } from "@tabler/icons-react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { AppLink } from "../../components/app-link.tsx";
-import classes from "../../styles/landing.module.css";
+import classes from "./index.module.css";
 
 const features = [
   {
@@ -83,8 +83,8 @@ function LandingPage() {
     <>
       <div className={classes.heroSection}>
         <Container size="lg">
-          <div className={classes.heroInner}>
-            <div className={classes.heroContent}>
+          <div className={classes.heroInnerLayout}>
+            <div className={classes.heroContentArea}>
               <Badge color="pink" variant="light" size="lg" radius="xl" mb="md">
                 Dormitory Life, Reimagined
               </Badge>
@@ -118,7 +118,7 @@ function LandingPage() {
                   radius="xl"
                   size="md"
                   color="pink"
-                  className={classes.heroControl}
+                  className={classes.heroControlButton}
                   component={AppLink}
                   to="/login"
                   search={{ register: "true" }}
@@ -129,7 +129,7 @@ function LandingPage() {
                   variant="default"
                   radius="xl"
                   size="md"
-                  className={classes.heroControl}
+                  className={classes.heroControlButton}
                   component="a"
                   href="#features"
                 >
@@ -138,7 +138,7 @@ function LandingPage() {
               </Group>
             </div>
 
-            <div className={classes.heroImage}>
+            <div className={classes.heroImageArea}>
               <Carousel withIndicators height={340} slideGap="md">
                 {carouselSlides.map((slide) => (
                   <Carousel.Slide key={slide.title}>
@@ -168,12 +168,12 @@ function LandingPage() {
       </div>
 
       <Container size="lg" mt={-40} mb="xl" style={{ position: "relative", zIndex: 1 }}>
-        <div className={classes.statsRoot}>
+        <div className={classes.statisticsBar}>
           {stats.map((stat) => (
-            <div key={stat.label} className={classes.statItem}>
-              <Text className={classes.statCount}>{stat.value}</Text>
-              <Text className={classes.statTitle}>{stat.label}</Text>
-              <Text className={classes.statDescription}>{stat.description}</Text>
+            <div key={stat.label} className={classes.statisticItem}>
+              <Text className={classes.statisticCount}>{stat.value}</Text>
+              <Text className={classes.statisticTitle}>{stat.label}</Text>
+              <Text className={classes.statisticDescription}>{stat.description}</Text>
             </div>
           ))}
         </div>
@@ -243,14 +243,14 @@ function LandingPage() {
       </Box>
 
       <Container size="lg" py={80}>
-        <div className={classes.aboutInner}>
-          <div className={classes.aboutImage}>
+        <div className={classes.aboutInnerLayout}>
+          <div className={classes.aboutImagePlaceholder}>
             <Text size="4rem" fw={900} c="pink" style={{ opacity: 0.3 }}>
               A.
             </Text>
           </div>
 
-          <div className={classes.aboutContent}>
+          <div className={classes.aboutContentArea}>
             <Badge color="pink" variant="light" size="lg" radius="xl" mb="md">
               About Us
             </Badge>
@@ -292,7 +292,7 @@ function LandingPage() {
       </Container>
 
       <Container size="lg" pb={80}>
-        <div className={classes.ctaBanner}>
+        <div className={classes.callToActionBanner}>
           <Title order={2} c="white" mb="md">
             Ready to Make Dorm Life Better?
           </Title>
