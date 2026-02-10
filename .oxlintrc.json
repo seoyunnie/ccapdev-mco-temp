@@ -2,16 +2,18 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
 
   "categories": { "correctness": "error", "suspicious": "warn", "pedantic": "warn", "perf": "warn", "style": "warn" },
-  "env": { "builtin": true, "browser": true, "es2023": true },
-  "ignorePatterns": ["dist/*", "node_modules/**", "src/routeTree.gen.ts"],
+  "env": { "builtin": true, "browser": true, "es2022": true },
+  "ignorePatterns": ["dist/**", "node_modules/**", "src/routeTree.gen.ts"],
   "overrides": [
     {
       "files": ["*.config.[jt]s"],
+      "env": { "node": true },
       "rules": {
         /* Style */
         "no-anonymous-default-export": ["warn", { "allowObject": true }]
       }
     },
+    { "files": ["vite.config.ts"], "env": { "es2023": true } },
     {
       "files": ["**/*.[jt]sx"],
       "jsPlugins": [
@@ -50,9 +52,11 @@
         /* Style */
         "jsx-max-depth": "off",
         "jsx-props-no-spreading": "off",
+        "no-nodejs-modules": "warn",
 
         /* Suspicious */
         "no-absolute-path": "off",
+        "no-unassigned-import": ["warn", { "allow": ["**/*.css"] }],
         "react-in-jsx-scope": "off"
       }
     },
@@ -90,6 +94,7 @@
     "id-length": "off",
     "init-declarations": "off",
     "max-params": "off",
+    "max-statements": "off",
     "no-continue": "off",
     "no-empty-interface": ["warn", { "allowSingleExtends": true }],
     "no-labels": "off",
@@ -106,14 +111,12 @@
       }
     ],
     "no-named-export": "off",
+    "no-nodejs-modules": "off",
     "no-null": "off",
     "no-ternary": "off",
     "prefer-default-export": "off",
     "sort-imports": "off",
     "sort-keys": "off",
-    "switch-case-braces": ["warn", "avoid"],
-
-    /* Suspicious */
-    "no-unassigned-import": ["warn", { "allow": ["**/*.css"] }]
+    "switch-case-braces": ["warn", "avoid"]
   }
 }
