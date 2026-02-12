@@ -35,7 +35,7 @@ function LoginRegisterPage() {
   const navigate = useNavigate();
 
   const handleSubmit = () => {
-    login("resident", isRegister ? "New Resident" : "OPPENHEIMER");
+    login("admin", isRegister ? "New Resident" : "OPPENHEIMER");
     navigate({ to: "/dashboard" });
   };
 

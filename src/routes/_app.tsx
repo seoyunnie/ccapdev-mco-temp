@@ -36,20 +36,33 @@ import { AppLink } from "../components/app-link.tsx";
 import { useAuth } from "../context/AuthContext.tsx";
 import classes from "./_app.module.css";
 
-const mainLinks = [
+const guestLinks = [
   { label: "Home", to: "/" },
   { label: "Study Nook", to: "/study-nook" },
   { label: "Lobby", to: "/lobby" },
   { label: "Survival Guide", to: "/guide" },
 ];
 
-const mobileLinks = [
+const authLinks = [
+  { label: "Dashboard", to: "/dashboard" },
+  { label: "Study Nook", to: "/study-nook" },
+  { label: "Lobby", to: "/lobby" },
+  { label: "Survival Guide", to: "/guide" },
+];
+
+const guestMobileLinks = [
   { label: "Home", to: "/", icon: IconHome },
-  { label: "Dashboard", to: "/dashboard", icon: IconLayoutDashboard, auth: true },
   { label: "Study Nook", to: "/study-nook", icon: IconBook },
   { label: "Lobby", to: "/lobby", icon: IconMessageCircle },
   { label: "Survival Guide", to: "/guide", icon: IconCompass },
-  { label: "Profile", to: "/profile", icon: IconUser, auth: true },
+];
+
+const authMobileLinks = [
+  { label: "Dashboard", to: "/dashboard", icon: IconLayoutDashboard },
+  { label: "Study Nook", to: "/study-nook", icon: IconBook },
+  { label: "Lobby", to: "/lobby", icon: IconMessageCircle },
+  { label: "Survival Guide", to: "/guide", icon: IconCompass },
+  { label: "Profile", to: "/profile", icon: IconUser },
 ];
 
 const footerData = [
@@ -109,14 +122,14 @@ function AppLayout() {
             <Link to="/" style={{ textDecoration: "none" }}>
               <Title order={3}>
                 <Text component="span" size="xl" fw={900} c="pink" style={{ letterSpacing: "-0.02em" }}>
-                  logo.exe
+                  Adormable
                 </Text>
               </Title>
             </Link>
           </Group>
 
           <Group gap={5} visibleFrom="sm">
-            {mainLinks.map((link) => (
+            {(isLoggedIn ? authLinks : guestLinks).map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
@@ -216,9 +229,6 @@ function AppLayout() {
                   </Button>
                 </Menu.Target>
                 <Menu.Dropdown>
-                  <Menu.Item leftSection={<IconLayoutDashboard size={16} />} component={AppLink} to="/dashboard">
-                    Dashboard
-                  </Menu.Item>
                   <Menu.Item leftSection={<IconUser size={16} />} component={AppLink} to="/profile">
                     Profile
                   </Menu.Item>
@@ -233,21 +243,19 @@ function AppLayout() {
         </Container>
       </AppShell.Header>
 
-      <Drawer opened={opened} onClose={close} size="xs" title="logo.exe">
+      <Drawer opened={opened} onClose={close} size="xs" title="Adormable">
         <Stack gap={0}>
-          {mobileLinks
-            .filter((l) => !l.auth || isLoggedIn)
-            .map((item) => (
-              <NavLink
-                key={item.to}
-                label={item.label}
-                leftSection={<item.icon size={18} />}
-                component={AppLink}
-                to={item.to}
-                active={location.pathname === item.to}
-                onClick={close}
-              />
-            ))}
+          {(isLoggedIn ? authMobileLinks : guestMobileLinks).map((item) => (
+            <NavLink
+              key={item.to}
+              label={item.label}
+              leftSection={<item.icon size={18} />}
+              component={AppLink}
+              to={item.to}
+              active={location.pathname === item.to}
+              onClick={close}
+            />
+          ))}
 
           {showStaff && (
             <>
@@ -342,7 +350,7 @@ function AppLayout() {
           <div className={classes.footerInnerLayout}>
             <div className={classes.footerLogoSection}>
               <Title order={3} c="pink" style={{ letterSpacing: "-0.02em" }}>
-                logo.exe
+                Adormable
               </Title>
               <Text size="sm" c="dimmed" className={classes.footerDescriptionText}>
                 Your all-in-one dormitory companion since 2026.
@@ -352,7 +360,7 @@ function AppLayout() {
           </div>
           <div className={classes.footerBottomBar}>
             <Text c="dimmed" size="sm">
-              &copy; 2026 logo.exe All rights reserved.
+              &copy; 2026 Adormable All rights reserved.
             </Text>
             <Group gap={0} className={classes.socialIconGroup} justify="flex-end" wrap="nowrap">
               <ActionIcon size="lg" color="gray" variant="subtle">

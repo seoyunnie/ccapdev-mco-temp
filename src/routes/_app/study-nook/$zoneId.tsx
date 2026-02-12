@@ -15,7 +15,7 @@ import {
   Badge,
   Tooltip,
 } from "@mantine/core";
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+
 import { Link, createFileRoute } from "@tanstack/react-router";
 import classes from "../../../styles/shared.module.css";
 
@@ -135,26 +135,18 @@ function ReservationPage() {
           <Paper shadow="md" p="md" radius="md" className={classes.contentCard}>
             <Stack>
               <Text fw={600}>Booking Options</Text>
-              <Group justify="space-between">
-                <ActionIcon variant="light" onClick={() => setSelectedDay(Math.max(0, selectedDay - 1))}>
-                  <IconChevronLeft size={16} />
-                </ActionIcon>
-                <SimpleGrid cols={7} spacing="xs">
-                  {weekDays.map((d, i) => (
-                    <Button
-                      key={d}
-                      size="xs"
-                      variant={selectedDay === i ? "filled" : "light"}
-                      onClick={() => setSelectedDay(i)}
-                    >
-                      {d}
-                    </Button>
-                  ))}
-                </SimpleGrid>
-                <ActionIcon variant="light" onClick={() => setSelectedDay(Math.min(6, selectedDay + 1))}>
-                  <IconChevronRight size={16} />
-                </ActionIcon>
-              </Group>
+              <SimpleGrid cols={7} spacing="xs">
+                {weekDays.map((d, i) => (
+                  <Button
+                    key={d}
+                    size="xs"
+                    variant={selectedDay === i ? "filled" : "light"}
+                    onClick={() => setSelectedDay(i)}
+                  >
+                    {d}
+                  </Button>
+                ))}
+              </SimpleGrid>
               <Select label="Start Time" placeholder="Select time" data={timeSlots} />
               <Select label="End Time" placeholder="Select time" data={timeSlots} />
               <Switch
