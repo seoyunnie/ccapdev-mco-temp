@@ -23,7 +23,7 @@ import { adormableTheme } from "./theme.ts";
 // oxlint-disable-next-line unicorn/prefer-query-selector
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MantineProvider theme={adormableTheme}>
+    <MantineProvider theme={adormableTheme} forceColorScheme="light">
       <AuthProvider>
         <RouterProvider router={router} />
       </AuthProvider>
