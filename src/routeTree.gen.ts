@@ -9,50 +9,372 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as AppModerationRouteImport } from './routes/_app/moderation'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppConciergeRouteImport } from './routes/_app/concierge'
+import { Route as AppStudyNookIndexRouteImport } from './routes/_app/study-nook/index'
+import { Route as AppLobbyIndexRouteImport } from './routes/_app/lobby/index'
+import { Route as AppGuideIndexRouteImport } from './routes/_app/guide/index'
+import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
+import { Route as AppStudyNookZoneIdRouteImport } from './routes/_app/study-nook/$zoneId'
+import { Route as AppLobbyThreadIdRouteImport } from './routes/_app/lobby/$threadId'
+import { Route as AppGuideEstIdRouteImport } from './routes/_app/guide/$estId'
+import { Route as AppAdminLogsRouteImport } from './routes/_app/admin/logs'
+import { Route as AppAdminEstablishmentsRouteImport } from './routes/_app/admin/establishments'
 
-const IndexRoute = IndexRouteImport.update({
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppModerationRoute = AppModerationRouteImport.update({
+  id: '/moderation',
+  path: '/moderation',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppConciergeRoute = AppConciergeRouteImport.update({
+  id: '/concierge',
+  path: '/concierge',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStudyNookIndexRoute = AppStudyNookIndexRouteImport.update({
+  id: '/study-nook/',
+  path: '/study-nook/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLobbyIndexRoute = AppLobbyIndexRouteImport.update({
+  id: '/lobby/',
+  path: '/lobby/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGuideIndexRoute = AppGuideIndexRouteImport.update({
+  id: '/guide/',
+  path: '/guide/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStudyNookZoneIdRoute = AppStudyNookZoneIdRouteImport.update({
+  id: '/study-nook/$zoneId',
+  path: '/study-nook/$zoneId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLobbyThreadIdRoute = AppLobbyThreadIdRouteImport.update({
+  id: '/lobby/$threadId',
+  path: '/lobby/$threadId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGuideEstIdRoute = AppGuideEstIdRouteImport.update({
+  id: '/guide/$estId',
+  path: '/guide/$estId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminLogsRoute = AppAdminLogsRouteImport.update({
+  id: '/admin/logs',
+  path: '/admin/logs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminEstablishmentsRoute = AppAdminEstablishmentsRouteImport.update({
+  id: '/admin/establishments',
+  path: '/admin/establishments',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
+  '/login': typeof LoginRoute
+  '/concierge': typeof AppConciergeRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/moderation': typeof AppModerationRoute
+  '/profile': typeof AppProfileRoute
+  '/admin/establishments': typeof AppAdminEstablishmentsRoute
+  '/admin/logs': typeof AppAdminLogsRoute
+  '/guide/$estId': typeof AppGuideEstIdRoute
+  '/lobby/$threadId': typeof AppLobbyThreadIdRoute
+  '/study-nook/$zoneId': typeof AppStudyNookZoneIdRoute
+  '/admin/': typeof AppAdminIndexRoute
+  '/guide/': typeof AppGuideIndexRoute
+  '/lobby/': typeof AppLobbyIndexRoute
+  '/study-nook/': typeof AppStudyNookIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/concierge': typeof AppConciergeRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/moderation': typeof AppModerationRoute
+  '/profile': typeof AppProfileRoute
+  '/': typeof AppIndexRoute
+  '/admin/establishments': typeof AppAdminEstablishmentsRoute
+  '/admin/logs': typeof AppAdminLogsRoute
+  '/guide/$estId': typeof AppGuideEstIdRoute
+  '/lobby/$threadId': typeof AppLobbyThreadIdRoute
+  '/study-nook/$zoneId': typeof AppStudyNookZoneIdRoute
+  '/admin': typeof AppAdminIndexRoute
+  '/guide': typeof AppGuideIndexRoute
+  '/lobby': typeof AppLobbyIndexRoute
+  '/study-nook': typeof AppStudyNookIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_app/concierge': typeof AppConciergeRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/moderation': typeof AppModerationRoute
+  '/_app/profile': typeof AppProfileRoute
+  '/_app/': typeof AppIndexRoute
+  '/_app/admin/establishments': typeof AppAdminEstablishmentsRoute
+  '/_app/admin/logs': typeof AppAdminLogsRoute
+  '/_app/guide/$estId': typeof AppGuideEstIdRoute
+  '/_app/lobby/$threadId': typeof AppLobbyThreadIdRoute
+  '/_app/study-nook/$zoneId': typeof AppStudyNookZoneIdRoute
+  '/_app/admin/': typeof AppAdminIndexRoute
+  '/_app/guide/': typeof AppGuideIndexRoute
+  '/_app/lobby/': typeof AppLobbyIndexRoute
+  '/_app/study-nook/': typeof AppStudyNookIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/concierge'
+    | '/dashboard'
+    | '/moderation'
+    | '/profile'
+    | '/admin/establishments'
+    | '/admin/logs'
+    | '/guide/$estId'
+    | '/lobby/$threadId'
+    | '/study-nook/$zoneId'
+    | '/admin/'
+    | '/guide/'
+    | '/lobby/'
+    | '/study-nook/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/login'
+    | '/concierge'
+    | '/dashboard'
+    | '/moderation'
+    | '/profile'
+    | '/'
+    | '/admin/establishments'
+    | '/admin/logs'
+    | '/guide/$estId'
+    | '/lobby/$threadId'
+    | '/study-nook/$zoneId'
+    | '/admin'
+    | '/guide'
+    | '/lobby'
+    | '/study-nook'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/login'
+    | '/_app/concierge'
+    | '/_app/dashboard'
+    | '/_app/moderation'
+    | '/_app/profile'
+    | '/_app/'
+    | '/_app/admin/establishments'
+    | '/_app/admin/logs'
+    | '/_app/guide/$estId'
+    | '/_app/lobby/$threadId'
+    | '/_app/study-nook/$zoneId'
+    | '/_app/admin/'
+    | '/_app/guide/'
+    | '/_app/lobby/'
+    | '/_app/study-nook/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/moderation': {
+      id: '/_app/moderation'
+      path: '/moderation'
+      fullPath: '/moderation'
+      preLoaderRoute: typeof AppModerationRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/concierge': {
+      id: '/_app/concierge'
+      path: '/concierge'
+      fullPath: '/concierge'
+      preLoaderRoute: typeof AppConciergeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/study-nook/': {
+      id: '/_app/study-nook/'
+      path: '/study-nook'
+      fullPath: '/study-nook/'
+      preLoaderRoute: typeof AppStudyNookIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/lobby/': {
+      id: '/_app/lobby/'
+      path: '/lobby'
+      fullPath: '/lobby/'
+      preLoaderRoute: typeof AppLobbyIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/guide/': {
+      id: '/_app/guide/'
+      path: '/guide'
+      fullPath: '/guide/'
+      preLoaderRoute: typeof AppGuideIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin/': {
+      id: '/_app/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AppAdminIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/study-nook/$zoneId': {
+      id: '/_app/study-nook/$zoneId'
+      path: '/study-nook/$zoneId'
+      fullPath: '/study-nook/$zoneId'
+      preLoaderRoute: typeof AppStudyNookZoneIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/lobby/$threadId': {
+      id: '/_app/lobby/$threadId'
+      path: '/lobby/$threadId'
+      fullPath: '/lobby/$threadId'
+      preLoaderRoute: typeof AppLobbyThreadIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/guide/$estId': {
+      id: '/_app/guide/$estId'
+      path: '/guide/$estId'
+      fullPath: '/guide/$estId'
+      preLoaderRoute: typeof AppGuideEstIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin/logs': {
+      id: '/_app/admin/logs'
+      path: '/admin/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AppAdminLogsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin/establishments': {
+      id: '/_app/admin/establishments'
+      path: '/admin/establishments'
+      fullPath: '/admin/establishments'
+      preLoaderRoute: typeof AppAdminEstablishmentsRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppConciergeRoute: typeof AppConciergeRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppModerationRoute: typeof AppModerationRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppAdminEstablishmentsRoute: typeof AppAdminEstablishmentsRoute
+  AppAdminLogsRoute: typeof AppAdminLogsRoute
+  AppGuideEstIdRoute: typeof AppGuideEstIdRoute
+  AppLobbyThreadIdRoute: typeof AppLobbyThreadIdRoute
+  AppStudyNookZoneIdRoute: typeof AppStudyNookZoneIdRoute
+  AppAdminIndexRoute: typeof AppAdminIndexRoute
+  AppGuideIndexRoute: typeof AppGuideIndexRoute
+  AppLobbyIndexRoute: typeof AppLobbyIndexRoute
+  AppStudyNookIndexRoute: typeof AppStudyNookIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppConciergeRoute: AppConciergeRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppModerationRoute: AppModerationRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppAdminEstablishmentsRoute: AppAdminEstablishmentsRoute,
+  AppAdminLogsRoute: AppAdminLogsRoute,
+  AppGuideEstIdRoute: AppGuideEstIdRoute,
+  AppLobbyThreadIdRoute: AppLobbyThreadIdRoute,
+  AppStudyNookZoneIdRoute: AppStudyNookZoneIdRoute,
+  AppAdminIndexRoute: AppAdminIndexRoute,
+  AppGuideIndexRoute: AppGuideIndexRoute,
+  AppLobbyIndexRoute: AppLobbyIndexRoute,
+  AppStudyNookIndexRoute: AppStudyNookIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

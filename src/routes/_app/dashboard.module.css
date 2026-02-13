@@ -1,0 +1,35 @@
+.quickActionCard {
+  border: 1px solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.reservationPaper {
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: var(--mantine-color-pink-3);
+  }
+}
+
+.sectionTitle {
+  font-size: var(--mantine-font-size-lg);
+  font-weight: 700;
+
+  &::after {
+    content: "";
+    display: block;
+    background-color: var(--mantine-color-pink-filled);
+    width: 45px;
+    height: 2px;
+    margin-top: var(--mantine-spacing-xs);
+  }
+}
