@@ -15,6 +15,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noUncheckedSideEffectImports": true,
+    "paths": { "@/*": ["./src/*"] },
     "types": ["vite/client"],
 
     /* Emit */

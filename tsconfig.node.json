@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.schemastore.org/tsconfig.json",
 
-  "include": ["vite.config.ts"],
+  "include": ["postcss.config.js", "vite.config.ts"],
 
   "compilerOptions": {
     /* Type Checking */

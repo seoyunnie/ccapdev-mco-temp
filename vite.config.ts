@@ -1,5 +1,6 @@
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
+import path from "node:path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -7,4 +8,5 @@ export default defineConfig({
     tanstackRouter({ target: "react", autoCodeSplitting: true }),
     react({ babel: { plugins: ["babel-plugin-react-compiler"] } }),
   ],
+  resolve: { alias: { "@": path.resolve(import.meta.dirname, "./src") } },
 });

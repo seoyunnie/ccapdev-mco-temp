@@ -1,5 +1,5 @@
 {
-  "name": "adormable-website",
+  "name": "adormable",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -10,8 +10,7 @@
     "format:check": "prettier . --check",
     "lint": "oxlint --type-aware --type-check",
     "lint:fix": "oxlint --type-aware --fix",
-    "preview": "vite preview",
-    "typecheck": "tsc"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@fontsource/nunito": "^5.2.7",
