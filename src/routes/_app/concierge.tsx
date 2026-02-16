@@ -14,7 +14,6 @@ import {
 } from "@mantine/core";
 import { IconTrash, IconPlus } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
-import classes from "../../styles/shared.module.css";
 
 const expiredBookings = [
   { id: "b1", student: "Carlos Lim", zone: "Main Hall – Seat 5", time: "10:00 AM – 12:00 PM", status: "No-Show" },
@@ -29,14 +28,14 @@ export const Route = createFileRoute("/_app/concierge")({ component: ConciergeDa
 function ConciergeDashboardPage() {
   return (
     <Container size="lg" py="xl">
-      <Title className={classes.pageTitle} mb="xs">
+      <Title className="page-title" mb="xs">
         Concierge Dashboard
       </Title>
-      <Text c="dimmed" className={classes.pageDescription} mb="xl">
+      <Text c="dimmed" className="page-description" mb="xl">
         Manage walk-in bookings and handle no-show reservations.
       </Text>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="xl">
+      <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Title order={4} mb="md">
           <Group gap="xs">
             <IconPlus size={18} />
@@ -69,7 +68,7 @@ function ConciergeDashboardPage() {
         </Stack>
       </Paper>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard}>
+      <Paper shadow="md" p="lg" radius="md" className="content-card">
         <Title order={4} mb="md">
           No-Show Manager
         </Title>

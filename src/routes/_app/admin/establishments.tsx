@@ -14,8 +14,6 @@ import {
 } from "@mantine/core";
 import { IconEdit, IconTrash, IconPlus, IconSearch } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
-import { AppLink } from "../../../components/app-link.tsx";
-import classes from "../../../styles/shared.module.css";
 
 const establishments = [
   { id: "1", name: "Café Manila", category: "Coffee Shop", owner: "cafe_manila_owner", status: "Active" },
@@ -30,18 +28,18 @@ function EstablishmentManagerPage() {
   return (
     <Container size="lg" py="xl">
       <Group justify="space-between" mb="xs">
-        <Title className={classes.pageTitle}>Establishment Manager</Title>
+        <Title className="page-title">Establishment Manager</Title>
         <Button leftSection={<IconPlus size={16} />} color="pink" radius="xl">
           Add Establishment
         </Button>
       </Group>
-      <Text c="dimmed" className={classes.pageDescription} mb="xl">
+      <Text c="dimmed" className="page-description" mb="xl">
         Manage directory entries and assign owner accounts.
       </Text>
 
       <TextInput placeholder="Search establishments..." leftSection={<IconSearch size={16} />} mb="lg" />
 
-      <Paper shadow="md" radius="md" className={classes.contentCard}>
+      <Paper shadow="md" radius="md" className="content-card">
         <Table>
           <Table.Thead>
             <Table.Tr>
@@ -91,7 +89,7 @@ function EstablishmentManagerPage() {
         </Table>
       </Paper>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mt="xl">
+      <Paper shadow="md" p="lg" radius="md" className="content-card" mt="xl">
         <Title order={4} mb="md">
           Add New Establishment
         </Title>

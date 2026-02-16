@@ -17,7 +17,6 @@ import {
 } from "@mantine/core";
 
 import { Link, createFileRoute } from "@tanstack/react-router";
-import classes from "../../../styles/shared.module.css";
 
 const seatMap = Array.from({ length: 5 }, (_, row) =>
   Array.from({ length: 8 }, (_, col) => ({
@@ -67,7 +66,7 @@ function ReservationPage() {
         </Link>
       </Group>
 
-      <Title className={classes.pageTitle} mb="xs">
+      <Title className="page-title" mb="xs">
         Main Hall - Reserve a Seat
       </Title>
       <Text c="dimmed" mb="xl">
@@ -76,7 +75,7 @@ function ReservationPage() {
 
       <Grid>
         <Grid.Col span={{ base: 12, md: 7 }}>
-          <Paper shadow="md" p="md" radius="md" className={classes.contentCard}>
+          <Paper shadow="md" p="md" radius="md" className="content-card">
             <Text fw={600} mb="sm" ta="center">
               Seat Map
             </Text>
@@ -132,7 +131,7 @@ function ReservationPage() {
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 5 }}>
-          <Paper shadow="md" p="md" radius="md" className={classes.contentCard}>
+          <Paper shadow="md" p="md" radius="md" className="content-card">
             <Stack>
               <Text fw={600}>Booking Options</Text>
               <SimpleGrid cols={7} spacing="xs">

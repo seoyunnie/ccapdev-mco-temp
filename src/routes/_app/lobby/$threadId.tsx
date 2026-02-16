@@ -14,7 +14,6 @@ import {
 } from "@mantine/core";
 import { IconArrowUp, IconArrowDown, IconEdit, IconTrash } from "@tabler/icons-react";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import classes from "../../../styles/shared.module.css";
 
 const post = {
   title: "Best study spots in the dorm?",
@@ -70,7 +69,7 @@ function ThreadViewPage() {
         </Button>
       </Link>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="lg">
+      <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
         <Group justify="space-between" mb="md">
           <Group>
             <Avatar color="pink" radius="xl">
@@ -113,7 +112,7 @@ function ThreadViewPage() {
         </Group>
       </Paper>
 
-      <Paper shadow="sm" p="md" radius="md" className={classes.contentCard} mb="lg">
+      <Paper shadow="sm" p="md" radius="md" className="content-card" mb="lg">
         <Textarea placeholder="Write a reply..." minRows={3} mb="sm" />
         <Button size="sm" color="pink" radius="xl">
           Post Reply

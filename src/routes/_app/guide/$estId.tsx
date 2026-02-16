@@ -16,7 +16,6 @@ import {
 } from "@mantine/core";
 import { IconThumbUp, IconPhoto } from "@tabler/icons-react";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import classes from "../../../styles/shared.module.css";
 
 const establishment = {
   name: "Café Manila",
@@ -69,7 +68,7 @@ function EstablishmentDetailsPage() {
         </Button>
       </Link>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="lg">
+      <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
         <Group justify="space-between" wrap="wrap">
           <Stack gap="xs">
             <Group>
@@ -92,7 +91,7 @@ function EstablishmentDetailsPage() {
         </Group>
       </Paper>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="lg">
+      <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
         <Title order={4} mb="md">
           Write a Review
         </Title>

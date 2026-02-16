@@ -65,3 +65,29 @@ a {
   outline: 2px solid var(--adormable-pink);
   outline-offset: 2px;
 }
+
+.page-title {
+  font-size: 34px;
+  font-weight: 800;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    font-size: 24px;
+  }
+}
+
+.page-description {
+  max-width: 600px;
+
+  &::after {
+    content: "";
+    display: block;
+    background-color: var(--mantine-color-pink-filled);
+    width: 45px;
+    height: 2px;
+    margin-top: var(--mantine-spacing-sm);
+  }
+}
+
+.content-card {
+  border: 1px solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+}

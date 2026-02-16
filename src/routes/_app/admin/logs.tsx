@@ -1,21 +1,60 @@
 import { Container, Title, Text, Paper, Group, Table, Badge, Select, TextInput, Tabs } from "@mantine/core";
 import { IconSearch, IconUser, IconBug } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
-import classes from "../../../styles/shared.module.css";
 
 const activityLogs = [
-  { id: "l1", user: "Maria Santos", action: "Created reservation for Quiet Room A", type: "Reservation", timestamp: "2026-02-09 14:32:10" },
-  { id: "l2", user: "Juan Reyes", action: "Posted 'Wi-Fi Issues on Floor 3' in Virtual Lobby", type: "Forum", timestamp: "2026-02-09 13:15:44" },
-  { id: "l3", user: "Lab Tech Mike", action: "Purged 3 no-show bookings", type: "Admin", timestamp: "2026-02-09 12:00:00" },
-  { id: "l4", user: "Ava Cruz", action: "Submitted review for Samgyup Corner (4★)", type: "Review", timestamp: "2026-02-09 11:45:22" },
-  { id: "l5", user: "System", action: "User SpamBot42 banned for 7 days", type: "Admin", timestamp: "2026-02-08 23:10:05" },
+  {
+    id: "l1",
+    user: "Maria Santos",
+    action: "Created reservation for Quiet Room A",
+    type: "Reservation",
+    timestamp: "2026-02-09 14:32:10",
+  },
+  {
+    id: "l2",
+    user: "Juan Reyes",
+    action: "Posted 'Wi-Fi Issues on Floor 3' in Virtual Lobby",
+    type: "Forum",
+    timestamp: "2026-02-09 13:15:44",
+  },
+  {
+    id: "l3",
+    user: "Lab Tech Mike",
+    action: "Purged 3 no-show bookings",
+    type: "Admin",
+    timestamp: "2026-02-09 12:00:00",
+  },
+  {
+    id: "l4",
+    user: "Ava Cruz",
+    action: "Submitted review for Samgyup Corner (4★)",
+    type: "Review",
+    timestamp: "2026-02-09 11:45:22",
+  },
+  {
+    id: "l5",
+    user: "System",
+    action: "User SpamBot42 banned for 7 days",
+    type: "Admin",
+    timestamp: "2026-02-08 23:10:05",
+  },
 ];
 
 const errorLogs = [
-  { id: "e1", level: "Error", message: "Database connection timeout on query /api/reservations", timestamp: "2026-02-09 14:30:00" },
+  {
+    id: "e1",
+    level: "Error",
+    message: "Database connection timeout on query /api/reservations",
+    timestamp: "2026-02-09 14:30:00",
+  },
   { id: "e2", level: "Warning", message: "High memory usage detected (89%)", timestamp: "2026-02-09 12:15:00" },
   { id: "e3", level: "Info", message: "Scheduled backup completed successfully", timestamp: "2026-02-09 06:00:00" },
-  { id: "e4", level: "Error", message: "Failed to send email notification to maria@adormable.com", timestamp: "2026-02-08 22:45:00" },
+  {
+    id: "e4",
+    level: "Error",
+    message: "Failed to send email notification to maria@adormable.com",
+    timestamp: "2026-02-08 22:45:00",
+  },
 ];
 
 const typeColors: Record<string, string> = { Reservation: "pink", Forum: "grape", Admin: "red", Review: "teal" };
@@ -27,10 +66,10 @@ export const Route = createFileRoute("/_app/admin/logs")({ component: SystemLogs
 function SystemLogsPage() {
   return (
     <Container size="lg" py="xl">
-      <Title className={classes.pageTitle} mb="xs">
+      <Title className="page-title" mb="xs">
         System Logs
       </Title>
-      <Text c="dimmed" className={classes.pageDescription} mb="xl">
+      <Text c="dimmed" className="page-description" mb="xl">
         Audit trails and technical error monitoring.
       </Text>
 
@@ -45,7 +84,7 @@ function SystemLogsPage() {
         </Tabs.List>
 
         <Tabs.Panel value="activity" pt="md">
-          <Paper shadow="md" radius="md" className={classes.contentCard}>
+          <Paper shadow="md" radius="md" className="content-card">
             <Group p="md" justify="space-between">
               <TextInput placeholder="Search logs..." leftSection={<IconSearch size={16} />} size="sm" />
               <Select
@@ -89,7 +128,7 @@ function SystemLogsPage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="errors" pt="md">
-          <Paper shadow="md" radius="md" className={classes.contentCard}>
+          <Paper shadow="md" radius="md" className="content-card">
             <Group p="md" justify="space-between">
               <TextInput placeholder="Search errors..." leftSection={<IconSearch size={16} />} size="sm" />
               <Select

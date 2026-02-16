@@ -15,7 +15,6 @@ import {
 import { IconSearch } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppLink } from "../../../components/app-link.tsx";
-import classes from "../../../styles/shared.module.css";
 
 const establishments = [
   {
@@ -77,10 +76,10 @@ function DirectoryListPage() {
 
   return (
     <Container size="lg" py="xl">
-      <Title className={classes.pageTitle} mb="xs">
+      <Title className="page-title" mb="xs">
         The Survival Guide
       </Title>
-      <Text c="dimmed" className={classes.pageDescription} mb="xl">
+      <Text c="dimmed" className="page-description" mb="xl">
         Discover and review local establishments near your dormitory.
       </Text>
 
@@ -95,7 +94,7 @@ function DirectoryListPage() {
 
       <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
         {filtered.map((est) => (
-          <Card key={est.id} shadow="md" padding="lg" radius="md" className={classes.contentCard}>
+          <Card key={est.id} shadow="md" padding="lg" radius="md" className="content-card">
             <Stack gap="sm">
               <Group justify="space-between">
                 <Text fw={700} size="lg">

@@ -16,7 +16,6 @@ import {
 import { IconSearch } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppLink } from "../../../components/app-link.tsx";
-import classes from "../../../styles/shared.module.css";
 
 const zones = [
   { id: "main-hall", name: "Main Hall", capacity: 40, available: 12, status: "Open" },
@@ -36,10 +35,10 @@ function ZoneSelectionPage() {
 
   return (
     <Container size="lg" py="xl">
-      <Title className={classes.pageTitle} mb="xs">
+      <Title className="page-title" mb="xs">
         The Study Nook
       </Title>
-      <Text c="dimmed" className={classes.pageDescription} mb="xl">
+      <Text c="dimmed" className="page-description" mb="xl">
         Choose a zone to reserve your study spot.
       </Text>
 
@@ -57,7 +56,7 @@ function ZoneSelectionPage() {
         {filtered.map((zone) => {
           const pct = ((zone.capacity - zone.available) / zone.capacity) * 100;
           return (
-            <Card key={zone.id} shadow="md" padding="lg" radius="md" className={classes.contentCard}>
+            <Card key={zone.id} shadow="md" padding="lg" radius="md" className="content-card">
               <Stack gap="sm">
                 <Group justify="space-between">
                   <Text fw={600} size="lg">

@@ -22,7 +22,6 @@ import {
   IconRefresh,
 } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
-import classes from "../../../styles/shared.module.css";
 
 const stats = [
   { label: "Total Users", value: "1,247", icon: IconUsers, color: "pink" },
@@ -45,16 +44,16 @@ export const Route = createFileRoute("/_app/admin/")({ component: AdminControlPa
 function AdminControlPanelPage() {
   return (
     <Container size="lg" py="xl">
-      <Title className={classes.pageTitle} mb="xs">
+      <Title className="page-title" mb="xs">
         Admin Control Panel
       </Title>
-      <Text c="dimmed" className={classes.pageDescription} mb="xl">
+      <Text c="dimmed" className="page-description" mb="xl">
         System overview and user management.
       </Text>
 
       <SimpleGrid cols={{ base: 2, md: 4 }} mb="xl">
         {stats.map((stat) => (
-          <Paper key={stat.label} shadow="md" p="md" radius="md" className={classes.contentCard}>
+          <Paper key={stat.label} shadow="md" p="md" radius="md" className="content-card">
             <Group justify="space-between">
               <Stack gap={4}>
                 <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
@@ -75,7 +74,7 @@ function AdminControlPanelPage() {
         ))}
       </SimpleGrid>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="xl">
+      <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Group justify="space-between" mb="md">
           <Title order={4}>User Management</Title>
           <TextInput placeholder="Search users..." leftSection={<IconSearch size={16} />} size="sm" />
@@ -125,7 +124,7 @@ function AdminControlPanelPage() {
         </Table>
       </Paper>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard}>
+      <Paper shadow="md" p="lg" radius="md" className="content-card">
         <Title order={4} mb="md">
           Site Diagnostics
         </Title>

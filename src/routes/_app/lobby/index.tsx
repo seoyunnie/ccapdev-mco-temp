@@ -16,7 +16,6 @@ import {
 import { IconSearch, IconArrowUp, IconPlus } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppLink } from "../../../components/app-link.tsx";
-import classes from "../../../styles/shared.module.css";
 
 const posts = [
   {
@@ -82,12 +81,12 @@ function ForumFeedPage() {
   return (
     <Container size="md" py="xl">
       <Group justify="space-between" mb="xs">
-        <Title className={classes.pageTitle}>The Virtual Lobby</Title>
+        <Title className="page-title">The Virtual Lobby</Title>
         <Button leftSection={<IconPlus size={16} />} color="pink" radius="xl">
           New Post
         </Button>
       </Group>
-      <Text c="dimmed" className={classes.pageDescription} mb="xl">
+      <Text c="dimmed" className="page-description" mb="xl">
         Discuss, share, and connect with fellow dormitory residents.
       </Text>
 
@@ -108,7 +107,7 @@ function ForumFeedPage() {
             shadow="md"
             padding="lg"
             radius="md"
-            className={classes.contentCard}
+            className="content-card"
             component={AppLink}
             to={`/lobby/${post.id}`}
             style={{ textDecoration: "none", color: "inherit" }}

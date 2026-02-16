@@ -1,24 +1,32 @@
-import {
-  Container,
-  Title,
-  Text,
-  Paper,
-  Group,
-  Stack,
-  Badge,
-  Button,
-  Avatar,
-  ActionIcon,
-  Select,
-} from "@mantine/core";
+import { Container, Title, Text, Paper, Group, Stack, Badge, Button, Avatar, ActionIcon, Select } from "@mantine/core";
 import { IconTrash, IconBan } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
-import classes from "../../styles/shared.module.css";
 
 const flaggedPosts = [
-  { id: "f1", title: "Inappropriate content in thread", author: "User123", reason: "Harassment", reports: 5, date: "Feb 8, 2026" },
-  { id: "f2", title: "Spam link posted repeatedly", author: "SpamBot42", reason: "Spam", reports: 12, date: "Feb 7, 2026" },
-  { id: "f3", title: "Misleading review on Café Manila", author: "FakeReviewer", reason: "Misinformation", reports: 3, date: "Feb 6, 2026" },
+  {
+    id: "f1",
+    title: "Inappropriate content in thread",
+    author: "User123",
+    reason: "Harassment",
+    reports: 5,
+    date: "Feb 8, 2026",
+  },
+  {
+    id: "f2",
+    title: "Spam link posted repeatedly",
+    author: "SpamBot42",
+    reason: "Spam",
+    reports: 12,
+    date: "Feb 7, 2026",
+  },
+  {
+    id: "f3",
+    title: "Misleading review on Café Manila",
+    author: "FakeReviewer",
+    reason: "Misinformation",
+    reports: 3,
+    date: "Feb 6, 2026",
+  },
 ];
 
 const reasonColors: Record<string, string> = { Harassment: "red", Spam: "orange", Misinformation: "yellow" };
@@ -28,14 +36,14 @@ export const Route = createFileRoute("/_app/moderation")({ component: ForumModer
 function ForumModerationPage() {
   return (
     <Container size="lg" py="xl">
-      <Title className={classes.pageTitle} mb="xs">
+      <Title className="page-title" mb="xs">
         Forum Moderation
       </Title>
-      <Text c="dimmed" className={classes.pageDescription} mb="xl">
+      <Text c="dimmed" className="page-description" mb="xl">
         Review flagged content and manage user behavior.
       </Text>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="xl">
+      <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Title order={4} mb="md">
           Report Queue ({flaggedPosts.length})
         </Title>
@@ -72,7 +80,7 @@ function ForumModerationPage() {
         </Stack>
       </Paper>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard}>
+      <Paper shadow="md" p="lg" radius="md" className="content-card">
         <Title order={4} mb="md">
           <Group gap="xs">
             <IconBan size={18} />

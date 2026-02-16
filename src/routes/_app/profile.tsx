@@ -16,7 +16,6 @@ import {
 } from "@mantine/core";
 import { IconUser, IconCalendar, IconHistory, IconEdit, IconTrash, IconCamera } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
-import classes from "../../styles/shared.module.css";
 
 const reservations = [
   { zone: "Quiet Room A", date: "Feb 10, 2026", time: "2:00 PM – 4:00 PM", status: "Confirmed" },
@@ -37,11 +36,11 @@ export const Route = createFileRoute("/_app/profile")({ component: UserProfilePa
 function UserProfilePage() {
   return (
     <Container size="md" py="xl">
-      <Title className={classes.pageTitle} mb="xl">
+      <Title className="page-title" mb="xl">
         My Profile
       </Title>
 
-      <Paper shadow="md" p="lg" radius="md" className={classes.contentCard} mb="xl">
+      <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Group wrap="wrap">
           <Stack align="center">
             <Avatar size={100} radius="xl" color="pink">
@@ -135,7 +134,7 @@ function UserProfilePage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="settings" pt="md">
-          <Paper shadow="md" p="lg" radius="md" className={classes.contentCard}>
+          <Paper shadow="md" p="lg" radius="md" className="content-card">
             <Stack>
               <Title order={4} c="red">
                 Danger Zone
