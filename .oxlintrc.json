@@ -3,7 +3,7 @@
 
   "categories": { "correctness": "error", "suspicious": "warn", "pedantic": "warn", "perf": "warn", "style": "warn" },
   "env": { "builtin": true, "browser": true, "es2022": true },
-  "ignorePatterns": ["dist/**", "node_modules/**", "src/routeTree.gen.ts"],
+  "ignorePatterns": ["dist/**", "node_modules/**", "src/route-tree.gen.ts"],
   "overrides": [
     {
       "files": ["*.config.[jt]s"],
@@ -61,7 +61,17 @@
       }
     },
     {
-      "files": ["src/routes/__root.tsx", "src/routes/**/index.[jt]sx", "src/routes/**/route.[jt]sx"],
+      "files": ["src/routes/__root.tsx", "src/routes/**/*.[jt]sx"],
+      "rules": {
+        /* eslint-plugin-react-refresh */
+        "react-refresh/only-export-components": "off",
+
+        /* Style */
+        "filename-case": "off"
+      }
+    },
+    {
+      "files": ["src/contexts/*.[jt]sx"],
       "rules": {
         /* eslint-plugin-react-refresh */
         "react-refresh/only-export-components": "off"
@@ -70,6 +80,9 @@
   ],
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "jsdoc", "node", "promise"],
   "rules": {
+    /* Correctness */
+    "no-unused-expressions": ["error", { "enforceForJSX": true }],
+
     /* Pedantic */
     "eqeqeq": ["warn", "always", { "null": "ignore" }],
     "max-classes-per-file": "off",
@@ -85,11 +98,16 @@
 
     /* Restriction */
     "explicit-function-return-type": "error",
+    "no-empty-object-type": ["error", { "allowInterfaces": "with-single-extends" }],
+    "no-require-imports": ["error", { "allowAsImport": true }],
+    "no-var": "error",
 
     /* Style */
     "consistent-type-specifier-style": "off",
     "exports-last": "off",
-    "func-style": ["warn", "declaration", { "allowArrowFunctions": true }],
+    "func-names": ["warn", "as-needed", { "generators": "as-needed" }],
+    "func-style": ["warn", "declaration", { "allowArrowFunctions": true, "allowTypeAnnotation": true }],
+    "grouped-accessor-pairs": ["warn", "getBeforeSet", { "enforceForTSTypes": true }],
     "group-exports": "off",
     "id-length": "off",
     "init-declarations": "off",
@@ -97,23 +115,13 @@
     "max-statements": "off",
     "no-continue": "off",
     "no-empty-interface": ["warn", { "allowSingleExtends": true }],
-    "no-labels": "off",
-    "no-magic-numbers": [
-      "warn",
-      {
-        "ignore": [0, 1],
-        "ignoreArrayIndexes": true,
-        "ignoreClassFieldInitialValues": true,
-        "ignoreDefaultValues": true,
-        "ignoreNumericLiteralTypes": true,
-        "ignoreReadonlyClassProperties": true,
-        "ignoreTypeIndexes": true
-      }
-    ],
+    "no-labels": ["warn", { "allowLoop": true, "allowSwitch": true }],
+    "no-magic-numbers": "off",
     "no-named-export": "off",
     "no-nodejs-modules": "off",
     "no-null": "off",
     "no-ternary": "off",
+    "prefer-const": ["warn", { "destructuring": "all", "ignoreReadBeforeAssign": true }],
     "prefer-default-export": "off",
     "sort-imports": "off",
     "sort-keys": "off",
