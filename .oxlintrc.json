@@ -3,7 +3,7 @@
 
   "categories": { "correctness": "error", "suspicious": "warn", "pedantic": "warn", "perf": "warn", "style": "warn" },
   "env": { "builtin": true, "browser": true, "es2022": true },
-  "ignorePatterns": ["dist/**", "node_modules/**", "src/routeTree.gen.ts"],
+  "ignorePatterns": ["dist/**", "node_modules/**", "src/route-tree.gen.ts"],
   "overrides": [
     {
       "files": ["*.config.[jt]s"],
