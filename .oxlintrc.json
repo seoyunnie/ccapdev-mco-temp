@@ -61,7 +61,17 @@
       }
     },
     {
-      "files": ["src/routes/__root.tsx", "src/routes/**/index.[jt]sx"],
+      "files": ["src/routes/__root.tsx", "src/routes/**/*.[jt]sx"],
+      "rules": {
+        /* eslint-plugin-react-refresh */
+        "react-refresh/only-export-components": "off",
+
+        /* Style */
+        "filename-case": "off"
+      }
+    },
+    {
+      "files": ["src/contexts/*.[jt]sx"],
       "rules": {
         /* eslint-plugin-react-refresh */
         "react-refresh/only-export-components": "off"

@@ -95,7 +95,9 @@ function ForumFeedPage() {
           placeholder="Search posts..."
           leftSection={<IconSearch size={16} />}
           value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
+          onChange={(e) => {
+            setSearch(e.currentTarget.value);
+          }}
         />
         <Select placeholder="Sort by" data={["Newest", "Most Popular"]} defaultValue="Newest" />
       </Group>

@@ -47,7 +47,9 @@ function ZoneSelectionPage() {
           placeholder="Search zones..."
           leftSection={<IconSearch size={16} />}
           value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
+          onChange={(e) => {
+            setSearch(e.currentTarget.value);
+          }}
         />
         <Select placeholder="Filter by availability" data={["All", "Open", "Full"]} defaultValue="All" />
       </Group>
@@ -69,6 +71,7 @@ function ZoneSelectionPage() {
                 <Text size="sm" c="dimmed">
                   {zone.available} / {zone.capacity} seats available
                 </Text>
+                {/* oxlint-disable-next-line unicorn/no-nested-ternary */}
                 <Progress value={pct} color={pct > 80 ? "red" : pct > 50 ? "yellow" : "green"} size="sm" />
                 <Button
                   fullWidth

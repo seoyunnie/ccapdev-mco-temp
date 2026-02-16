@@ -87,7 +87,9 @@ function DirectoryListPage() {
         placeholder="Search establishments by name..."
         leftSection={<IconSearch size={16} />}
         value={search}
-        onChange={(e) => setSearch(e.currentTarget.value)}
+        onChange={(e) => {
+          setSearch(e.currentTarget.value);
+        }}
         mb="xl"
         size="md"
       />

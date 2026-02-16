@@ -20,7 +20,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 
 const seatMap = Array.from({ length: 5 }, (_, row) =>
   Array.from({ length: 8 }, (_, col) => ({
-    id: `${String.fromCharCode(65 + row)}${col + 1}`,
+    id: `${String.fromCodePoint(65 + row)}${col + 1}`,
     taken: Math.random() > 0.6,
   })),
 );
@@ -103,7 +103,7 @@ function ReservationPage() {
               {seatMap.map((row, ri) => (
                 <Group key={ri} gap="xs">
                   <Text size="xs" w={20} fw={600}>
-                    {String.fromCharCode(65 + ri)}
+                    {String.fromCodePoint(65 + ri)}
                   </Text>
                   {row.map((seat) => {
                     const isSelected = selectedSeat === seat.id;
@@ -112,8 +112,13 @@ function ReservationPage() {
                         <ActionIcon
                           size="md"
                           variant="filled"
+                          // oxlint-disable-next-line unicorn/no-nested-ternary
                           color={isSelected ? "pink" : seat.taken ? "red" : "green"}
-                          onClick={() => !seat.taken && setSelectedSeat(seat.id)}
+                          onClick={() => {
+                            if (!seat.taken) {
+                              setSelectedSeat(seat.id);
+                            }
+                          }}
                           disabled={seat.taken}
                           style={{ cursor: seat.taken ? "not-allowed" : "pointer" }}
                         >
@@ -140,7 +145,9 @@ function ReservationPage() {
                     key={d}
                     size="xs"
                     variant={selectedDay === i ? "filled" : "light"}
-                    onClick={() => setSelectedDay(i)}
+                    onClick={() => {
+                      setSelectedDay(i);
+                    }}
                   >
                     {d}
                   </Button>
@@ -152,16 +159,18 @@ function ReservationPage() {
                 label="Anonymous Reservation"
                 description="Your name won't be visible to others"
                 checked={anonymous}
-                onChange={(e) => setAnonymous(e.currentTarget.checked)}
+                onChange={(e) => {
+                  setAnonymous(e.currentTarget.checked);
+                }}
               />
-              {selectedSeat && (
+              {selectedSeat !== null && (
                 <Paper bg="pink.0" p="sm" radius="md">
                   <Text size="sm">
                     Selected seat: <Badge>{selectedSeat}</Badge>
                   </Text>
                 </Paper>
               )}
-              <Button fullWidth disabled={!selectedSeat} color="pink" radius="xl">
+              <Button fullWidth disabled={selectedSeat !== null} color="pink" radius="xl">
                 Confirm Reservation
               </Button>
             </Stack>

@@ -13,8 +13,8 @@ import {
   Divider,
   Group,
 } from "@mantine/core";
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useAuth } from "../context/AuthContext.tsx";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { useAuth } from "../contexts/auth-context.tsx";
 import classes from "./login.module.css";
 
 interface LoginSearch {
@@ -32,12 +32,6 @@ function LoginRegisterPage() {
   const { register } = Route.useSearch();
   const [isRegister, setIsRegister] = useState(register === "true");
   const { login } = useAuth();
-  const navigate = useNavigate();
-
-  const handleSubmit = () => {
-    login("admin", isRegister ? "New Resident" : "OPPENHEIMER");
-    navigate({ to: "/dashboard" });
-  };
 
   return (
     <div className={classes.authenticationPageWrapper}>
@@ -50,7 +44,14 @@ function LoginRegisterPage() {
         </Title>
         <Text className={classes.authenticationSubtitle}>
           {isRegister ? "Already have an account? " : "Don't have an account? "}
-          <Anchor component="button" size="sm" c="pink" onClick={() => setIsRegister(!isRegister)}>
+          <Anchor
+            component="button"
+            size="sm"
+            c="pink"
+            onClick={() => {
+              setIsRegister(!isRegister);
+            }}
+          >
             {isRegister ? "Login" : "Register"}
           </Anchor>
         </Text>
@@ -81,7 +82,17 @@ function LoginRegisterPage() {
               </Group>
             )}
 
-            <Button fullWidth mt="xl" color="pink" radius="md" onClick={handleSubmit}>
+            <Button
+              component={Link}
+              fullWidth
+              mt="xl"
+              color="pink"
+              radius="md"
+              to="/dashboard"
+              onClick={() => {
+                login("admin", isRegister ? "New Resident" : "OPPENHEIMER");
+              }}
+            >
               {isRegister ? "Create Account" : "Sign In"}
             </Button>
 

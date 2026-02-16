@@ -33,7 +33,7 @@ import {
 } from "@tabler/icons-react";
 import { Link, Outlet, createFileRoute, useLocation } from "@tanstack/react-router";
 import { AppLink } from "../components/app-link.tsx";
-import { useAuth } from "../context/AuthContext.tsx";
+import { useAuth } from "../contexts/auth-context.tsx";
 import classes from "./_app.module.css";
 
 const guestLinks = [
@@ -201,23 +201,7 @@ function AppLayout() {
           </Group>
 
           <Group gap="sm" visibleFrom="sm">
-            {!isLoggedIn ? (
-              <>
-                <Button variant="default" radius="xl" component={AppLink} to="/login" size="sm">
-                  Log In
-                </Button>
-                <Button
-                  color="pink"
-                  radius="xl"
-                  component={AppLink}
-                  to="/login"
-                  search={{ register: "true" }}
-                  size="sm"
-                >
-                  Register
-                </Button>
-              </>
-            ) : (
+            {isLoggedIn ? (
               <Menu>
                 <Menu.Target>
                   <Button variant="subtle" color="dark" size="sm" radius="xl">
@@ -238,6 +222,22 @@ function AppLayout() {
                   </Menu.Item>
                 </Menu.Dropdown>
               </Menu>
+            ) : (
+              <>
+                <Button variant="default" radius="xl" component={AppLink} to="/login" size="sm">
+                  Log In
+                </Button>
+                <Button
+                  color="pink"
+                  radius="xl"
+                  component={AppLink}
+                  to="/login"
+                  search={{ register: "true" }}
+                  size="sm"
+                >
+                  Register
+                </Button>
+              </>
             )}
           </Group>
         </Container>
@@ -304,7 +304,20 @@ function AppLayout() {
           )}
 
           <Divider my="sm" />
-          {!isLoggedIn ? (
+          {isLoggedIn ? (
+            <Button
+              color="red"
+              variant="light"
+              fullWidth
+              radius="xl"
+              onClick={() => {
+                logout();
+                close();
+              }}
+            >
+              Logout
+            </Button>
+          ) : (
             <>
               <Button component={AppLink} to="/login" variant="default" fullWidth radius="xl" onClick={close}>
                 Log In
@@ -322,19 +335,6 @@ function AppLayout() {
                 Register
               </Button>
             </>
-          ) : (
-            <Button
-              color="red"
-              variant="light"
-              fullWidth
-              radius="xl"
-              onClick={() => {
-                logout();
-                close();
-              }}
-            >
-              Logout
-            </Button>
           )}
         </Stack>
       </Drawer>

@@ -197,7 +197,8 @@ function LandingPage() {
               <Text ta="center" fz="sm" c="dimmed" mt="sm">
                 {i === 0
                   ? "Explore study zones, forum posts, or local establishments — all in one platform."
-                  : i === 1
+                  : // oxlint-disable-next-line unicorn/no-nested-ternary
+                    i === 1
                     ? "Book your study spot, join conversations, or write reviews about your favorite stores."
                     : "Share your experiences, help fellow residents, and build your dorm community together!"}
               </Text>

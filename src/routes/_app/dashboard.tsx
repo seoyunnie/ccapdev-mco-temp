@@ -15,7 +15,7 @@ import {
 import { IconBook, IconMessageCircle, IconStar, IconCalendar } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppLink } from "../../components/app-link.tsx";
-import { useAuth } from "../../context/AuthContext.tsx";
+import { useAuth } from "../../contexts/auth-context.tsx";
 import classes from "./dashboard.module.css";
 
 const quickActions = [
@@ -46,7 +46,7 @@ function DashboardPage() {
         Welcome back, {name}!
       </Title>
       <Text c="dimmed" mb="xl">
-        Here's a quick overview of your Adormable activity.
+        Here&apos;s a quick overview of your Adormable activity.
       </Text>
 
       <Text className={classes.sectionTitle} mb="md">

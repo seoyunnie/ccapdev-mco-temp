@@ -144,7 +144,7 @@ function EstablishmentDetailsPage() {
                 {review.helpful} found helpful
               </Text>
             </Group>
-            {review.ownerReply && (
+            {review.ownerReply !== null && (
               <>
                 <Divider my="sm" />
                 <Paper bg="pink.0" p="sm" radius="sm">

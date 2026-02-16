@@ -16,7 +16,7 @@ import { MantineProvider } from "@mantine/core";
 import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { AuthProvider } from "./context/AuthContext.tsx";
+import { AuthProvider } from "./contexts/auth-context.tsx";
 import { router } from "./router.ts";
 import { adormableTheme } from "./theme.ts";
 
