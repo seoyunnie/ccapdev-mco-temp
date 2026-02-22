@@ -6,12 +6,9 @@
 # Node.js
 node_modules/
 
-# Vite
-dist/
-
-# TanStack Router
-.tanstack/
-
+# Node.js Tools
+**/.turbo/
+**/dist/
 
 # macOS
 **/.DS_Store

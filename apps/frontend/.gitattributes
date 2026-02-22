@@ -1,0 +1,3 @@
+*.css  text diff=css
+*.html text diff=html
+*.tsx  text
