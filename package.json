@@ -6,10 +6,10 @@
   "scripts": {
     "build": "tsc -b && vite build",
     "dev": "vite",
-    "format": "prettier . --write",
-    "format:check": "prettier . --check",
-    "lint": "oxlint --type-aware --type-check",
-    "lint:fix": "oxlint --type-aware --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives",
+    "lint:fix": "oxlint --type-aware --type-check --report-unused-disable-directives --fix",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -46,9 +46,9 @@
     "typescript": "~5.9.3",
     "vite": "^7.3.1"
   },
-  "packageManager": "pnpm@10.30.3+sha512.c961d1e0a2d8e354ecaa5166b822516668b7f44cb5bd95122d590dd81922f606f5473b6d23ec4a5be05e7fcd18e8488d47d978bbe981872f1145d06e9a740017",
   "engines": {
     "node": ">=24.14",
     "pnpm": ">=10.16.0"
-  }
+  },
+  "packageManager": "pnpm@10.30.3+sha512.c961d1e0a2d8e354ecaa5166b822516668b7f44cb5bd95122d590dd81922f606f5473b6d23ec4a5be05e7fcd18e8488d47d978bbe981872f1145d06e9a740017"
 }
