@@ -2,15 +2,14 @@
   "cssVariables.lookupFiles": ["**/*.css", "node_modules/@mantine/core/styles.css"],
 
   "oxc.configPath": ".oxlintrc.json",
-  "oxc.tsConfigPath": "tsconfig.json",
-  "oxc.unusedDisableDirectives": "warn",
-  "oxc.typeAware": true,
   "oxc.disableNestedConfig": true,
-
-  "prettier.configPath": ".prettierrc.json",
-  "prettier.ignorePath": ".prettierignore",
+  "oxc.enable": true,
+  "oxc.fmt.configPath": ".oxfmtrc.json",
+  "oxc.tsConfigPath": "tsconfig.json",
+  "oxc.typeAware": true,
+  "oxc.unusedDisableDirectives": "warn",
 
   "[css][html][json][jsonc][markdown][typescript][typescriptreact][yaml]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   }
 }

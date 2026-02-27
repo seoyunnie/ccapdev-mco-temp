@@ -1,5 +1,0 @@
-# pnpm
-pnpm-lock.yaml
-
-# TanStack Router
-src/route-tree.gen.ts

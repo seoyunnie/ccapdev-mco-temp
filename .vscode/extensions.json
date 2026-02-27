@@ -9,7 +9,6 @@
 
     /* JavaScript */
     "oxc.oxc-vscode",
-    "esbenp.prettier-vscode",
 
     /* YAML */
     "redhat.vscode-yaml"

@@ -12,7 +12,6 @@
 .gitattributes  text export-ignore
 .gitignore      text export-ignore
 .node-version   text
-.prettierignore text
 
 # Overrides
 .vscode/*.json linguist-language=jsonc
