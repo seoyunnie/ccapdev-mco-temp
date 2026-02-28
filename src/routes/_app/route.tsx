@@ -32,9 +32,11 @@ import {
   IconBrandFacebook,
 } from "@tabler/icons-react";
 import { Link, Outlet, createFileRoute, useLocation } from "@tanstack/react-router";
-import { AppLink } from "../components/app-link.tsx";
-import { useAuth } from "../contexts/auth-context.tsx";
-import classes from "./_app.module.css";
+
+import { AppLink } from "../../components/app-link.tsx";
+import { useAuth } from "../../contexts/auth-context.tsx";
+
+import classes from "./route.module.css";
 
 const guestLinks = [
   { label: "Home", to: "/" },
