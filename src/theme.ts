@@ -1,10 +1,9 @@
 import { createTheme } from "@mantine/core";
 
-export const adormableTheme = createTheme({
+export const theme = createTheme({
   primaryColor: "pink",
   fontFamily: "'Nunito', 'Quicksand', sans-serif",
   headings: {
-    fontFamily: "'Nunito', 'Quicksand', sans-serif",
     fontWeight: "800",
     sizes: {
       h1: { fontSize: "2.5rem", lineHeight: "1.15" },
