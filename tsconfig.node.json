@@ -1,8 +1,6 @@
 {
   "$schema": "https://www.schemastore.org/tsconfig.json",
 
-  "include": ["postcss.config.js", "vite.config.ts"],
-
   "compilerOptions": {
     /* Type Checking */
     "noFallthroughCasesInSwitch": true,
@@ -34,5 +32,7 @@
 
     /* Completeness */
     "skipLibCheck": true
-  }
+  },
+
+  "include": ["vite.config.ts"]
 }

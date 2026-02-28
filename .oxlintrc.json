@@ -2,7 +2,9 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
 
   "ignorePatterns": ["dist/**", "node_modules/**", "src/route-tree.gen.ts"],
+
   "env": { "builtin": true, "browser": true, "es2022": true },
+
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "node", "promise"],
   "categories": { "correctness": "error", "suspicious": "warn", "pedantic": "warn", "perf": "warn", "style": "warn" },
   "rules": {

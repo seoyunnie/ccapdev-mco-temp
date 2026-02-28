@@ -1,8 +1,6 @@
 {
   "$schema": "https://www.schemastore.org/tsconfig.json",
 
-  "include": ["src/**/*"],
-
   "compilerOptions": {
     /* Type Checking */
     "noFallthroughCasesInSwitch": true,
@@ -36,5 +34,7 @@
 
     /* Completeness */
     "skipLibCheck": true
-  }
+  },
+
+  "include": ["src/**/*"]
 }
