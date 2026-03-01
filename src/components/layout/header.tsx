@@ -4,7 +4,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 
 import { useAuth } from "../../contexts/auth-context.tsx";
 import { NAV_ITEMS } from "../../data/nav-items.ts";
-import { AppLink } from "../app-link.tsx";
+import { LinkButton } from "../link-button.tsx";
 
 import styles from "./header.module.css";
 
@@ -70,10 +70,10 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
                 </button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item leftSection={<IconShield size={16} />} component={AppLink} to="/concierge">
+                <Menu.Item leftSection={<IconShield size={16} />} component={Link} to="/concierge">
                   Concierge
                 </Menu.Item>
-                <Menu.Item leftSection={<IconShield size={16} />} component={AppLink} to="/moderation">
+                <Menu.Item leftSection={<IconShield size={16} />} component={Link} to="/moderation">
                   Moderation
                 </Menu.Item>
               </Menu.Dropdown>
@@ -98,13 +98,13 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
                 </button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item leftSection={<IconSettings size={16} />} component={AppLink} to="/admin">
+                <Menu.Item leftSection={<IconSettings size={16} />} component={Link} to="/admin">
                   Control Panel
                 </Menu.Item>
-                <Menu.Item leftSection={<IconSettings size={16} />} component={AppLink} to="/admin/establishments">
+                <Menu.Item leftSection={<IconSettings size={16} />} component={Link} to="/admin/establishments">
                   Establishments
                 </Menu.Item>
-                <Menu.Item leftSection={<IconSettings size={16} />} component={AppLink} to="/admin/logs">
+                <Menu.Item leftSection={<IconSettings size={16} />} component={Link} to="/admin/logs">
                   System Logs
                 </Menu.Item>
               </Menu.Dropdown>
@@ -125,7 +125,7 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item leftSection={<IconUser size={16} />} component={AppLink} to="/profile">
+                <Menu.Item leftSection={<IconUser size={16} />} component={Link} to="/profile">
                   Profile
                 </Menu.Item>
                 <Menu.Divider />
@@ -136,12 +136,12 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
             </Menu>
           ) : (
             <>
-              <Button variant="default" radius="xl" component={AppLink} to="/login" size="sm">
+              <Button variant="default" radius="xl" component={Link} to="/login" size="sm">
                 Log In
               </Button>
-              <Button color="pink" radius="xl" component={AppLink} to="/login" search={{ register: "true" }} size="sm">
+              <LinkButton color="pink" radius="xl" to="/login" search={{ register: "true" }} size="sm">
                 Register
-              </Button>
+              </LinkButton>
             </>
           )}
         </Group>

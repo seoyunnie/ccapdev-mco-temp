@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Container,
   Title,
@@ -14,8 +13,8 @@ import {
   ActionIcon,
 } from "@mantine/core";
 import { IconSearch, IconArrowUp, IconPlus } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
-import { AppLink } from "../../../components/app-link.tsx";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 
 const posts = [
   {
@@ -110,7 +109,7 @@ function ForumFeedPage() {
             padding="lg"
             radius="md"
             className="content-card"
-            component={AppLink}
+            component={Link}
             to={`/lobby/${post.id}`}
             style={{ textDecoration: "none", color: "inherit" }}
           >

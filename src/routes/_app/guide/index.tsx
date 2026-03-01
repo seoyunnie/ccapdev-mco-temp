@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Container,
   Title,
@@ -13,8 +12,8 @@ import {
   Button,
 } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
-import { AppLink } from "../../../components/app-link.tsx";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 
 const establishments = [
   {
@@ -113,7 +112,7 @@ function DirectoryListPage() {
                   ({est.reviews} reviews)
                 </Text>
               </Group>
-              <Button variant="light" color="pink" fullWidth radius="xl" component={AppLink} to={`/guide/${est.id}`}>
+              <Button variant="light" color="pink" fullWidth radius="xl" component={Link} to={`/guide/${est.id}`}>
                 View Details
               </Button>
             </Stack>

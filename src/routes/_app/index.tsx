@@ -1,3 +1,4 @@
+import { Carousel } from "@mantine/carousel";
 import {
   Container,
   Title,
@@ -13,10 +14,11 @@ import {
   rem,
   Badge,
 } from "@mantine/core";
-import { Carousel } from "@mantine/carousel";
 import { IconBook, IconMessageCircle, IconCompass, IconCheck, IconArrowRight } from "@tabler/icons-react";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { AppLink } from "../../components/app-link.tsx";
+
+import { LinkButton } from "../../components/link-button.tsx";
+
 import classes from "./index.module.css";
 
 const features = [
@@ -114,17 +116,16 @@ function LandingPage() {
               </List>
 
               <Group mt={30}>
-                <Button
+                <LinkButton
                   radius="xl"
                   size="md"
                   color="pink"
                   className={classes.heroControlButton}
-                  component={AppLink}
                   to="/login"
                   search={{ register: "true" }}
                 >
                   Get Started
-                </Button>
+                </LinkButton>
                 <Button
                   variant="default"
                   radius="xl"
@@ -227,7 +228,7 @@ function LandingPage() {
                 radius="md"
                 className={classes.featureCard}
                 padding="xl"
-                component={AppLink}
+                component={Link}
                 to={feature.to}
               >
                 <feature.icon size={rem(50)} stroke={1.5} color={`var(--mantine-color-${feature.color}-6)`} />
@@ -276,18 +277,17 @@ function LandingPage() {
               <List.Item>Comprehensive local directory with honest reviews & ratings</List.Item>
             </List>
 
-            <Button
+            <LinkButton
               color="pink"
               radius="xl"
               size="md"
               mt={30}
-              component={AppLink}
               to="/login"
               search={{ register: "true" }}
               rightSection={<IconArrowRight size={16} />}
             >
               Join Adormable
-            </Button>
+            </LinkButton>
           </div>
         </div>
       </Container>

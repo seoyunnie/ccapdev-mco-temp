@@ -13,9 +13,10 @@ import {
   rem,
 } from "@mantine/core";
 import { IconBook, IconMessageCircle, IconStar, IconCalendar } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
-import { AppLink } from "../../components/app-link.tsx";
+import { createFileRoute, Link } from "@tanstack/react-router";
+
 import { useAuth } from "../../contexts/auth-context.tsx";
+
 import classes from "./dashboard.module.css";
 
 const quickActions = [
@@ -60,7 +61,7 @@ function DashboardPage() {
             padding="xl"
             radius="md"
             className={classes.quickActionCard}
-            component={AppLink}
+            component={Link}
             to={action.to}
           >
             <ThemeIcon size={rem(50)} radius="md" variant="light" color={action.color} mb="md">

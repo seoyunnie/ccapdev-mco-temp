@@ -1,8 +1,8 @@
 import { ActionIcon, Container, Group, Text, Title } from "@mantine/core";
 import { IconBrandFacebook, IconBrandInstagram, IconBrandTwitter } from "@tabler/icons-react";
+import { Link } from "@tanstack/react-router";
 
 import { FOOTER_ITEMS } from "../../data/footer-items.ts";
-import { AppLink } from "../app-link.tsx";
 
 import styles from "./footer.module.css";
 
@@ -24,7 +24,7 @@ export function Footer() {
               <div className={styles.linksWrapper} key={group.title}>
                 <Text className={styles.linksTitle}>{group.title}</Text>
                 {group.links.map((link) => (
-                  <Text key={link.label} className={styles.link} component={AppLink} to={link.to}>
+                  <Text key={link.label} className={styles.link} component={Link} to={link.to}>
                     {link.label}
                   </Text>
                 ))}

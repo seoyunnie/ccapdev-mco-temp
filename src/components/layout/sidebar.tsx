@@ -1,9 +1,10 @@
 import { Button, Divider, Drawer, NavLink, Stack } from "@mantine/core";
 import { IconSettings, IconShield } from "@tabler/icons-react";
+import { Link } from "@tanstack/react-router";
 
 import { useAuth } from "../../contexts/auth-context.tsx";
 import { NAV_ITEMS } from "../../data/nav-items.ts";
-import { AppLink } from "../app-link.tsx";
+import { LinkButton } from "../link-button.tsx";
 
 export interface SidebarProps {
   isOpen: boolean;
@@ -23,7 +24,7 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
             key={item.to}
             label={item.label}
             leftSection={item.iconComponent && <item.iconComponent size={18} />}
-            component={AppLink}
+            component={Link}
             to={item.to}
             active={location.pathname === item.to}
             onClick={onToggle}
@@ -36,14 +37,14 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
             <NavLink
               label="Concierge"
               leftSection={<IconShield size={18} />}
-              component={AppLink}
+              component={Link}
               to="/concierge"
               onClick={close}
             />
             <NavLink
               label="Moderation"
               leftSection={<IconShield size={18} />}
-              component={AppLink}
+              component={Link}
               to="/moderation"
               onClick={close}
             />
@@ -55,21 +56,21 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
             <NavLink
               label="Control Panel"
               leftSection={<IconSettings size={18} />}
-              component={AppLink}
+              component={Link}
               to="/admin"
               onClick={close}
             />
             <NavLink
               label="Establishments"
               leftSection={<IconSettings size={18} />}
-              component={AppLink}
+              component={Link}
               to="/admin/establishments"
               onClick={close}
             />
             <NavLink
               label="System Logs"
               leftSection={<IconSettings size={18} />}
-              component={AppLink}
+              component={Link}
               to="/admin/logs"
               onClick={close}
             />
@@ -92,11 +93,10 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
           </Button>
         ) : (
           <>
-            <Button component={AppLink} to="/login" variant="default" fullWidth radius="xl" onClick={close}>
+            <Button component={Link} to="/login" variant="default" fullWidth radius="xl" onClick={close}>
               Log In
             </Button>
-            <Button
-              component={AppLink}
+            <LinkButton
               to="/login"
               search={{ register: "true" }}
               color="pink"
@@ -106,7 +106,7 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
               onClick={close}
             >
               Register
-            </Button>
+            </LinkButton>
           </>
         )}
       </Stack>
