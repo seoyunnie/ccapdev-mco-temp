@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Container,
   Paper,
@@ -14,15 +13,18 @@ import {
   Group,
 } from "@mantine/core";
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+
 import { useAuth } from "../contexts/auth-context.tsx";
+
 import classes from "./login.module.css";
 
 interface LoginSearch {
-  register?: string;
+  register?: string | undefined;
 }
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (search: Record<string, unknown>): LoginSearch => ({
+  validateSearch: (search): LoginSearch => ({
     register: typeof search.register === "string" ? search.register : undefined,
   }),
   component: LoginRegisterPage,
