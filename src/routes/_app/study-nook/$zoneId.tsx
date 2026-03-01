@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Container,
   Title,
@@ -15,8 +14,8 @@ import {
   Badge,
   Tooltip,
 } from "@mantine/core";
-
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 
 const seatMap = Array.from({ length: 5 }, (_, row) =>
   Array.from({ length: 8 }, (_, col) => ({
