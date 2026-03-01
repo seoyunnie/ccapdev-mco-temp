@@ -21,8 +21,8 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
   const location = useLocation();
 
   return (
-    <AppShell.Header className={styles.applicationHeader}>
-      <Container size="xl" className={styles.headerInnerLayout}>
+    <AppShell.Header className={styles.root}>
+      <Container size="xl" className={styles.container}>
         <Group gap="xs">
           <Burger
             opened={isBurgerOpen}
@@ -45,7 +45,7 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
             <Link
               key={link.to}
               to={link.to}
-              className={styles.navigationLink}
+              className={styles.navItem}
               data-active={location.pathname === link.to || undefined}
             >
               {link.label}
@@ -56,7 +56,7 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
             <Menu trigger="hover" openDelay={100} closeDelay={200}>
               <Menu.Target>
                 <button
-                  className={styles.navigationLink}
+                  className={styles.navItem}
                   style={{
                     border: "none",
                     background: "none",
@@ -84,7 +84,7 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
             <Menu trigger="hover" openDelay={100} closeDelay={200}>
               <Menu.Target>
                 <button
-                  className={styles.navigationLink}
+                  className={styles.navItem}
                   style={{
                     border: "none",
                     background: "none",
