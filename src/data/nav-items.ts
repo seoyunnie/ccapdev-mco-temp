@@ -1,3 +1,4 @@
+import type { LinkProps } from "@tanstack/react-router";
 import type { ForwardRefExoticComponent, RefAttributes } from "react";
 
 import {
@@ -12,7 +13,7 @@ import {
 
 export interface NavItem {
   readonly label: Capitalize<string>;
-  readonly to: string;
+  readonly to: LinkProps["to"];
   readonly iconComponent?: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
 }
 
