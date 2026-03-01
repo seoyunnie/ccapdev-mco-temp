@@ -17,7 +17,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { useAuth } from "../../contexts/auth-context.tsx";
 
-import classes from "./dashboard.module.css";
+import styles from "./dashboard.module.css";
 
 const quickActions = [
   { icon: IconBook, title: "Book a Slot", description: "Reserve your study space", to: "/study-nook", color: "pink" },
@@ -50,7 +50,7 @@ function DashboardPage() {
         Here&apos;s a quick overview of your Adormable activity.
       </Text>
 
-      <Text className={classes.sectionTitle} mb="md">
+      <Text className={styles.sectionTitle} mb="md">
         Quick Actions
       </Text>
       <SimpleGrid cols={{ base: 1, sm: 3 }} mb="xl">
@@ -60,7 +60,7 @@ function DashboardPage() {
             shadow="md"
             padding="xl"
             radius="md"
-            className={classes.quickActionCard}
+            className={styles.quickActionCard}
             component={Link}
             to={action.to}
           >
@@ -79,11 +79,11 @@ function DashboardPage() {
 
       <Group gap="xs" mb="md">
         <IconCalendar size={20} />
-        <Text className={classes.sectionTitle}>My Upcoming Reservations</Text>
+        <Text className={styles.sectionTitle}>My Upcoming Reservations</Text>
       </Group>
       <Stack gap="sm">
         {upcomingReservations.map((res, i) => (
-          <Paper key={i} withBorder p="md" radius="md" className={classes.reservationPaper}>
+          <Paper key={i} withBorder p="md" radius="md" className={styles.reservationContainer}>
             <Group justify="space-between" wrap="wrap">
               <Stack gap={2}>
                 <Text fw={600}>{res.zone}</Text>

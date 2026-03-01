@@ -17,7 +17,7 @@ import { useState } from "react";
 
 import { useAuth } from "../contexts/auth-context.tsx";
 
-import classes from "./login.module.css";
+import styles from "./login.module.css";
 
 interface LoginSearch {
   register?: string | undefined;
@@ -36,15 +36,15 @@ function LoginRegisterPage() {
   const { login } = useAuth();
 
   return (
-    <div className={classes.authenticationPageWrapper}>
+    <div className={styles.page}>
       <Container size={420} my={40}>
         <Text ta="center" size="lg" fw={800} c="pink" mb={4}>
           HELLO KUROMI.
         </Text>
-        <Title ta="center" className={classes.authenticationTitle}>
+        <Title ta="center" className={styles.title}>
           {isRegister ? "Create your account" : "Welcome back!"}
         </Title>
-        <Text className={classes.authenticationSubtitle}>
+        <Text className={styles.subtitle}>
           {isRegister ? "Already have an account? " : "Don't have an account? "}
           <Anchor
             component="button"
