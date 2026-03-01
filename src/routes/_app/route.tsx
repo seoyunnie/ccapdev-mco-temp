@@ -1,4 +1,4 @@
-import { AppShell, Box } from "@mantine/core";
+import { AppShell } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 
@@ -18,9 +18,7 @@ function AppLayout() {
       <Sidebar isOpen={isSidebarOpen} onToggle={onSidebarToggle} />
 
       <AppShell.Main>
-        <Box pt={70}>
-          <Outlet />
-        </Box>
+        <Outlet />
       </AppShell.Main>
 
       <Footer />
