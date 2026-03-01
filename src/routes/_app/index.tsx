@@ -1,3 +1,4 @@
+import { Carousel } from "@mantine/carousel";
 import {
   Container,
   Title,
@@ -13,11 +14,12 @@ import {
   rem,
   Badge,
 } from "@mantine/core";
-import { Carousel } from "@mantine/carousel";
 import { IconBook, IconMessageCircle, IconCompass, IconCheck, IconArrowRight } from "@tabler/icons-react";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { AppLink } from "../../components/app-link.tsx";
-import classes from "./index.module.css";
+
+import { LinkButton } from "../../components/link-button.tsx";
+
+import styles from "./index.module.css";
 
 const features = [
   {
@@ -81,16 +83,16 @@ export const Route = createFileRoute("/_app/")({ component: LandingPage });
 function LandingPage() {
   return (
     <>
-      <div className={classes.heroSection}>
+      <div className={styles.heroSection}>
         <Container size="lg">
-          <div className={classes.heroInnerLayout}>
-            <div className={classes.heroContentArea}>
+          <div className={styles.heroContainer}>
+            <div className={styles.heroContent}>
               <Badge color="pink" variant="light" size="lg" radius="xl" mb="md">
                 Dormitory Life, Reimagined
               </Badge>
 
-              <Title className={classes.heroTitle}>
-                Find Your Perfect <span className={classes.heroHighlight}>Study Spot</span> & Dorm Community
+              <Title className={styles.heroTitle}>
+                Find Your Perfect <span className={styles.heroHighlight}>Study Spot</span> & Dorm Community
               </Title>
 
               <Text c="dimmed" mt="md" size="lg">
@@ -114,22 +116,21 @@ function LandingPage() {
               </List>
 
               <Group mt={30}>
-                <Button
+                <LinkButton
                   radius="xl"
                   size="md"
                   color="pink"
-                  className={classes.heroControlButton}
-                  component={AppLink}
+                  className={styles.heroControlButton}
                   to="/login"
                   search={{ register: "true" }}
                 >
                   Get Started
-                </Button>
+                </LinkButton>
                 <Button
                   variant="default"
                   radius="xl"
                   size="md"
-                  className={classes.heroControlButton}
+                  className={styles.heroControlButton}
                   component="a"
                   href="#features"
                 >
@@ -138,7 +139,7 @@ function LandingPage() {
               </Group>
             </div>
 
-            <div className={classes.heroImageArea}>
+            <div className={styles.heroImageContainer}>
               <Carousel withIndicators height={340} slideGap="md">
                 {carouselSlides.map((slide) => (
                   <Carousel.Slide key={slide.title}>
@@ -168,29 +169,29 @@ function LandingPage() {
       </div>
 
       <Container size="lg" mt={-40} mb="xl" style={{ position: "relative", zIndex: 1 }}>
-        <div className={classes.statisticsBar}>
+        <div className={styles.statisticsBar}>
           {stats.map((stat) => (
-            <div key={stat.label} className={classes.statisticItem}>
-              <Text className={classes.statisticCount}>{stat.value}</Text>
-              <Text className={classes.statisticTitle}>{stat.label}</Text>
-              <Text className={classes.statisticDescription}>{stat.description}</Text>
+            <div key={stat.label} className={styles.statisticItem}>
+              <Text className={styles.statisticCount}>{stat.value}</Text>
+              <Text className={styles.statisticTitle}>{stat.label}</Text>
+              <Text className={styles.statisticDescription}>{stat.description}</Text>
             </div>
           ))}
         </div>
       </Container>
 
       <Container size="lg" py={80}>
-        <Title className={classes.sectionTitle} ta="center">
+        <Title className={styles.sectionTitle} ta="center">
           Everything You Need, In 3 Simple Steps
         </Title>
-        <Text c="dimmed" className={classes.sectionDescription} ta="center" mt="md">
+        <Text c="dimmed" className={styles.sectionDescription} ta="center" mt="md">
           Getting started with Adormable is as easy as 1-2-3.
         </Text>
 
         <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="xl" mt={50}>
           {["Browse & Discover", "Reserve & Engage", "Rate & Connect"].map((title, i) => (
-            <Card key={title} shadow="md" radius="md" className={classes.stepCard} padding="xl">
-              <div className={classes.stepNumber}>{i + 1}</div>
+            <Card key={title} shadow="md" radius="md" className={styles.stepCard} padding="xl">
+              <div className={styles.stepNumber}>{i + 1}</div>
               <Text ta="center" fz="lg" fw={500} mt="sm">
                 {title}
               </Text>
@@ -212,10 +213,10 @@ function LandingPage() {
           <Badge color="pink" variant="filled" size="lg" radius="xl" mx="auto" display="block" w="fit-content">
             Our Features
           </Badge>
-          <Title className={classes.sectionTitle} ta="center" mt="sm">
+          <Title className={styles.sectionTitle} ta="center" mt="sm">
             What Makes Adormable Special?
           </Title>
-          <Text c="dimmed" className={classes.sectionDescription} ta="center" mt="md">
+          <Text c="dimmed" className={styles.sectionDescription} ta="center" mt="md">
             Three core modules designed to make your dorm life easier.
           </Text>
 
@@ -225,13 +226,13 @@ function LandingPage() {
                 key={feature.title}
                 shadow="md"
                 radius="md"
-                className={classes.featureCard}
+                className={styles.featureCard}
                 padding="xl"
-                component={AppLink}
+                component={Link}
                 to={feature.to}
               >
                 <feature.icon size={rem(50)} stroke={1.5} color={`var(--mantine-color-${feature.color}-6)`} />
-                <Text fz="lg" fw={500} className={classes.featureCardTitle} mt="md">
+                <Text fz="lg" fw={500} className={styles.featureCardTitle} mt="md">
                   {feature.title}
                 </Text>
                 <Text fz="sm" c="dimmed" mt="sm">
@@ -244,18 +245,18 @@ function LandingPage() {
       </Box>
 
       <Container size="lg" py={80}>
-        <div className={classes.aboutInnerLayout}>
-          <div className={classes.aboutImagePlaceholder}>
+        <div className={styles.aboutContainer}>
+          <div className={styles.aboutImagePlaceholder}>
             <Text size="4rem" fw={900} c="pink" style={{ opacity: 0.3 }}>
               A.
             </Text>
           </div>
 
-          <div className={classes.aboutContentArea}>
+          <div className={styles.aboutContent}>
             <Badge color="pink" variant="light" size="lg" radius="xl" mb="md">
               About Us
             </Badge>
-            <Title className={classes.sectionTitle}>Comfort Is Our Top Priority</Title>
+            <Title className={styles.sectionTitle}>Comfort Is Our Top Priority</Title>
             <Text c="dimmed" mt="md">
               Adormable is built for dormitory residents who want a seamless way to manage daily life — from reserving
               study spaces to finding the best food spots nearby.
@@ -276,24 +277,23 @@ function LandingPage() {
               <List.Item>Comprehensive local directory with honest reviews & ratings</List.Item>
             </List>
 
-            <Button
+            <LinkButton
               color="pink"
               radius="xl"
               size="md"
               mt={30}
-              component={AppLink}
               to="/login"
               search={{ register: "true" }}
               rightSection={<IconArrowRight size={16} />}
             >
               Join Adormable
-            </Button>
+            </LinkButton>
           </div>
         </div>
       </Container>
 
       <Container size="lg" pb={80}>
-        <div className={classes.callToActionBanner}>
+        <div className={styles.callToActionBanner}>
           <Title order={2} c="white" mb="md">
             Ready to Make Dorm Life Better?
           </Title>

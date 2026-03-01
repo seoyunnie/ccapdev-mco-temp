@@ -1,7 +1,7 @@
 .quickActionCard {
   border: 1px solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
-  text-decoration: none;
   color: inherit;
+  text-decoration: none;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
@@ -12,7 +12,7 @@
   }
 }
 
-.reservationPaper {
+.reservationContainer {
   transition: border-color 0.2s ease;
 
   &:hover {
@@ -25,11 +25,11 @@
   font-weight: 700;
 
   &::after {
+    background-color: var(--mantine-color-pink-filled);
     content: "";
     display: block;
-    background-color: var(--mantine-color-pink-filled);
-    width: 45px;
     height: 2px;
     margin-top: var(--mantine-spacing-xs);
+    width: 45px;
   }
 }

@@ -1,0 +1,89 @@
+.root {
+  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+  border-top: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+  padding-bottom: calc(var(--mantine-spacing-xl) * 2);
+  padding-top: calc(var(--mantine-spacing-xl) * 2);
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    align-items: center;
+    flex-direction: column;
+  }
+}
+
+.logoSection {
+  max-width: 260px;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    align-items: center;
+    flex-direction: column;
+    display: flex;
+  }
+}
+
+.description {
+  margin-top: 5px;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    margin-top: var(--mantine-spacing-xs);
+    text-align: center;
+  }
+}
+
+.linksSection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--mantine-spacing-xl) * 2);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    display: none;
+  }
+}
+
+.linksWrapper {
+  width: 160px;
+}
+
+.linksTitle {
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  font-size: var(--mantine-font-size-lg);
+  font-weight: 700;
+  margin-bottom: calc(var(--mantine-spacing-xs) / 2);
+}
+
+.link {
+  color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-1));
+  display: block;
+  font-size: var(--mantine-font-size-sm);
+  padding-bottom: 3px;
+  padding-top: 3px;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.bottomBar {
+  align-items: center;
+  border-top: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--mantine-spacing-xl);
+  padding-top: var(--mantine-spacing-xl);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    flex-direction: column;
+    gap: var(--mantine-spacing-sm);
+  }
+}
+
+.socialsSection {
+  @media (max-width: $mantine-breakpoint-sm) {
+    margin-top: var(--mantine-spacing-xs);
+  }
+}

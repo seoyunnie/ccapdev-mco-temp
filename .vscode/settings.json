@@ -9,7 +9,7 @@
   "oxc.typeAware": true,
   "oxc.unusedDisableDirectives": "warn",
 
-  "[css][html][json][jsonc][markdown][typescript][typescriptreact][yaml]": {
+  "[css][html][json][jsonc][markdown][postcss][typescript][typescriptreact][yaml]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   }
 }

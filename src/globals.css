@@ -1,36 +1,17 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap");
-
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  font-family: "Nunito", "Quicksand", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: var(--adormable-text);
-  background-color: #fafafa;
-}
-
-:root {
-  --adormable-pink: #f06595;
-  --adormable-pink-light: #fff0f6;
-  --adormable-bg: #fdf2f8;
-  --adormable-rose: #fcc2d7;
-  --adormable-lavender: #e8d5f5;
-  --adormable-mint: #d3f9d8;
-  --adormable-sky: #d0ebff;
-  --adormable-cream: #fff9db;
-  --adormable-text: #1a1a2e;
-  --adormable-text-light: #6b7280;
-  --adormable-border: #f1e4ec;
-}
-
 html {
   scroll-behavior: smooth;
+}
+
+body {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  background-color: #fafafa;
 }
 
 a {

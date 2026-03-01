@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Container,
   Title,
@@ -14,8 +13,8 @@ import {
   Progress,
 } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
-import { AppLink } from "../../../components/app-link.tsx";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 
 const zones = [
   { id: "main-hall", name: "Main Hall", capacity: 40, available: 12, status: "Open" },
@@ -77,7 +76,7 @@ function ZoneSelectionPage() {
                   fullWidth
                   color="pink"
                   radius="xl"
-                  component={AppLink}
+                  component={Link}
                   to={`/study-nook/${zone.id}`}
                   disabled={zone.status === "Full"}
                 >
