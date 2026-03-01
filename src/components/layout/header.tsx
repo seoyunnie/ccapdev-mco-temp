@@ -1,6 +1,6 @@
 import { AppShell, Avatar, Burger, Button, Container, Group, Menu, Text, Title } from "@mantine/core";
 import { IconChevronDown, IconLogout, IconSettings, IconShield, IconUser } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 
 import { useAuth } from "../../contexts/auth-context.tsx";
 import { NAV_ITEMS } from "../../data/nav-items.ts";
@@ -17,6 +17,8 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
   const { isLoggedIn, role, name, logout } = useAuth();
   const isStaff = role === "concierge" || role === "admin";
   const isAdmin = role === "admin";
+
+  const location = useLocation();
 
   return (
     <AppShell.Header className={styles.applicationHeader}>
