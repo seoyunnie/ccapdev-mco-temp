@@ -1,19 +1,21 @@
-*      text=auto
-*.css  text diff=css
-*.html text diff=html
-*.json text
-*.md   text diff=markdown
-*.ts   text
-*.tsx  text
-*.txt  text
-*.yaml text
+*              text=auto
 
-.editorconfig   text
-.gitattributes  text export-ignore
-.gitignore      text export-ignore
-.node-version   text
+*.css          text diff=css
+*.html         text diff=html
+*.json         text
+*.md           text diff=markdown
+*.ts           text
+*.tsx          text
+*.txt          text
+*.yaml         text
+
+.editorconfig  text
+.gitattributes text export-ignore
+.gitignore     text export-ignore
+.node-version  text
 
 # Overrides
+
 .vscode/*.json linguist-language=jsonc
 
 package.json   eol=lf

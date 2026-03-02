@@ -4,14 +4,11 @@
 !.vscode/extensions.json
 
 # Node.js
-node_modules/
-
-# Vite
 dist/
+node_modules/
 
 # TanStack Router
 .tanstack/
-
 
 # macOS
 **/.DS_Store
