@@ -9,7 +9,7 @@
   display: flex;
   justify-content: space-between;
 
-  @media (max-width: $mantine-breakpoint-sm) {
+  @mixin smaller-than $mantine-breakpoint-sm {
     align-items: center;
     flex-direction: column;
   }
@@ -18,7 +18,7 @@
 .logoSection {
   max-width: 260px;
 
-  @media (max-width: $mantine-breakpoint-sm) {
+  @mixin smaller-than $mantine-breakpoint-sm {
     align-items: center;
     flex-direction: column;
     display: flex;
@@ -28,7 +28,7 @@
 .description {
   margin-top: 5px;
 
-  @media (max-width: $mantine-breakpoint-sm) {
+  @mixin smaller-than $mantine-breakpoint-sm {
     margin-top: var(--mantine-spacing-xs);
     text-align: center;
   }
@@ -39,7 +39,7 @@
   flex-wrap: wrap;
   gap: calc(var(--mantine-spacing-xl) * 2);
 
-  @media (max-width: $mantine-breakpoint-sm) {
+  @mixin smaller-than $mantine-breakpoint-sm {
     display: none;
   }
 }
@@ -76,14 +76,14 @@
   margin-top: var(--mantine-spacing-xl);
   padding-top: var(--mantine-spacing-xl);
 
-  @media (max-width: $mantine-breakpoint-sm) {
+  @mixin smaller-than $mantine-breakpoint-sm {
     flex-direction: column;
     gap: var(--mantine-spacing-sm);
   }
 }
 
 .socialsSection {
-  @media (max-width: $mantine-breakpoint-sm) {
+  @mixin smaller-than $mantine-breakpoint-sm {
     margin-top: var(--mantine-spacing-xs);
   }
 }
