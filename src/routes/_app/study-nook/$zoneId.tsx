@@ -17,36 +17,7 @@ import {
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
-const seatMap = Array.from({ length: 5 }, (_, row) =>
-  Array.from({ length: 8 }, (_, col) => ({
-    id: `${String.fromCodePoint(65 + row)}${col + 1}`,
-    taken: Math.random() > 0.6,
-  })),
-);
-
-const timeSlots = [
-  "8:00 AM",
-  "8:30 AM",
-  "9:00 AM",
-  "9:30 AM",
-  "10:00 AM",
-  "10:30 AM",
-  "11:00 AM",
-  "11:30 AM",
-  "12:00 PM",
-  "12:30 PM",
-  "1:00 PM",
-  "1:30 PM",
-  "2:00 PM",
-  "2:30 PM",
-  "3:00 PM",
-  "3:30 PM",
-  "4:00 PM",
-  "4:30 PM",
-  "5:00 PM",
-];
-
-const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+import { TIME_SLOTS, WEEK_DAYS } from "../../../features/study-nook/study-nook.constants.ts";
 
 export const Route = createFileRoute("/_app/study-nook/$zoneId")({ component: ReservationPage });
 
@@ -54,6 +25,13 @@ function ReservationPage() {
   const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
   const [anonymous, setAnonymous] = useState(false);
+
+  const seatMap = Array.from({ length: 5 }, (_, row) =>
+    Array.from({ length: 8 }, (_, col) => ({
+      id: `${String.fromCodePoint(65 + row)}${col + 1}`,
+      taken: Math.random() > 0.6,
+    })),
+  );
 
   return (
     <Container size="lg" py="xl">
@@ -139,21 +117,21 @@ function ReservationPage() {
             <Stack>
               <Text fw={600}>Booking Options</Text>
               <SimpleGrid cols={7} spacing="xs">
-                {weekDays.map((d, i) => (
+                {WEEK_DAYS.map((day, idx) => (
                   <Button
-                    key={d}
+                    key={day}
                     size="xs"
-                    variant={selectedDay === i ? "filled" : "light"}
+                    variant={selectedDay === idx ? "filled" : "light"}
                     onClick={() => {
-                      setSelectedDay(i);
+                      setSelectedDay(idx);
                     }}
                   >
-                    {d}
+                    {day}
                   </Button>
                 ))}
               </SimpleGrid>
-              <Select label="Start Time" placeholder="Select time" data={timeSlots} />
-              <Select label="End Time" placeholder="Select time" data={timeSlots} />
+              <Select label="Start Time" placeholder="Select time" data={TIME_SLOTS} />
+              <Select label="End Time" placeholder="Select time" data={TIME_SLOTS} />
               <Switch
                 label="Anonymous Reservation"
                 description="Your name won't be visible to others"

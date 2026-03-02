@@ -16,6 +16,8 @@ import { IconSearch, IconArrowUp, IconPlus } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { TAG_COLORS } from "../../../features/lobby/lobby.constants.ts";
+
 const posts = [
   {
     id: "1",
@@ -59,13 +61,6 @@ const posts = [
     time: "1 day ago",
   },
 ];
-
-const tagColors: Record<string, string> = {
-  Discussion: "pink",
-  Issue: "red",
-  Event: "grape",
-  "Lost & Found": "yellow",
-};
 
 export const Route = createFileRoute("/_app/lobby/")({ component: ForumFeedPage });
 
@@ -124,7 +119,7 @@ function ForumFeedPage() {
                 <Stack gap={2}>
                   <Group gap="xs">
                     <Text fw={600}>{post.title}</Text>
-                    <Badge color={tagColors[post.tag]} size="sm" variant="light">
+                    <Badge color={TAG_COLORS[post.tag]} size="sm" variant="light">
                       {post.tag}
                     </Badge>
                   </Group>

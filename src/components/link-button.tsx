@@ -1,5 +1,5 @@
 import { type ButtonProps, type PolymorphicComponentProps, Button } from "@mantine/core";
-import { createLink, type LinkComponent } from "@tanstack/react-router";
+import { type LinkComponent, createLink } from "@tanstack/react-router";
 import { forwardRef } from "react";
 
 const BaseLinkButton = createLink(

@@ -2,13 +2,13 @@ import type { LinkProps } from "@tanstack/react-router";
 import type { ForwardRefExoticComponent, RefAttributes } from "react";
 
 import {
+  type IconProps,
   IconBook,
   IconCompass,
   IconHome,
   IconLayoutDashboard,
   IconMessageCircle,
   IconUser,
-  type IconProps,
 } from "@tabler/icons-react";
 
 export interface NavItem {

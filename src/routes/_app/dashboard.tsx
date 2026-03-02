@@ -12,24 +12,13 @@ import {
   Paper,
   rem,
 } from "@mantine/core";
-import { IconBook, IconMessageCircle, IconStar, IconCalendar } from "@tabler/icons-react";
+import { IconCalendar } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { useAuth } from "../../contexts/auth-context.tsx";
+import { QUICK_ACTIONS } from "../../features/dashboard/data/quick-actions.ts";
 
 import styles from "./dashboard.module.css";
-
-const quickActions = [
-  { icon: IconBook, title: "Book a Slot", description: "Reserve your study space", to: "/study-nook", color: "pink" },
-  {
-    icon: IconMessageCircle,
-    title: "Post in Lobby",
-    description: "Share with the community",
-    to: "/lobby",
-    color: "grape",
-  },
-  { icon: IconStar, title: "Write a Review", description: "Rate a local spot", to: "/guide", color: "teal" },
-];
 
 const upcomingReservations = [
   { zone: "Quiet Room A", date: "Feb 10, 2026", time: "2:00 PM - 4:00 PM", status: "Confirmed" },
@@ -54,7 +43,7 @@ function DashboardPage() {
         Quick Actions
       </Text>
       <SimpleGrid cols={{ base: 1, sm: 3 }} mb="xl">
-        {quickActions.map((action) => (
+        {QUICK_ACTIONS.map((action) => (
           <Card
             key={action.title}
             shadow="md"
@@ -65,7 +54,7 @@ function DashboardPage() {
             to={action.to}
           >
             <ThemeIcon size={rem(50)} radius="md" variant="light" color={action.color} mb="md">
-              <action.icon size={rem(26)} stroke={1.5} />
+              <action.iconComponent size={rem(26)} stroke={1.5} />
             </ThemeIcon>
             <Text fz="lg" fw={500}>
               {action.title}
