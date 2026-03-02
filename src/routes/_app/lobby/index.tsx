@@ -60,7 +60,7 @@ const posts = [
     tag: "Lost & Found",
     time: "1 day ago",
   },
-];
+] as const;
 
 export const Route = createFileRoute("/_app/lobby/")({ component: ForumFeedPage });
 

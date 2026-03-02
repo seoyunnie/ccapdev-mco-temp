@@ -11,7 +11,6 @@ import {
   TextInput,
   RingProgress,
   ActionIcon,
-  type DefaultMantineColor,
 } from "@mantine/core";
 import {
   IconUsers,
@@ -25,6 +24,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 
 import { UserRole } from "../../../contexts/auth-context.tsx";
+import { ROLE_COLORS } from "../../../features/admin/admin.constants.ts";
 
 const stats = [
   { label: "Total Users", value: "1,247", icon: IconUsers, color: "pink" },
@@ -39,13 +39,6 @@ const users = [
   { id: "u3", name: "SpamBot42", email: "spam@fake.com", role: UserRole.RESIDENT, status: "Banned" },
   { id: "u4", name: "Lab Tech Mike", email: "mike@adormable.com", role: UserRole.CONCIERGE, status: "Active" },
 ];
-
-const roleColors: Record<UserRole, DefaultMantineColor> = {
-  [UserRole.GUEST]: "gray",
-  [UserRole.RESIDENT]: "pink",
-  [UserRole.CONCIERGE]: "teal",
-  [UserRole.ADMIN]: "red",
-};
 
 export const Route = createFileRoute("/_app/admin/")({ component: AdminControlPanelPage });
 
@@ -107,7 +100,7 @@ function AdminControlPanelPage() {
                   </Text>
                 </Table.Td>
                 <Table.Td>
-                  <Badge color={roleColors[user.role]} variant="light" size="sm">
+                  <Badge color={ROLE_COLORS[user.role]} variant="light" size="sm">
                     {user.role}
                   </Badge>
                 </Table.Td>
