@@ -1,6 +1,6 @@
 import { Button, Divider, Drawer, NavLink, Stack } from "@mantine/core";
 import { IconSettings, IconShield } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 
 import { useAuth, UserRole } from "../../contexts/auth-context.tsx";
 import { NAV_ITEMS } from "../../data/nav-items.ts";
@@ -15,6 +15,8 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
   const { isLoggedIn, role, logout } = useAuth();
   const isStaff = role === UserRole.CONCIERGE || role === UserRole.ADMIN;
   const isAdmin = role === UserRole.ADMIN;
+
+  const location = useLocation();
 
   return (
     <Drawer opened={isOpen} onClose={onToggle} size="xs" title="Adormable">
@@ -86,14 +88,14 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
             radius="xl"
             onClick={() => {
               logout();
-              close();
+              onToggle();
             }}
           >
             Logout
           </Button>
         ) : (
           <>
-            <Button component={Link} to="/login" variant="default" fullWidth radius="xl" onClick={close}>
+            <Button component={Link} to="/login" variant="default" fullWidth radius="xl" onClick={onToggle}>
               Log In
             </Button>
             <LinkButton
@@ -103,7 +105,7 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
               fullWidth
               mt="xs"
               radius="xl"
-              onClick={close}
+              onClick={onToggle}
             >
               Register
             </LinkButton>
