@@ -14,69 +14,14 @@ import {
   rem,
   Badge,
 } from "@mantine/core";
-import { IconBook, IconMessageCircle, IconCompass, IconCheck, IconArrowRight } from "@tabler/icons-react";
+import { IconCheck, IconArrowRight } from "@tabler/icons-react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 
 import { LinkButton } from "../../components/link-button.tsx";
+import { CAROUSEL_FEATURES, FEATURES } from "../../data/features.ts";
+import { STATS } from "../../data/stats.ts";
 
 import styles from "./index.module.css";
-
-const features = [
-  {
-    icon: IconBook,
-    title: "The Study Nook",
-    description:
-      "Reserve study spaces in seconds. Interactive seat maps, 30-minute intervals, and anonymous booking options.",
-    color: "pink",
-    to: "/study-nook",
-  },
-  {
-    icon: IconMessageCircle,
-    title: "The Virtual Lobby",
-    description:
-      "Connect with fellow residents. Post discussions, upvote content, and engage in threaded conversations.",
-    color: "grape",
-    to: "/lobby",
-  },
-  {
-    icon: IconCompass,
-    title: "The Survival Guide",
-    description: "Discover local spots. Browse reviews, star ratings, and recommendations from fellow residents.",
-    color: "teal",
-    to: "/guide",
-  },
-];
-
-const stats = [
-  { value: "500+", label: "Happy Residents", description: "Active users across all dormitory buildings" },
-  { value: "50+", label: "Study Spots", description: "Reservable spaces with real-time availability" },
-  { value: "200+", label: "Reviews", description: "Honest community ratings of local establishments" },
-];
-
-const carouselSlides = [
-  {
-    title: "Study Nook",
-    description: "Book your ideal study spot with our interactive reservation system.",
-    bg: "linear-gradient(135deg, #fff0f6, #fcc2d7)",
-  },
-  {
-    title: "Virtual Lobby",
-    description: "Stay connected with the dormitory community through discussions and posts.",
-    bg: "linear-gradient(135deg, #f3f0ff, #d0bfff)",
-  },
-  {
-    title: "Survival Guide",
-    description: "Find the best local establishments near your dormitory.",
-    bg: "linear-gradient(135deg, #e6fcf5, #96f2d7)",
-  },
-];
-
-const bulletPoints = [
-  "Interactive study space reservations with real-time availability",
-  "Community forum to connect, discuss, and share with residents",
-  "Comprehensive local directory with honest reviews & ratings",
-  "Role-based access for residents, concierge, and administrators",
-];
 
 export const Route = createFileRoute("/_app/")({ component: LandingPage });
 
@@ -110,9 +55,10 @@ function LandingPage() {
                   </ThemeIcon>
                 }
               >
-                {bulletPoints.map((point) => (
-                  <List.Item key={point}>{point}</List.Item>
-                ))}
+                <List.Item>Interactive study space reservations with real-time availability</List.Item>
+                <List.Item>Community forum to connect, discuss, and share with residents</List.Item>
+                <List.Item>Comprehensive local directory with honest reviews & ratings</List.Item>
+                <List.Item>Role-based access for residents, concierge, and administrators</List.Item>
               </List>
 
               <Group mt={30}>
@@ -141,9 +87,9 @@ function LandingPage() {
 
             <div className={styles.heroImageContainer}>
               <Carousel withIndicators height={340} slideGap="md">
-                {carouselSlides.map((slide) => (
+                {CAROUSEL_FEATURES.map((slide) => (
                   <Carousel.Slide key={slide.title}>
-                    <Card h="100%" p="xl" radius="md" style={{ background: slide.bg }}>
+                    <Card h="100%" p="xl" radius="md" style={{ background: slide.background }}>
                       <Stack justify="center" h="100%" gap="md">
                         <Title order={2}>{slide.title}</Title>
                         <Text c="dimmed" size="md">
@@ -170,7 +116,7 @@ function LandingPage() {
 
       <Container size="lg" mt={-40} mb="xl" style={{ position: "relative", zIndex: 1 }}>
         <div className={styles.statisticsBar}>
-          {stats.map((stat) => (
+          {STATS.map((stat) => (
             <div key={stat.label} className={styles.statisticItem}>
               <Text className={styles.statisticCount}>{stat.value}</Text>
               <Text className={styles.statisticTitle}>{stat.label}</Text>
@@ -221,7 +167,7 @@ function LandingPage() {
           </Text>
 
           <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl" mt={50}>
-            {features.map((feature) => (
+            {FEATURES.map((feature) => (
               <Card
                 key={feature.title}
                 shadow="md"
@@ -231,7 +177,7 @@ function LandingPage() {
                 component={Link}
                 to={feature.to}
               >
-                <feature.icon size={rem(50)} stroke={1.5} color={`var(--mantine-color-${feature.color}-6)`} />
+                <feature.iconComponent size={rem(50)} stroke={1.5} color={`var(--mantine-color-${feature.color}-6)`} />
                 <Text fz="lg" fw={500} className={styles.featureCardTitle} mt="md">
                   {feature.title}
                 </Text>
