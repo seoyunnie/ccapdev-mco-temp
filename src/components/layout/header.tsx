@@ -2,7 +2,7 @@ import { AppShell, Avatar, Burger, Button, Container, Group, Menu, Text, Title }
 import { IconChevronDown, IconLogout, IconSettings, IconShield, IconUser } from "@tabler/icons-react";
 import { Link, useLocation } from "@tanstack/react-router";
 
-import { useAuth } from "../../contexts/auth-context.tsx";
+import { useAuth, UserRole } from "../../contexts/auth-context.tsx";
 import { NAV_ITEMS } from "../../data/nav-items.ts";
 import { LinkButton } from "../link-button.tsx";
 
@@ -15,8 +15,8 @@ export interface HeaderProps {
 
 export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>) {
   const { isLoggedIn, role, name, logout } = useAuth();
-  const isStaff = role === "concierge" || role === "admin";
-  const isAdmin = role === "admin";
+  const isStaff = role === UserRole.CONCIERGE || role === UserRole.ADMIN;
+  const isAdmin = role === UserRole.ADMIN;
 
   const location = useLocation();
 

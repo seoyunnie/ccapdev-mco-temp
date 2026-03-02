@@ -11,6 +11,7 @@ import {
   TextInput,
   RingProgress,
   ActionIcon,
+  type DefaultMantineColor,
 } from "@mantine/core";
 import {
   IconUsers,
@@ -23,6 +24,8 @@ import {
 } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 
+import { UserRole } from "../../../contexts/auth-context.tsx";
+
 const stats = [
   { label: "Total Users", value: "1,247", icon: IconUsers, color: "pink" },
   { label: "Active Reservations", value: "89", icon: IconBook, color: "teal" },
@@ -31,13 +34,18 @@ const stats = [
 ];
 
 const users = [
-  { id: "u1", name: "Maria Santos", email: "maria@adormable.com", role: "Resident", status: "Active" },
-  { id: "u2", name: "Juan Reyes", email: "juan@adormable.com", role: "Resident", status: "Active" },
-  { id: "u3", name: "SpamBot42", email: "spam@fake.com", role: "Resident", status: "Banned" },
-  { id: "u4", name: "Lab Tech Mike", email: "mike@adormable.com", role: "Concierge", status: "Active" },
+  { id: "u1", name: "Maria Santos", email: "maria@adormable.com", role: UserRole.RESIDENT, status: "Active" },
+  { id: "u2", name: "Juan Reyes", email: "juan@adormable.com", role: UserRole.RESIDENT, status: "Active" },
+  { id: "u3", name: "SpamBot42", email: "spam@fake.com", role: UserRole.RESIDENT, status: "Banned" },
+  { id: "u4", name: "Lab Tech Mike", email: "mike@adormable.com", role: UserRole.CONCIERGE, status: "Active" },
 ];
 
-const roleColors: Record<string, string> = { Resident: "pink", Concierge: "teal", Admin: "red" };
+const roleColors: Record<UserRole, DefaultMantineColor> = {
+  [UserRole.GUEST]: "gray",
+  [UserRole.RESIDENT]: "pink",
+  [UserRole.CONCIERGE]: "teal",
+  [UserRole.ADMIN]: "red",
+};
 
 export const Route = createFileRoute("/_app/admin/")({ component: AdminControlPanelPage });
 

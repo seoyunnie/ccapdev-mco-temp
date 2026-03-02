@@ -1,6 +1,7 @@
-import { type ReactNode, createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
 
-export type UserRole = "guest" | "resident" | "concierge" | "admin";
+export const UserRole = { GUEST: "guest", RESIDENT: "resident", CONCIERGE: "concierge", ADMIN: "admin" } as const;
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 interface AuthState {
   isLoggedIn: boolean;
@@ -10,32 +11,12 @@ interface AuthState {
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthState>({
+export const AuthContext = createContext<AuthState>({
   isLoggedIn: false,
   role: "guest",
   name: "",
   login: () => {},
   logout: () => {},
 });
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [role, setRole] = useState<UserRole>("guest");
-  const [name, setName] = useState("");
-
-  const login = (r: UserRole, n = "Resident") => {
-    setIsLoggedIn(true);
-    setRole(r);
-    setName(n);
-  };
-
-  const logout = () => {
-    setIsLoggedIn(false);
-    setRole("guest");
-    setName("");
-  };
-
-  return <AuthContext value={{ isLoggedIn, role, name, login, logout }}>{children}</AuthContext>;
-}
 
 export const useAuth = () => useContext(AuthContext);

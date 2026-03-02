@@ -2,7 +2,7 @@ import { Button, Divider, Drawer, NavLink, Stack } from "@mantine/core";
 import { IconSettings, IconShield } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 
-import { useAuth } from "../../contexts/auth-context.tsx";
+import { useAuth, UserRole } from "../../contexts/auth-context.tsx";
 import { NAV_ITEMS } from "../../data/nav-items.ts";
 import { LinkButton } from "../link-button.tsx";
 
@@ -13,8 +13,8 @@ export interface SidebarProps {
 
 export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
   const { isLoggedIn, role, logout } = useAuth();
-  const isStaff = role === "concierge" || role === "admin";
-  const isAdmin = role === "admin";
+  const isStaff = role === UserRole.CONCIERGE || role === UserRole.ADMIN;
+  const isAdmin = role === UserRole.ADMIN;
 
   return (
     <Drawer opened={isOpen} onClose={onToggle} size="xs" title="Adormable">

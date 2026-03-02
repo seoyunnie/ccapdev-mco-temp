@@ -17,7 +17,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { AuthProvider } from "./contexts/auth-context.tsx";
+import { AuthProvider } from "./contexts/auth-provider.tsx";
 import { router } from "./router.ts";
 import { theme } from "./theme.ts";
 
