@@ -8,9 +8,6 @@
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "node", "promise"],
   "categories": { "correctness": "error", "suspicious": "warn", "pedantic": "warn", "perf": "warn", "style": "warn" },
   "rules": {
-    /* Correctness */
-    "eslint/no-unused-expressions": ["error", { "enforceForJSX": true }],
-
     /* Pedantic */
     "eslint/eqeqeq": ["warn", "always", { "null": "ignore" }],
     "eslint/max-classes-per-file": "off",
@@ -50,7 +47,7 @@
     "eslint/no-magic-numbers": [
       "warn",
       {
-        "ignore": [-1, 0, 1, 10, 16],
+        "ignore": [-1, 0, 1],
         "ignoreArrayIndexes": true,
         "ignoreDefaultValues": true,
         "ignoreClassFieldInitialValues": true,
@@ -99,6 +96,7 @@
       "plugins": ["react", "jsx-a11y"],
       "rules": {
         /* Correctness */
+        "eslint/no-unused-expressions": ["error", { "enforceForJSX": true }],
         "react/no-string-refs": ["error", { "noTemplateLiterals": true }],
         "tanstack-router/create-route-property-order": "error",
 
@@ -143,7 +141,10 @@
       "files": ["src/routes/**/*.[jt]sx"],
       "rules": {
         /* Perf */
-        "react-refresh/only-export-components": "off"
+        "react-refresh/only-export-components": "off",
+
+        /* Style */
+        "unicorn/filename-case": "off"
       }
     }
   ]
