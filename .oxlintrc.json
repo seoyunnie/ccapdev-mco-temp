@@ -3,6 +3,8 @@
 
   "ignorePatterns": ["dist/**", "generated/prisma/**", "node_modules/**", "src/route-tree.gen.ts"],
 
+  "options": { "typeAware": true, "typeCheck": true },
+
   "env": { "builtin": true, "browser": true, "node": true, "es2022": true },
 
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "node", "promise"],
