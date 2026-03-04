@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
 
-  "ignorePatterns": ["dist/**", "node_modules/**", "src/route-tree.gen.ts"],
+  "ignorePatterns": ["dist/**", "generated/prisma/**", "node_modules/**", "src/route-tree.gen.ts"],
 
   "env": { "builtin": true, "browser": true, "node": true, "es2022": true },
 

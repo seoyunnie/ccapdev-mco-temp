@@ -4,6 +4,7 @@
 *.html         text diff=html
 *.json         text
 *.md           text diff=markdown
+*.prisma       text
 *.ts           text
 *.tsx          text
 *.txt          text

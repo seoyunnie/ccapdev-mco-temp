@@ -1,2 +1,9 @@
 # Dependency Resolution
 minimumReleaseAge: 1440
+
+# Build Settings
+onlyBuiltDependencies:
+  - "@prisma/client"
+  - "@prisma/engines"
+  - esbuild
+  - prisma
