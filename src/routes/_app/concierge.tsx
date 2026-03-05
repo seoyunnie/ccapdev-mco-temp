@@ -23,7 +23,10 @@ const expiredBookings = [
 
 const zones = ["Main Hall", "Quiet Room A", "Quiet Room B", "Group Study Room", "Computer Lab"];
 
-export const Route = createFileRoute("/_app/concierge")({ component: ConciergeDashboardPage });
+export const Route = createFileRoute("/_app/concierge")({
+  head: () => ({ meta: [{ title: "Concierge | Adormable" }] }),
+  component: ConciergeDashboardPage,
+});
 
 function ConciergeDashboardPage() {
   return (

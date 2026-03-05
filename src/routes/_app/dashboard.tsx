@@ -25,7 +25,10 @@ const upcomingReservations = [
   { zone: "Main Hall - Seat 12", date: "Feb 12, 2026", time: "10:00 AM - 12:00 PM", status: "Pending" },
 ];
 
-export const Route = createFileRoute("/_app/dashboard")({ component: DashboardPage });
+export const Route = createFileRoute("/_app/dashboard")({
+  head: () => ({ meta: [{ title: "Dashboard | Adormable" }] }),
+  component: DashboardPage,
+});
 
 function DashboardPage() {
   const { name } = useAuth();

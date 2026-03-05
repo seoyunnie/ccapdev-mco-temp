@@ -40,7 +40,10 @@ const users = [
   { id: "u4", name: "Lab Tech Mike", email: "mike@adormable.com", role: UserRole.CONCIERGE, status: "Active" },
 ];
 
-export const Route = createFileRoute("/_app/admin/")({ component: AdminControlPanelPage });
+export const Route = createFileRoute("/_app/admin/")({
+  head: () => ({ meta: [{ title: "Admin | Adormable" }] }),
+  component: AdminControlPanelPage,
+});
 
 function AdminControlPanelPage() {
   return (

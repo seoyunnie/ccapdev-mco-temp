@@ -22,7 +22,10 @@ const establishments = [
   { id: "4", name: "Samgyup Corner", category: "Korean BBQ", owner: "—", status: "Inactive" },
 ];
 
-export const Route = createFileRoute("/_app/admin/establishments")({ component: EstablishmentManagerPage });
+export const Route = createFileRoute("/_app/admin/establishments")({
+  head: () => ({ meta: [{ title: "Establishments | Adormable" }] }),
+  component: EstablishmentManagerPage,
+});
 
 function EstablishmentManagerPage() {
   return (

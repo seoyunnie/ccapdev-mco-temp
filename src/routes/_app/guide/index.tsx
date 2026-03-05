@@ -66,7 +66,10 @@ const establishments = [
   },
 ];
 
-export const Route = createFileRoute("/_app/guide/")({ component: DirectoryListPage });
+export const Route = createFileRoute("/_app/guide/")({
+  head: () => ({ meta: [{ title: "Survival Guide | Adormable" }] }),
+  component: DirectoryListPage,
+});
 
 function DirectoryListPage() {
   const [search, setSearch] = useState("");

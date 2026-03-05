@@ -31,7 +31,10 @@ const flaggedPosts = [
 
 const reasonColors: Record<string, string> = { Harassment: "red", Spam: "orange", Misinformation: "yellow" };
 
-export const Route = createFileRoute("/_app/moderation")({ component: ForumModerationPage });
+export const Route = createFileRoute("/_app/moderation")({
+  head: () => ({ meta: [{ title: "Moderation | Adormable" }] }),
+  component: ForumModerationPage,
+});
 
 function ForumModerationPage() {
   return (

@@ -27,6 +27,7 @@ export const Route = createFileRoute("/login")({
   validateSearch: (search): LoginSearch => ({
     register: typeof search.register === "string" ? search.register : undefined,
   }),
+  head: () => ({ meta: [{ title: "Login | Adormable" }] }),
   component: LoginRegisterPage,
 });
 

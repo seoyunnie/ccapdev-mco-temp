@@ -61,7 +61,10 @@ const typeColors: Record<string, string> = { Reservation: "pink", Forum: "grape"
 
 const levelColors: Record<string, string> = { Error: "red", Warning: "yellow", Info: "pink" };
 
-export const Route = createFileRoute("/_app/admin/logs")({ component: SystemLogsPage });
+export const Route = createFileRoute("/_app/admin/logs")({
+  head: () => ({ meta: [{ title: "Logs | Adormable" }] }),
+  component: SystemLogsPage,
+});
 
 function SystemLogsPage() {
   return (

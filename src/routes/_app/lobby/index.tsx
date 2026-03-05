@@ -62,7 +62,10 @@ const posts = [
   },
 ] as const;
 
-export const Route = createFileRoute("/_app/lobby/")({ component: ForumFeedPage });
+export const Route = createFileRoute("/_app/lobby/")({
+  head: () => ({ meta: [{ title: "Lobby | Adormable" }] }),
+  component: ForumFeedPage,
+});
 
 function ForumFeedPage() {
   const [search, setSearch] = useState("");

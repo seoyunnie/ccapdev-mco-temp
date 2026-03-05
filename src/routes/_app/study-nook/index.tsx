@@ -25,7 +25,10 @@ const zones = [
   { id: "reading-room", name: "Reading Room", capacity: 15, available: 0, status: "Full" },
 ];
 
-export const Route = createFileRoute("/_app/study-nook/")({ component: ZoneSelectionPage });
+export const Route = createFileRoute("/_app/study-nook/")({
+  head: () => ({ meta: [{ title: "Study Nook | Adormable" }] }),
+  component: ZoneSelectionPage,
+});
 
 function ZoneSelectionPage() {
   const [search, setSearch] = useState("");
