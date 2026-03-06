@@ -1,0 +1,81 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  install-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up PNPM
+        uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ./.node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Upload node_modules as artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: node-modules-artifact
+          path: ./node_modules
+          retention-days: 1
+
+  lint-check:
+    needs: install-deps
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up PNPM
+        uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ./.node-version
+          cache: pnpm
+
+      - name: Download node_modules artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: node-modules-artifact
+          path: ./node_modules
+
+      - name: Run lint checks
+        run: pnpm lint
+
+  format-check:
+    needs: install-deps
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up PNPM
+        uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ./.node-version
+          cache: pnpm
+
+      - name: Download node_modules artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: node-modules-artifact
+          path: ./node_modules
+
+      - name: Check formatting
+        run: pnpm format:check
