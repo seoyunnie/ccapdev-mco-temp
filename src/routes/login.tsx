@@ -23,7 +23,7 @@ import { authClient } from "../lib/auth-client.ts";
 import styles from "./login.module.css";
 
 export const Route = createFileRoute("/login")({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async () => {
     const { data: session } = await authClient.getSession();
     if (session?.user) {
       throw redirect({ to: "/dashboard" });
@@ -56,7 +56,7 @@ function LoginPage() {
       return;
     }
 
-    router.navigate({ to: "/dashboard" });
+    void router.navigate({ to: "/dashboard" });
   };
 
   return (

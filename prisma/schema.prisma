@@ -26,6 +26,10 @@ model User {
   threads        Thread[]
   comments       Comment[]
   establishments Establishment[] @relation("EstablishmentOwner")
+  votes          Vote[]
+  reports        Report[]
+  bans           Ban[]
+  activityLogs   ActivityLog[]
 
   @@unique([email])
   @@map("user")
@@ -170,6 +174,8 @@ model Thread {
   tag       String?
   upvotes   Int       @default(0)
   comments  Comment[]
+  votes     Vote[]
+  reports   Report[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -188,10 +194,70 @@ model Comment {
   author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   content   String
   upvotes   Int       @default(0)
+  votes     Vote[]
+  reports   Report[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   @@index([threadId])
   @@index([authorId])
   @@map("comment")
+}
+
+model Vote {
+  id        String  @id @map("_id")
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  threadId  String?
+  thread    Thread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  value     Int // 1 = upvote, -1 = downvote
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([threadId])
+  @@index([commentId])
+  @@map("vote")
+}
+
+model Report {
+  id         String  @id @map("_id")
+  reporterId String
+  reporter   User    @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  threadId   String?
+  thread     Thread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  commentId  String?
+  comment    Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  reason     String
+  status     String   @default("pending") // pending | resolved | dismissed
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([reporterId])
+  @@map("report")
+}
+
+model Ban {
+  id        String    @id @map("_id")
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason    String
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("ban")
+}
+
+model ActivityLog {
+  id        String   @id @map("_id")
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String // e.g. "login", "create_thread", "ban_user"
+  detail    String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("activity_log")
 }

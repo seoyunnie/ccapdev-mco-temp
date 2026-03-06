@@ -13,7 +13,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useMemo(
     () => async () => {
       await authClient.signOut();
-      router.navigate({ to: "/login" });
+      void router.navigate({ to: "/login" });
     },
     [router],
   );
