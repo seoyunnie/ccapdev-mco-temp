@@ -7,8 +7,15 @@
 dist/
 node_modules/
 
-# TanStack Router
+# TanStack Start
 .tanstack/
+
+# Prisma
+.env
+generated/prisma/
 
 # macOS
 **/.DS_Store
+
+
+/pers

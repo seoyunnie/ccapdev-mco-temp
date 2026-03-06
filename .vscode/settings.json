@@ -1,4 +1,8 @@
 {
+  "files.readonlyInclude": { "**/route-tree.gen.ts": true, "generated/**": true },
+  "files.watcherExclude": { "**/route-tree.gen.ts": true },
+  "search.exclude": { "**/route-tree.gen.ts": true },
+
   "cssVariables.lookupFiles": ["**/*.css", "node_modules/@mantine/core/styles.css"],
 
   "oxc.configPath": ".oxlintrc.json",
@@ -10,5 +14,6 @@
 
   "[css][html][json][jsonc][markdown][postcss][typescript][typescriptreact][yaml]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
-  }
+  },
+  "prisma.pinToPrisma6": true
 }

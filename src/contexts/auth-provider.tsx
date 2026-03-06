@@ -1,23 +1,33 @@
-import { type ReactNode, useState } from "react";
+import type { ReactNode } from "react";
 
+import { useRouter } from "@tanstack/react-router";
+import { useMemo } from "react";
+
+import { authClient } from "../lib/auth-client.ts";
 import { type UserRole, AuthContext } from "./auth-context.tsx";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [role, setRole] = useState<UserRole>("guest");
-  const [name, setName] = useState("");
+  const { data: session, isPending } = authClient.useSession();
+  const router = useRouter();
 
-  const login = (r: UserRole, n = "Resident") => {
-    setIsLoggedIn(true);
-    setRole(r);
-    setName(n);
-  };
+  const signOut = useMemo(
+    () => async () => {
+      await authClient.signOut();
+      void router.navigate({ to: "/login" });
+    },
+    [router],
+  );
 
-  const logout = () => {
-    setIsLoggedIn(false);
-    setRole("guest");
-    setName("");
-  };
+  const value = useMemo(
+    () => ({
+      isLoggedIn: !!session?.user,
+      role: (session?.user?.role as UserRole) ?? "guest",
+      name: session?.user?.name ?? "",
+      isPending,
+      signOut,
+    }),
+    [session, isPending, signOut],
+  );
 
-  return <AuthContext value={{ isLoggedIn, role, name, login, logout }}>{children}</AuthContext>;
+  return <AuthContext value={value}>{children}</AuthContext>;
 }

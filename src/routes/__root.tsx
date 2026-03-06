@@ -15,8 +15,9 @@ import "../globals.css";
 import type { ReactNode } from "react";
 
 import { ColorSchemeScript, mantineHtmlProps, MantineProvider } from "@mantine/core";
-import { createRootRoute, HeadContent } from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet } from "@tanstack/react-router";
 
+import { AuthProvider } from "../contexts/auth-provider.tsx";
 import { theme } from "../theme.ts";
 
 export const Route = createRootRoute({
@@ -30,6 +31,7 @@ export const Route = createRootRoute({
     ],
   }),
   shellComponent: RootComponent,
+  component: RootLayout,
 });
 
 function RootComponent({ children }: { children: ReactNode }) {
@@ -45,5 +47,13 @@ function RootComponent({ children }: { children: ReactNode }) {
         </MantineProvider>
       </body>
     </html>
+  );
+}
+
+function RootLayout() {
+  return (
+    <AuthProvider>
+      <Outlet />
+    </AuthProvider>
   );
 }

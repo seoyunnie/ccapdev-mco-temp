@@ -14,6 +14,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@better-auth/prisma-adapter": "^1.5.3",
     "@fontsource/nunito": "^5.2.7",
     "@fontsource/quicksand": "^5.2.10",
     "@mantine/carousel": "^8.3.16",
@@ -46,6 +47,7 @@
     "postcss": "^8.5.8",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
+    "prisma": "~6.19.2",
     "typescript": "~5.9.3",
     "vite": "^7.3.1"
   },
