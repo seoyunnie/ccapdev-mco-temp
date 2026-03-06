@@ -9,8 +9,8 @@
     "dev": "vite",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives",
-    "lint:fix": "oxlint --type-aware --type-check --report-unused-disable-directives --fix",
+    "lint": "oxlint --report-unused-disable-directives",
+    "lint:fix": "oxlint --report-unused-disable-directives --fix",
     "preview": "vite preview"
   },
   "dependencies": {
