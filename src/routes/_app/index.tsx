@@ -62,14 +62,7 @@ function LandingPage() {
               </List>
 
               <Group mt={30}>
-                <LinkButton
-                  radius="xl"
-                  size="md"
-                  color="pink"
-                  className={styles.heroControlButton}
-                  to="/login"
-                  search={{ register: "true" }}
-                >
+                <LinkButton radius="xl" size="md" color="pink" className={styles.heroControlButton} to="/signup">
                   Get Started
                 </LinkButton>
                 <Button
@@ -228,8 +221,7 @@ function LandingPage() {
               radius="xl"
               size="md"
               mt={30}
-              to="/login"
-              search={{ register: "true" }}
+              to="/signup"
               rightSection={<IconArrowRight size={16} />}
             >
               Join Adormable
@@ -248,7 +240,7 @@ function LandingPage() {
             discover local gems.
           </Text>
           <Group justify="center">
-            <Link to="/login" search={{ register: "true" }}>
+            <Link to="/signup">
               <Button size="lg" variant="white" color="pink" radius="xl">
                 Join Now
               </Button>

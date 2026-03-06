@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   PasswordInput,
-  Checkbox,
   Button,
   Anchor,
   Stack,
@@ -22,41 +21,49 @@ import { authClient } from "../lib/auth-client.ts";
 
 import styles from "./login.module.css";
 
-export const Route = createFileRoute("/login")({
-  beforeLoad: async ({ context }) => {
+export const Route = createFileRoute("/signup")({
+  beforeLoad: async () => {
     const { data: session } = await authClient.getSession();
     if (session?.user) {
       throw redirect({ to: "/dashboard" });
     }
   },
-  component: LoginPage,
+  component: SignupPage,
 });
 
-function LoginPage() {
+function SignupPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const form = useForm({
-    initialValues: { email: "", password: "" },
+    initialValues: { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" },
     validate: {
-      email: (v) => (/^\S+@\S+\.\S+$/.test(v) ? null : "Invalid email"),
-      password: (v) => (v.length < 1 ? "Password is required" : null),
+      firstName: (v: string) => (v.trim().length < 1 ? "First name is required" : null),
+      lastName: (v: string) => (v.trim().length < 1 ? "Last name is required" : null),
+      email: (v: string) => (/^\S+@\S+\.\S+$/.test(v) ? null : "Invalid email"),
+      password: (v: string) => (v.length < 8 ? "Password must be at least 8 characters" : null),
+      confirmPassword: (v: string, values: { password: string }) =>
+        v !== values.password ? "Passwords do not match" : null,
     },
   });
 
   const handleSubmit = async (values: typeof form.values) => {
     setError("");
     setLoading(true);
-    const { error: authError } = await authClient.signIn.email({ email: values.email, password: values.password });
+    const { error: authError } = await authClient.signUp.email({
+      name: `${values.firstName.trim()} ${values.lastName.trim()}`,
+      email: values.email,
+      password: values.password,
+    });
     setLoading(false);
 
     if (authError) {
-      setError(authError.message ?? "Invalid email or password");
+      setError(authError.message ?? "Registration failed. Please try again.");
       return;
     }
 
-    router.navigate({ to: "/dashboard" });
+    void router.navigate({ to: "/dashboard" });
   };
 
   return (
@@ -66,12 +73,12 @@ function LoginPage() {
           HELLO KUROMI.
         </Text>
         <Title ta="center" className={styles.title}>
-          Welcome back!
+          Create your account
         </Title>
         <Text className={styles.subtitle}>
-          Don&apos;t have an account?{" "}
-          <Anchor component={Link} to="/signup" size="sm" c="pink">
-            Register
+          Already have an account?{" "}
+          <Anchor component={Link} to="/login" size="sm" c="pink">
+            Login
           </Anchor>
         </Text>
 
@@ -83,6 +90,23 @@ function LoginPage() {
                   {error}
                 </Alert>
               )}
+
+              <Group grow>
+                <TextInput
+                  label="First Name"
+                  placeholder="Juan"
+                  required
+                  radius="md"
+                  {...form.getInputProps("firstName")}
+                />
+                <TextInput
+                  label="Last Name"
+                  placeholder="Dela Cruz"
+                  required
+                  radius="md"
+                  {...form.getInputProps("lastName")}
+                />
+              </Group>
 
               <TextInput
                 label="Email"
@@ -100,12 +124,16 @@ function LoginPage() {
                 {...form.getInputProps("password")}
               />
 
-              <Group justify="space-between">
-                <Checkbox label="Remember me" color="pink" />
-              </Group>
+              <PasswordInput
+                label="Confirm Password"
+                placeholder="Confirm your password"
+                required
+                radius="md"
+                {...form.getInputProps("confirmPassword")}
+              />
 
               <Button type="submit" fullWidth mt="xl" color="pink" radius="md" loading={loading}>
-                Sign In
+                Create Account
               </Button>
 
               <Divider label="or" labelPosition="center" />

@@ -12,7 +12,7 @@ export interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
-  const { isLoggedIn, role, logout } = useAuth();
+  const { isLoggedIn, role, signOut } = useAuth();
   const isStaff = role === UserRole.CONCIERGE || role === UserRole.ADMIN;
   const isAdmin = role === UserRole.ADMIN;
 
@@ -87,7 +87,7 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
             fullWidth
             radius="xl"
             onClick={() => {
-              logout();
+              signOut();
               onToggle();
             }}
           >
@@ -98,15 +98,7 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
             <Button component={Link} to="/login" variant="default" fullWidth radius="xl" onClick={onToggle}>
               Log In
             </Button>
-            <LinkButton
-              to="/login"
-              search={{ register: "true" }}
-              color="pink"
-              fullWidth
-              mt="xs"
-              radius="xl"
-              onClick={onToggle}
-            >
+            <LinkButton to="/signup" color="pink" fullWidth mt="xs" radius="xl" onClick={onToggle}>
               Register
             </LinkButton>
           </>

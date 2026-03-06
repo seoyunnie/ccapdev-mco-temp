@@ -15,5 +15,6 @@
 
   "[css][html][json][jsonc][markdown][postcss][typescript][typescriptreact][yaml]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
-  }
+  },
+  "prisma.pinToPrisma6": true
 }

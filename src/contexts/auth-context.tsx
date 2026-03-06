@@ -7,16 +7,16 @@ interface AuthState {
   isLoggedIn: boolean;
   role: UserRole;
   name: string;
-  login: (role: UserRole, name?: string) => void;
-  logout: () => void;
+  isPending: boolean;
+  signOut: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthState>({
   isLoggedIn: false,
   role: "guest",
   name: "",
-  login: () => {},
-  logout: () => {},
+  isPending: true,
+  signOut: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);

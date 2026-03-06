@@ -14,7 +14,7 @@ export interface HeaderProps {
 }
 
 export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>) {
-  const { isLoggedIn, role, name, logout } = useAuth();
+  const { isLoggedIn, role, name, signOut } = useAuth();
   const isStaff = role === UserRole.CONCIERGE || role === UserRole.ADMIN;
   const isAdmin = role === UserRole.ADMIN;
 
@@ -129,7 +129,7 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
                   Profile
                 </Menu.Item>
                 <Menu.Divider />
-                <Menu.Item leftSection={<IconLogout size={16} />} color="red" onClick={logout}>
+                <Menu.Item leftSection={<IconLogout size={16} />} color="red" onClick={signOut}>
                   Logout
                 </Menu.Item>
               </Menu.Dropdown>
@@ -139,7 +139,7 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
               <Button variant="default" radius="xl" component={Link} to="/login" size="sm">
                 Log In
               </Button>
-              <LinkButton color="pink" radius="xl" to="/login" search={{ register: "true" }} size="sm">
+              <LinkButton color="pink" radius="xl" to="/signup" size="sm">
                 Register
               </LinkButton>
             </>
