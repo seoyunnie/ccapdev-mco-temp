@@ -9,5 +9,9 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "mongodb" }),
   emailAndPassword: { enabled: true },
   plugins: [tanstackStartCookies()],
-  user: { additionalFields: { role: { type: "string", required: true, defaultValue: "guest", input: false } } },
+  user: {
+    additionalFields: {
+      role: { type: ["guest", "resident", "concierge", "admin"], required: true, defaultValue: "guest", input: false },
+    },
+  },
 });
