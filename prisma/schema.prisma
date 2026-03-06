@@ -9,20 +9,13 @@ datasource db {
   url      = env("DATABASE_URL") // Ignore error message, we're not using 7.x
 }
 
-enum Role {
-  guest
-  resident
-  concierge
-  admin
-}
-
 model User {
   id             String          @id @map("_id")
   name           String
   email          String
   emailVerified  Boolean         @default(false)
   image          String?
-  role           Role            @default(guest)
+  role           String          @default("guest")
   bio            String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
