@@ -14,9 +14,10 @@ import {
   Badge,
   Tooltip,
 } from "@mantine/core";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { BackButton } from "../../../components/back-button.tsx";
 import { TIME_SLOTS, WEEK_DAYS } from "../../../features/study-nook/study-nook.constants.ts";
 
 export const Route = createFileRoute("/_app/study-nook/$zoneId")({ component: ReservationPage });
@@ -35,13 +36,7 @@ function ReservationPage() {
 
   return (
     <Container size="lg" py="xl">
-      <Group mb="md">
-        <Link to="/study-nook">
-          <Button variant="subtle" color="pink" size="sm">
-            ← Back to Zones
-          </Button>
-        </Link>
-      </Group>
+      <BackButton to="/study-nook" label="Back to Zones" />
 
       <Title className="page-title" mb="xs">
         Main Hall - Reserve a Seat

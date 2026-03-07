@@ -1,7 +1,6 @@
 import {
   Container,
   Title,
-  Text,
   Tabs,
   Paper,
   Group,
@@ -13,11 +12,13 @@ import {
   Badge,
   Table,
   ActionIcon,
+  Text,
 } from "@mantine/core";
 import { IconUser, IconCalendar, IconHistory, IconEdit, IconTrash, IconCamera } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import defaultAvatarFemale from "../../assets/avatars/default-avatar-female.svg";
+import { SectionHeader } from "../../components/section-header.tsx";
 
 const reservations = [
   { zone: "Quiet Room A", date: "Feb 10, 2026", time: "2:00 PM – 4:00 PM", status: "Confirmed" },
@@ -38,9 +39,7 @@ export const Route = createFileRoute("/_app/profile")({ component: UserProfilePa
 function UserProfilePage() {
   return (
     <Container size="md" py="xl">
-      <Title className="page-title" mb="xl">
-        My Profile
-      </Title>
+      <SectionHeader title="My Profile" />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Group wrap="wrap">

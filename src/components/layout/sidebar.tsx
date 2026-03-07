@@ -20,7 +20,12 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
   const location = useLocation();
 
   return (
-    <Drawer opened={isOpen} onClose={onToggle} size="xs" title={<img src={adormableLogo} alt="Adormable" height={28} />}>
+    <Drawer
+      opened={isOpen}
+      onClose={onToggle}
+      size="xs"
+      title={<img src={adormableLogo} alt="Adormable" height={28} />}
+    >
       <Stack gap={0}>
         {NAV_ITEMS[isLoggedIn ? "auth" : "guest"].map((item) => (
           <NavLink

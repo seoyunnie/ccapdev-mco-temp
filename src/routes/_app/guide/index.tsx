@@ -1,17 +1,14 @@
 import {
   Container,
-  Title,
   Text,
   Card,
   SimpleGrid,
-  TextInput,
   Group,
   Stack,
   Rating,
   Badge,
   Button,
 } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -27,6 +24,10 @@ import catFilipinoFood from "../../../assets/establishments/cat-filipino-food.sv
 import catKoreanBbq from "../../../assets/establishments/cat-korean-bbq.svg";
 import catServices from "../../../assets/establishments/cat-services.svg";
 import emptyState from "../../../assets/features/empty-state.svg";
+import { EmptyState } from "../../../components/empty-state.tsx";
+import { SearchBar } from "../../../components/search-bar.tsx";
+import { SectionHeader } from "../../../components/section-header.tsx";
+import imgStyles from "../../../components/shared-images.module.css";
 
 const CATEGORY_ICONS: Record<string, string> = {
   "Coffee Shop": catCoffeeShop,
@@ -105,41 +106,45 @@ function DirectoryListPage() {
 
   return (
     <Container size="lg" py="xl">
-      <Title className="page-title" mb="xs">
-        The Survival Guide
-      </Title>
-      <Text c="dimmed" className="page-description" mb="xl">
-        Discover and review local establishments near your dormitory.
-      </Text>
+      <SectionHeader
+        title="The Survival Guide"
+        description="Discover and review local establishments near your dormitory."
+        color="teal"
+      />
 
-      <TextInput
-        placeholder="Search establishments by name..."
-        leftSection={<IconSearch size={16} />}
-        value={search}
-        onChange={(e) => {
-          setSearch(e.currentTarget.value);
-        }}
-        mb="xl"
-        size="md"
+      <SearchBar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search establishments by name..."
       />
 
       {filtered.length === 0 && (
-        <Stack align="center" py="xl">
-          <img src={emptyState} alt="No results found" style={{ width: 200, height: 200, objectFit: "contain" }} />
-          <Text c="dimmed" ta="center">No establishments match your search.</Text>
-        </Stack>
+        <EmptyState image={emptyState} message="No establishments match your search." />
       )}
 
       <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
         {filtered.map((est) => (
           <Card key={est.id} shadow="md" padding="lg" radius="md" className="content-card">
-            <img src={est.image} alt={est.name} style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: "var(--mantine-radius-sm)", marginBottom: "var(--mantine-spacing-sm)" }} />
+            <img
+              src={est.image}
+              alt={est.name}
+              className={imgStyles.cardImage}
+            />
             <Stack gap="sm">
               <Group justify="space-between">
                 <Text fw={700} size="lg">
                   {est.name}
                 </Text>
-                <Badge variant="light" leftSection={CATEGORY_ICONS[est.category] ? <img src={CATEGORY_ICONS[est.category]} alt="" width={14} height={14} /> : undefined}>{est.category}</Badge>
+                <Badge
+                  variant="light"
+                  leftSection={
+                    CATEGORY_ICONS[est.category] ? (
+                      <img src={CATEGORY_ICONS[est.category]} alt="" width={14} height={14} />
+                    ) : undefined
+                  }
+                >
+                  {est.category}
+                </Badge>
               </Group>
               <Text size="sm" c="dimmed" lineClamp={2}>
                 {est.description}
@@ -150,7 +155,7 @@ function DirectoryListPage() {
                   ({est.reviews} reviews)
                 </Text>
               </Group>
-              <Button variant="light" color="pink" fullWidth radius="xl" component={Link} to={`/guide/${est.id}`}>
+              <Button variant="light" color="teal" fullWidth radius="xl" component={Link} to={`/guide/${est.id}`}>
                 View Details
               </Button>
             </Stack>

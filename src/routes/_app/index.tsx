@@ -17,14 +17,15 @@ import {
 import { IconCheck, IconArrowRight } from "@tabler/icons-react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 
-import { LinkButton } from "../../components/link-button.tsx";
+import ctaPattern from "../../assets/backgrounds/cta-pattern.svg";
 import heroBg from "../../assets/backgrounds/hero-bg.svg";
 import statsTexture from "../../assets/backgrounds/stats-texture.svg";
-import ctaPattern from "../../assets/backgrounds/cta-pattern.svg";
 import aboutIllustration from "../../assets/features/about-illustration.svg";
 import step1Browse from "../../assets/features/step-1-browse.svg";
 import step2Reserve from "../../assets/features/step-2-reserve.svg";
 import step3Rate from "../../assets/features/step-3-rate.svg";
+import { LinkButton } from "../../components/link-button.tsx";
+import imgStyles from "../../components/shared-images.module.css";
 import { CAROUSEL_FEATURES, FEATURES } from "../../data/features.ts";
 import { STATS } from "../../data/stats.ts";
 
@@ -37,7 +38,14 @@ const STEP_IMAGES = [step1Browse, step2Reserve, step3Rate];
 function LandingPage() {
   return (
     <>
-      <div className={styles.heroSection} style={{ backgroundImage: `linear-gradient(160deg, rgba(255,240,246,0.85) 0%, rgba(250,250,250,0.85) 50%, rgba(243,229,245,0.85) 100%), url(${heroBg})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+      <div
+        className={styles.heroSection}
+        style={{
+          backgroundImage: `linear-gradient(160deg, rgba(255,240,246,0.85) 0%, rgba(250,250,250,0.85) 50%, rgba(243,229,245,0.85) 100%), url(${heroBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
         <Container size="lg">
           <div className={styles.heroContainer}>
             <div className={styles.heroContent}>
@@ -100,14 +108,14 @@ function LandingPage() {
                   <Carousel.Slide key={slide.title}>
                     <Card h="100%" p="xl" radius="md" style={{ background: slide.background }}>
                       <Stack justify="center" align="center" h="100%" gap="md">
-                        <img src={slide.image} alt={slide.title} style={{ maxHeight: 120, objectFit: "contain" }} />
+                        <img src={slide.image} alt={slide.title} className={imgStyles.carouselImage} />
                         <Title order={2}>{slide.title}</Title>
                         <Text c="dimmed" size="md">
                           {slide.description}
                         </Text>
                         <Button
                           variant="white"
-                          color="dark"
+                          color={slide.color}
                           radius="xl"
                           rightSection={<IconArrowRight size={16} />}
                           style={{ width: "fit-content" }}
@@ -125,7 +133,10 @@ function LandingPage() {
       </div>
 
       <Container size="lg" mt={-40} mb="xl" style={{ position: "relative", zIndex: 1 }}>
-        <div className={styles.statisticsBar} style={{ backgroundImage: `url(${statsTexture})`, backgroundSize: "cover", backgroundBlendMode: "overlay" }}>
+        <div
+          className={styles.statisticsBar}
+          style={{ backgroundImage: `url(${statsTexture})`, backgroundSize: "cover", backgroundBlendMode: "overlay" }}
+        >
           {STATS.map((stat) => (
             <div key={stat.label} className={styles.statisticItem}>
               <Text className={styles.statisticCount}>{stat.value}</Text>
@@ -147,7 +158,11 @@ function LandingPage() {
         <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="xl" mt={50}>
           {["Browse & Discover", "Reserve & Engage", "Rate & Connect"].map((title, i) => (
             <Card key={title} shadow="md" radius="md" className={styles.stepCard} padding="xl">
-              <img src={STEP_IMAGES[i]} alt={title} style={{ width: 120, height: 120, objectFit: "contain", margin: "0 auto", display: "block" }} />
+              <img
+                src={STEP_IMAGES[i]}
+                alt={title}
+                className={imgStyles.stepImage}
+              />
               <div className={styles.stepNumber}>{i + 1}</div>
               <Text ta="center" fz="lg" fw={500} mt="sm">
                 {title}
@@ -188,9 +203,13 @@ function LandingPage() {
                 component={Link}
                 to={feature.to}
               >
-                <img src={feature.image} alt={feature.title} style={{ width: "100%", height: 140, objectFit: "contain", marginBottom: "var(--mantine-spacing-sm)" }} />
+                <img
+                  src={feature.image}
+                  alt={feature.title}
+                  className={imgStyles.cardImageContained}
+                />
                 <feature.iconComponent size={rem(28)} stroke={1.5} color={`var(--mantine-color-${feature.color}-6)`} />
-                <Text fz="lg" fw={500} className={styles.featureCardTitle} mt="md">
+                <Text fz="lg" fw={500} className={styles.featureCardTitle} mt="md" style={{ "--feature-color": `var(--mantine-color-${feature.color}-filled)` } as React.CSSProperties}>
                   {feature.title}
                 </Text>
                 <Text fz="sm" c="dimmed" mt="sm">
@@ -205,7 +224,11 @@ function LandingPage() {
       <Container size="lg" py={80}>
         <div className={styles.aboutContainer}>
           <div className={styles.aboutImagePlaceholder}>
-            <img src={aboutIllustration} alt="About Adormable" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 24 }} />
+            <img
+              src={aboutIllustration}
+              alt="About Adormable"
+              className={imgStyles.aboutImage}
+            />
           </div>
 
           <div className={styles.aboutContent}>
@@ -249,7 +272,10 @@ function LandingPage() {
       </Container>
 
       <Container size="lg" pb={80}>
-        <div className={styles.callToActionBanner} style={{ backgroundImage: `url(${ctaPattern})`, backgroundSize: "cover", backgroundBlendMode: "soft-light" }}>
+        <div
+          className={styles.callToActionBanner}
+          style={{ backgroundImage: `url(${ctaPattern})`, backgroundSize: "cover", backgroundBlendMode: "soft-light" }}
+        >
           <Title order={2} c="black" mb="md">
             Ready to Make Dorm Life Better?
           </Title>
@@ -264,7 +290,7 @@ function LandingPage() {
               </Button>
             </Link>
             <Link to="/guide">
-              <Button size="lg" variant="outline" radius="xl" style={{ borderColor: "black", color: "black" }}>
+              <Button size="lg" variant="outline" radius="xl" color="white">
                 Browse Directory
               </Button>
             </Link>

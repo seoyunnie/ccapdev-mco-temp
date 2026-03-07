@@ -22,7 +22,8 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
   const isStaff = role === UserRole.CONCIERGE || role === UserRole.ADMIN;
   const isAdmin = role === UserRole.ADMIN;
   // oxlint-disable-next-line unicorn/no-nested-ternary
-  const avatarSrc = role === UserRole.ADMIN ? defaultAdmin : role === UserRole.CONCIERGE ? defaultConcierge : defaultAvatarFemale;
+  const avatarSrc =
+    role === UserRole.ADMIN ? defaultAdmin : role === UserRole.CONCIERGE ? defaultConcierge : defaultAvatarFemale;
 
   const location = useLocation();
 

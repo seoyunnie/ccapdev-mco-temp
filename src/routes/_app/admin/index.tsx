@@ -6,11 +6,9 @@ import {
   SimpleGrid,
   Paper,
   Group,
-  Stack,
   Table,
   Badge,
   TextInput,
-  RingProgress,
   ActionIcon,
 } from "@mantine/core";
 import {
@@ -24,8 +22,10 @@ import {
 } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { UserRole } from "../../../contexts/auth-context.tsx";
 import defaultAdmin from "../../../assets/avatars/default-admin.svg";
+import { SectionHeader } from "../../../components/section-header.tsx";
+import { StatCard } from "../../../components/stat-card.tsx";
+import { UserRole } from "../../../contexts/auth-context.tsx";
 import { ROLE_COLORS } from "../../../features/admin/admin.constants.ts";
 
 const stats = [
@@ -52,32 +52,22 @@ function AdminControlPanelPage() {
     <Container size="lg" py="xl">
       <Group gap="md" mb="xs">
         <Avatar src={defaultAdmin} alt="Admin" size={48} radius="xl" />
-        <Title className="page-title">Admin Control Panel</Title>
+        <SectionHeader
+          title="Admin Control Panel"
+          description="System overview and user management."
+          mb="xs"
+        />
       </Group>
-      <Text c="dimmed" className="page-description" mb="xl">
-        System overview and user management.
-      </Text>
 
       <SimpleGrid cols={{ base: 2, md: 4 }} mb="xl">
         {stats.map((stat) => (
-          <Paper key={stat.label} shadow="md" p="md" radius="md" className="content-card">
-            <Group justify="space-between">
-              <Stack gap={4}>
-                <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
-                  {stat.label}
-                </Text>
-                <Text size="xl" fw={700}>
-                  {stat.value}
-                </Text>
-              </Stack>
-              <RingProgress
-                size={60}
-                thickness={5}
-                sections={[{ value: 65, color: stat.color }]}
-                label={<stat.icon size={20} style={{ display: "block", margin: "auto" }} />}
-              />
-            </Group>
-          </Paper>
+          <StatCard
+            key={stat.label}
+            label={stat.label}
+            value={stat.value}
+            color={stat.color}
+            iconComponent={stat.icon}
+          />
         ))}
       </SimpleGrid>
 

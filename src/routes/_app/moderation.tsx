@@ -2,6 +2,8 @@ import { Container, Title, Text, Paper, Group, Stack, Badge, Button, Avatar, Act
 import { IconTrash, IconBan } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 
+import { SectionHeader } from "../../components/section-header.tsx";
+
 const flaggedPosts = [
   {
     id: "f1",
@@ -39,12 +41,10 @@ export const Route = createFileRoute("/_app/moderation")({
 function ForumModerationPage() {
   return (
     <Container size="lg" py="xl">
-      <Title className="page-title" mb="xs">
-        Forum Moderation
-      </Title>
-      <Text c="dimmed" className="page-description" mb="xl">
-        Review flagged content and manage user behavior.
-      </Text>
+      <SectionHeader
+        title="Forum Moderation"
+        description="Review flagged content and manage user behavior."
+      />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Title order={4} mb="md">

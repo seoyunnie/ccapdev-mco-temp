@@ -54,6 +54,7 @@ export interface CarouselFeature {
   readonly description: string;
   readonly background: CSSProperties["background"];
   readonly image: string;
+  readonly color: DefaultMantineColor;
 }
 
 export const CAROUSEL_FEATURES: readonly CarouselFeature[] = [
@@ -62,17 +63,20 @@ export const CAROUSEL_FEATURES: readonly CarouselFeature[] = [
     description: "Book your ideal study spot with our interactive reservation system.",
     background: "linear-gradient(135deg, #fff0f6, #fcc2d7)",
     image: studyNookHero,
+    color: "pink",
   },
   {
     title: "Virtual Lobby",
     description: "Stay connected with the dormitory community through discussions and posts.",
     background: "linear-gradient(135deg, #f3f0ff, #d0bfff)",
     image: virtualLobbyHero,
+    color: "grape",
   },
   {
     title: "Survival Guide",
     description: "Find the best local establishments near your dormitory.",
     background: "linear-gradient(135deg, #e6fcf5, #96f2d7)",
     image: survivalGuideHero,
+    color: "teal",
   },
 ];

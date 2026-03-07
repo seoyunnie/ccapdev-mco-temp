@@ -17,6 +17,7 @@ import { IconTrash, IconPlus } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import defaultConcierge from "../../assets/avatars/default-concierge.svg";
+import { SectionHeader } from "../../components/section-header.tsx";
 
 const expiredBookings = [
   { id: "b1", student: "Carlos Lim", zone: "Main Hall – Seat 5", time: "10:00 AM – 12:00 PM", status: "No-Show" },
@@ -36,11 +37,12 @@ function ConciergeDashboardPage() {
     <Container size="lg" py="xl">
       <Group gap="md" mb="xs">
         <Avatar src={defaultConcierge} alt="Concierge" size={48} radius="xl" />
-        <Title className="page-title">Concierge Dashboard</Title>
+        <SectionHeader
+          title="Concierge Dashboard"
+          description="Manage walk-in bookings and handle no-show reservations."
+          mb="xs"
+        />
       </Group>
-      <Text c="dimmed" className="page-description" mb="xl">
-        Manage walk-in bookings and handle no-show reservations.
-      </Text>
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Title order={4} mb="md">

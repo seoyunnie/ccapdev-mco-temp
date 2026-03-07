@@ -15,9 +15,9 @@ import {
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { useAuth } from "../contexts/auth-context.tsx";
 import loginBg from "../assets/backgrounds/login-bg.svg";
-import adormableLogo from "../assets/logos/adormable-logo-2.png";
+import adormableLogo from "../assets/logos/adormable-logo.png";
+import { useAuth } from "../contexts/auth-context.tsx";
 
 import styles from "./login.module.css";
 
@@ -39,7 +39,14 @@ function LoginRegisterPage() {
   const { login } = useAuth();
 
   return (
-    <div className={styles.page} style={{ backgroundImage: `linear-gradient(160deg, rgba(255,240,246,0.85) 0%, rgba(250,250,250,0.85) 50%, rgba(243,229,245,0.85) 100%), url(${loginBg})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+    <div
+      className={styles.page}
+      style={{
+        backgroundImage: `linear-gradient(160deg, rgba(255,240,246,0.85) 0%, rgba(250,250,250,0.85) 50%, rgba(243,229,245,0.85) 100%), url(${loginBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <Container size={420} my={40}>
         <img src={adormableLogo} alt="Adormable" style={{ display: "block", margin: "0 auto 8px auto", height: 64 }} />
         <Title ta="center" className={styles.title}>

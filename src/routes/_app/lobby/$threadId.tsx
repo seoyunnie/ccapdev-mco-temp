@@ -13,11 +13,13 @@ import {
   Divider,
 } from "@mantine/core";
 import { IconArrowUp, IconArrowDown, IconEdit, IconTrash } from "@tabler/icons-react";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import defaultAvatarFemale from "../../../assets/avatars/default-avatar-female.svg";
 import defaultAvatarMale from "../../../assets/avatars/default-avatar-male.svg";
 import threadPlaceholder from "../../../assets/lobby/thread-placeholder.svg";
+import { BackButton } from "../../../components/back-button.tsx";
+import imgStyles from "../../../components/shared-images.module.css";
 
 const post = {
   title: "Best study spots in the dorm?",
@@ -71,14 +73,14 @@ export const Route = createFileRoute("/_app/lobby/$threadId")({ component: Threa
 function ThreadViewPage() {
   return (
     <Container size="md" py="xl">
-      <Link to="/lobby">
-        <Button variant="subtle" color="pink" mb="md" size="sm">
-          ← Back to Lobby
-        </Button>
-      </Link>
+      <BackButton to="/lobby" label="Back to Lobby" color="grape" />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
-        <img src={threadPlaceholder} alt="Thread" style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: "var(--mantine-radius-sm)", marginBottom: "var(--mantine-spacing-md)" }} />
+        <img
+          src={threadPlaceholder}
+          alt="Thread"
+          className={imgStyles.cardImage}
+        />
         <Group justify="space-between" mb="md">
           <Group>
             <Avatar src={post.avatar} alt={post.author} radius="xl" />
