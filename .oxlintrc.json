@@ -3,6 +3,8 @@
 
   "ignorePatterns": ["dist/**", "node_modules/**", "src/route-tree.gen.ts"],
 
+  "options": { "typeAware": true, "typeCheck": true },
+
   "env": { "builtin": true, "browser": true, "node": true, "es2022": true },
 
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "node", "promise"],
@@ -18,7 +20,12 @@
     "import/max-dependencies": "off",
     "typescript/only-throw-error": [
       "warn",
-      { "allow": [{ "from": "package", "package": "tanstack-router-core", "name": "Redirect" }] }
+      {
+        "allow": [
+          { "from": "package", "package": "@tanstack-router-core", "name": "Redirect" },
+          { "from": "package", "package": "@tanstack/router-core", "name": "NotFoundError" }
+        ]
+      }
     ],
 
     /* Restriction */
@@ -83,6 +90,7 @@
       }
     },
     { "files": ["vite.config.ts"], "env": { "es2023": true } },
+
     {
       "files": ["**/*.[jt]sx"],
       "jsPlugins": [
@@ -92,31 +100,36 @@
       ],
       "plugins": ["react", "jsx-a11y"],
       "rules": {
-        /* Correctness */
-        "eslint/no-unused-expressions": ["error", { "enforceForJSX": true }],
-        "react/no-string-refs": ["error", { "noTemplateLiterals": true }],
+        /* @tanstack/eslint-plugin-router */
         "tanstack-router/create-route-property-order": "error",
+        "tanstack-router/route-param-names": "error",
 
-        /* Pedantic */
-        "react/jsx-no-target-blank": ["warn", { "forms": true, "warnOnSpreadAttributes": true }],
-
-        /* Perf */
+        /* eslint-plugin-react-compiler */
+        "react-compiler/component-hook-factories": "error",
         "react-compiler/config": "error",
         "react-compiler/error-boundaries": "error",
-        "react-compiler/component-hook-factories": "error",
         "react-compiler/gating": "error",
         "react-compiler/globals": "error",
         "react-compiler/immutability": "error",
+        "react-compiler/incompatible-library": "error",
         "react-compiler/preserve-manual-memoization": "error",
         "react-compiler/purity": "error",
         "react-compiler/refs": "error",
         "react-compiler/set-state-in-effect": "error",
         "react-compiler/set-state-in-render": "error",
         "react-compiler/static-components": "error",
-        "react-compiler/unsupported-syntax": "warn",
+        "react-compiler/unsupported-syntax": "error",
         "react-compiler/use-memo": "error",
-        "react-compiler/incompatible-library": "warn",
+
+        /* eslint-plugin-react-refresh */
         "react-refresh/only-export-components": ["warn", { "allowConstantExport": true }],
+
+        /* Correctness */
+        "eslint/no-unused-expressions": ["error", { "enforceForJSX": true }],
+        "react/no-string-refs": ["error", { "noTemplateLiterals": true }],
+
+        /* Pedantic */
+        "react/jsx-no-target-blank": ["warn", { "forms": true, "warnOnSpreadAttributes": true }],
 
         /* Restriction */
         "react/no-unknown-property": ["error", { "requireDataLowercase": true }],
@@ -137,7 +150,7 @@
     {
       "files": ["src/routes/**/*.[jt]sx"],
       "rules": {
-        /* Perf */
+        /* eslint-plugin-react-refresh */
         "react-refresh/only-export-components": "off",
 
         /* Style */
