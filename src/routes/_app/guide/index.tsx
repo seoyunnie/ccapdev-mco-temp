@@ -1,14 +1,4 @@
-import {
-  Container,
-  Text,
-  Card,
-  SimpleGrid,
-  Group,
-  Stack,
-  Rating,
-  Badge,
-  Button,
-} from "@mantine/core";
+import { Container, Text, Card, SimpleGrid, Group, Stack, Rating, Badge, Button } from "@mantine/core";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -27,6 +17,7 @@ import emptyState from "../../../assets/features/empty-state.svg";
 import { EmptyState } from "../../../components/empty-state.tsx";
 import { SearchBar } from "../../../components/search-bar.tsx";
 import { SectionHeader } from "../../../components/section-header.tsx";
+
 import imgStyles from "../../../components/shared-images.module.css";
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -112,24 +103,14 @@ function DirectoryListPage() {
         color="teal"
       />
 
-      <SearchBar
-        searchValue={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Search establishments by name..."
-      />
+      <SearchBar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search establishments by name..." />
 
-      {filtered.length === 0 && (
-        <EmptyState image={emptyState} message="No establishments match your search." />
-      )}
+      {filtered.length === 0 && <EmptyState image={emptyState} message="No establishments match your search." />}
 
       <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
         {filtered.map((est) => (
           <Card key={est.id} shadow="md" padding="lg" radius="md" className="content-card">
-            <img
-              src={est.image}
-              alt={est.name}
-              className={imgStyles.cardImage}
-            />
+            <img src={est.image} alt={est.name} className={imgStyles.cardImage} />
             <Stack gap="sm">
               <Group justify="space-between">
                 <Text fw={700} size="lg">

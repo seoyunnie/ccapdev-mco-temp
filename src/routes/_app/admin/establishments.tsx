@@ -17,6 +17,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import placeholder from "../../../assets/establishments/placeholder.svg";
 import { SectionHeader } from "../../../components/section-header.tsx";
+
 import imgStyles from "../../../components/shared-images.module.css";
 
 const establishments = [
@@ -101,11 +102,7 @@ function EstablishmentManagerPage() {
         <Title order={4} mb="md">
           Add New Establishment
         </Title>
-        <img
-          src={placeholder}
-          alt="Preview"
-          className={imgStyles.previewImage}
-        />
+        <img src={placeholder} alt="Preview" className={imgStyles.previewImage} />
         <Stack>
           <Group grow>
             <TextInput label="Name" placeholder="Establishment name" />

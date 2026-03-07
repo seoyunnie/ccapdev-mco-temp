@@ -19,6 +19,7 @@ import defaultAvatarFemale from "../../../assets/avatars/default-avatar-female.s
 import defaultAvatarMale from "../../../assets/avatars/default-avatar-male.svg";
 import threadPlaceholder from "../../../assets/lobby/thread-placeholder.svg";
 import { BackButton } from "../../../components/back-button.tsx";
+
 import imgStyles from "../../../components/shared-images.module.css";
 
 const post = {
@@ -76,11 +77,7 @@ function ThreadViewPage() {
       <BackButton to="/lobby" label="Back to Lobby" color="grape" />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
-        <img
-          src={threadPlaceholder}
-          alt="Thread"
-          className={imgStyles.cardImage}
-        />
+        <img src={threadPlaceholder} alt="Thread" className={imgStyles.cardImage} />
         <Group justify="space-between" mb="md">
           <Group>
             <Avatar src={post.avatar} alt={post.author} radius="xl" />

@@ -20,6 +20,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import cafeManila from "../../../assets/establishments/1-cafe-manila.svg";
 import catCoffeeShop from "../../../assets/establishments/cat-coffee-shop.svg";
 import { BackButton } from "../../../components/back-button.tsx";
+
 import imgStyles from "../../../components/shared-images.module.css";
 
 const establishment = {
@@ -72,11 +73,7 @@ function EstablishmentDetailsPage() {
       <BackButton to="/guide" label="Back to Directory" color="teal" />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
-        <img
-          src={establishment.image}
-          alt={establishment.name}
-          className={imgStyles.cardImageTall}
-        />
+        <img src={establishment.image} alt={establishment.name} className={imgStyles.cardImageTall} />
         <Group justify="space-between" wrap="wrap">
           <Stack gap="xs">
             <Group>

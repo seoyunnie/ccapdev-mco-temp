@@ -52,11 +52,7 @@ function AdminControlPanelPage() {
     <Container size="lg" py="xl">
       <Group gap="md" mb="xs">
         <Avatar src={defaultAdmin} alt="Admin" size={48} radius="xl" />
-        <SectionHeader
-          title="Admin Control Panel"
-          description="System overview and user management."
-          mb="xs"
-        />
+        <SectionHeader title="Admin Control Panel" description="System overview and user management." mb="xs" />
       </Group>
 
       <SimpleGrid cols={{ base: 2, md: 4 }} mb="xl">

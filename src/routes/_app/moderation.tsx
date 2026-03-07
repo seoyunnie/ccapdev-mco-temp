@@ -41,10 +41,7 @@ export const Route = createFileRoute("/_app/moderation")({
 function ForumModerationPage() {
   return (
     <Container size="lg" py="xl">
-      <SectionHeader
-        title="Forum Moderation"
-        description="Review flagged content and manage user behavior."
-      />
+      <SectionHeader title="Forum Moderation" description="Review flagged content and manage user behavior." />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Title order={4} mb="md">

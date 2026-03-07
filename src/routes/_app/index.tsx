@@ -25,10 +25,10 @@ import step1Browse from "../../assets/features/step-1-browse.svg";
 import step2Reserve from "../../assets/features/step-2-reserve.svg";
 import step3Rate from "../../assets/features/step-3-rate.svg";
 import { LinkButton } from "../../components/link-button.tsx";
-import imgStyles from "../../components/shared-images.module.css";
 import { CAROUSEL_FEATURES, FEATURES } from "../../data/features.ts";
 import { STATS } from "../../data/stats.ts";
 
+import imgStyles from "../../components/shared-images.module.css";
 import styles from "./index.module.css";
 
 export const Route = createFileRoute("/_app/")({ component: LandingPage });
@@ -158,11 +158,7 @@ function LandingPage() {
         <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="xl" mt={50}>
           {["Browse & Discover", "Reserve & Engage", "Rate & Connect"].map((title, i) => (
             <Card key={title} shadow="md" radius="md" className={styles.stepCard} padding="xl">
-              <img
-                src={STEP_IMAGES[i]}
-                alt={title}
-                className={imgStyles.stepImage}
-              />
+              <img src={STEP_IMAGES[i]} alt={title} className={imgStyles.stepImage} />
               <div className={styles.stepNumber}>{i + 1}</div>
               <Text ta="center" fz="lg" fw={500} mt="sm">
                 {title}
@@ -203,13 +199,15 @@ function LandingPage() {
                 component={Link}
                 to={feature.to}
               >
-                <img
-                  src={feature.image}
-                  alt={feature.title}
-                  className={imgStyles.cardImageContained}
-                />
+                <img src={feature.image} alt={feature.title} className={imgStyles.cardImageContained} />
                 <feature.iconComponent size={rem(28)} stroke={1.5} color={`var(--mantine-color-${feature.color}-6)`} />
-                <Text fz="lg" fw={500} className={styles.featureCardTitle} mt="md" style={{ "--feature-color": `var(--mantine-color-${feature.color}-filled)` } as React.CSSProperties}>
+                <Text
+                  fz="lg"
+                  fw={500}
+                  className={styles.featureCardTitle}
+                  mt="md"
+                  style={{ "--feature-color": `var(--mantine-color-${feature.color}-filled)` } as React.CSSProperties}
+                >
                   {feature.title}
                 </Text>
                 <Text fz="sm" c="dimmed" mt="sm">
@@ -224,11 +222,7 @@ function LandingPage() {
       <Container size="lg" py={80}>
         <div className={styles.aboutContainer}>
           <div className={styles.aboutImagePlaceholder}>
-            <img
-              src={aboutIllustration}
-              alt="About Adormable"
-              className={imgStyles.aboutImage}
-            />
+            <img src={aboutIllustration} alt="About Adormable" className={imgStyles.aboutImage} />
           </div>
 
           <div className={styles.aboutContent}>

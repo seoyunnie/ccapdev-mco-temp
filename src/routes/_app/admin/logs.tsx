@@ -71,10 +71,7 @@ export const Route = createFileRoute("/_app/admin/logs")({
 function SystemLogsPage() {
   return (
     <Container size="lg" py="xl">
-      <SectionHeader
-        title="System Logs"
-        description="Audit trails and technical error monitoring."
-      />
+      <SectionHeader title="System Logs" description="Audit trails and technical error monitoring." />
 
       <Tabs defaultValue="activity">
         <Tabs.List>

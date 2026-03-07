@@ -1,6 +1,7 @@
-import { Paper, RingProgress, Stack, Text, type DefaultMantineColor } from "@mantine/core";
-import type { ForwardRefExoticComponent, RefAttributes } from "react";
 import type { IconProps } from "@tabler/icons-react";
+import type { ForwardRefExoticComponent, RefAttributes } from "react";
+
+import { Paper, RingProgress, Stack, Text, type DefaultMantineColor } from "@mantine/core";
 
 import styles from "./stat-card.module.css";
 
@@ -12,13 +13,7 @@ interface StatCardProps {
   readonly progress?: number;
 }
 
-export function StatCard({
-  label,
-  value,
-  color = "pink",
-  iconComponent: Icon,
-  progress = 65,
-}: StatCardProps) {
+export function StatCard({ label, value, color = "pink", iconComponent: Icon, progress = 65 }: StatCardProps) {
   return (
     <Paper shadow="md" p="md" radius="md" className={styles.card}>
       <Stack gap={4}>

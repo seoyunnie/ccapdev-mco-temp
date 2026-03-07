@@ -1,14 +1,4 @@
-import {
-  Container,
-  Text,
-  Card,
-  Group,
-  Stack,
-  Avatar,
-  Badge,
-  Button,
-  ActionIcon,
-} from "@mantine/core";
+import { Container, Text, Card, Group, Stack, Avatar, Badge, Button, ActionIcon } from "@mantine/core";
 import { IconArrowUp, IconPlus } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -18,8 +8,9 @@ import threadPlaceholder from "../../../assets/lobby/thread-placeholder.svg";
 import { EmptyState } from "../../../components/empty-state.tsx";
 import { SearchBar } from "../../../components/search-bar.tsx";
 import { SectionHeader } from "../../../components/section-header.tsx";
-import imgStyles from "../../../components/shared-images.module.css";
 import { TAG_COLORS, TAG_ICONS } from "../../../features/lobby/lobby.constants.ts";
+
+import imgStyles from "../../../components/shared-images.module.css";
 
 const posts = [
   {
@@ -102,9 +93,7 @@ function ForumFeedPage() {
         onFilterChange={() => {}}
       />
 
-      {filtered.length === 0 && (
-        <EmptyState image={emptyState} message="No posts match your search." />
-      )}
+      {filtered.length === 0 && <EmptyState image={emptyState} message="No posts match your search." />}
 
       <Stack>
         {filtered.map((post) => (
@@ -118,11 +107,7 @@ function ForumFeedPage() {
             to={`/lobby/${post.id}`}
             style={{ textDecoration: "none", color: "inherit" }}
           >
-            <img
-              src={threadPlaceholder}
-              alt=""
-              className={imgStyles.cardImageShort}
-            />
+            <img src={threadPlaceholder} alt="" className={imgStyles.cardImageShort} />
             <Group justify="space-between" wrap="wrap">
               <Group>
                 <Avatar color="pink" radius="xl">
