@@ -1,4 +1,3 @@
-import { Carousel } from "@mantine/carousel";
 import {
   Container,
   Title,
@@ -7,7 +6,6 @@ import {
   Group,
   Card,
   SimpleGrid,
-  Stack,
   Box,
   ThemeIcon,
   List,
@@ -24,6 +22,7 @@ import aboutIllustration from "../../assets/features/about-illustration.svg";
 import step1Browse from "../../assets/features/step-1-browse.svg";
 import step2Reserve from "../../assets/features/step-2-reserve.svg";
 import step3Rate from "../../assets/features/step-3-rate.svg";
+import { HeroCarousel } from "../../components/hero-carousel.tsx";
 import { LinkButton } from "../../components/link-button.tsx";
 import { CAROUSEL_FEATURES, FEATURES } from "../../data/features.ts";
 import { STATS } from "../../data/stats.ts";
@@ -103,40 +102,7 @@ function LandingPage() {
             </div>
 
             <div className={styles.heroImageContainer}>
-              <Carousel
-                withIndicators
-                height={380}
-                slideGap="md"
-                emblaOptions={{ loop: true }}
-                classNames={{ indicator: styles.carouselIndicator }}
-              >
-                {CAROUSEL_FEATURES.map((slide) => (
-                  <Carousel.Slide key={slide.title}>
-                    <Card h="100%" p="xl" radius="lg" style={{ background: slide.background }}>
-                      <Stack justify="center" align="center" h="100%" gap="sm">
-                        <img src={slide.image} alt={slide.title} className={imgStyles.carouselImage} />
-                        <Title order={3} ta="center">
-                          {slide.title}
-                        </Title>
-                        <Text c="dimmed" size="sm" ta="center" maw={280}>
-                          {slide.description}
-                        </Text>
-                        <Button
-                          variant="white"
-                          color={slide.color}
-                          radius="xl"
-                          rightSection={<IconArrowRight size={16} />}
-                          component={Link}
-                          to={slide.to}
-                          style={{ width: "fit-content" }}
-                        >
-                          Learn More
-                        </Button>
-                      </Stack>
-                    </Card>
-                  </Carousel.Slide>
-                ))}
-              </Carousel>
+              <HeroCarousel features={CAROUSEL_FEATURES} />
             </div>
           </div>
         </Container>

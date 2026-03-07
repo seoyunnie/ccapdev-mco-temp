@@ -55,20 +55,6 @@
   }
 }
 
-.carouselIndicator {
-  background-color: rgba(0, 0, 0, 0.15);
-  height: 6px;
-  transition:
-    width 0.3s ease,
-    background-color 0.3s ease;
-  width: 16px;
-
-  &[data-active] {
-    background-color: var(--mantine-color-pink-filled);
-    width: 28px;
-  }
-}
-
 .heroControlButton {
   @mixin smaller-than $mantine-breakpoint-xs {
     flex: 1;

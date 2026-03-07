@@ -1,0 +1,21 @@
+.indicator {
+  width: 16px;
+  height: 6px;
+  border-radius: var(--mantine-radius-xl);
+  background-color: rgba(0, 0, 0, 0.15);
+  transition:
+    width 0.3s ease,
+    background-color 0.3s ease;
+
+  &[data-active] {
+    background-color: var(--mantine-color-pink-filled);
+    width: 28px;
+  }
+}
+
+.control {
+  box-shadow: var(--mantine-shadow-md);
+  border: 1px solid var(--mantine-color-gray-3);
+  background-color: var(--mantine-color-white);
+  color: var(--mantine-color-dark-6);
+}
