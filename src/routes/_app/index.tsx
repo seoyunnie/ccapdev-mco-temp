@@ -16,6 +16,8 @@ import {
 } from "@mantine/core";
 import { IconCheck, IconArrowRight } from "@tabler/icons-react";
 import { Link, createFileRoute } from "@tanstack/react-router";
+import Autoplay from "embla-carousel-autoplay";
+import { useRef } from "react";
 
 import ctaPattern from "../../assets/backgrounds/cta-pattern.svg";
 import heroBg from "../../assets/backgrounds/hero-bg.svg";
@@ -36,6 +38,8 @@ export const Route = createFileRoute("/_app/")({ component: LandingPage });
 const STEP_IMAGES = [step1Browse, step2Reserve, step3Rate];
 
 function LandingPage() {
+  const autoplay = useRef(Autoplay({ delay: 4000, stopOnInteraction: true }));
+
   return (
     <>
       <div
@@ -103,14 +107,23 @@ function LandingPage() {
             </div>
 
             <div className={styles.heroImageContainer}>
-              <Carousel withIndicators height={340} slideGap="md">
+              <Carousel
+                withIndicators
+                height={380}
+                slideGap="md"
+                loop
+                plugins={[autoplay.current]}
+                classNames={{ indicator: styles.carouselIndicator }}
+              >
                 {CAROUSEL_FEATURES.map((slide) => (
                   <Carousel.Slide key={slide.title}>
-                    <Card h="100%" p="xl" radius="md" style={{ background: slide.background }}>
-                      <Stack justify="center" align="center" h="100%" gap="md">
+                    <Card h="100%" p="xl" radius="lg" style={{ background: slide.background }}>
+                      <Stack justify="center" align="center" h="100%" gap="sm">
                         <img src={slide.image} alt={slide.title} className={imgStyles.carouselImage} />
-                        <Title order={2}>{slide.title}</Title>
-                        <Text c="dimmed" size="md">
+                        <Title order={3} ta="center">
+                          {slide.title}
+                        </Title>
+                        <Text c="dimmed" size="sm" ta="center" maw={280}>
                           {slide.description}
                         </Text>
                         <Button
@@ -118,6 +131,8 @@ function LandingPage() {
                           color={slide.color}
                           radius="xl"
                           rightSection={<IconArrowRight size={16} />}
+                          component={Link}
+                          to={slide.to}
                           style={{ width: "fit-content" }}
                         >
                           Learn More
@@ -159,7 +174,9 @@ function LandingPage() {
           {["Browse & Discover", "Reserve & Engage", "Rate & Connect"].map((title, i) => (
             <Card key={title} shadow="md" radius="md" className={styles.stepCard} padding="xl">
               <img src={STEP_IMAGES[i]} alt={title} className={imgStyles.stepImage} />
-              <div className={styles.stepNumber}>{i + 1}</div>
+              <div className={styles.stepNumber} style={{ marginTop: "var(--mantine-spacing-md)" }}>
+                {i + 1}
+              </div>
               <Text ta="center" fz="lg" fw={500} mt="sm">
                 {title}
               </Text>
@@ -200,16 +217,21 @@ function LandingPage() {
                 to={feature.to}
               >
                 <img src={feature.image} alt={feature.title} className={imgStyles.cardImageContained} />
-                <feature.iconComponent size={rem(28)} stroke={1.5} color={`var(--mantine-color-${feature.color}-6)`} />
-                <Text
-                  fz="lg"
-                  fw={500}
-                  className={styles.featureCardTitle}
-                  mt="md"
-                  style={{ "--feature-color": `var(--mantine-color-${feature.color}-filled)` } as React.CSSProperties}
-                >
-                  {feature.title}
-                </Text>
+                <Group gap="xs" mt="md">
+                  <feature.iconComponent
+                    size={rem(24)}
+                    stroke={1.5}
+                    color={`var(--mantine-color-${feature.color}-6)`}
+                  />
+                  <Text
+                    fz="lg"
+                    fw={500}
+                    className={styles.featureCardTitle}
+                    style={{ "--feature-color": `var(--mantine-color-${feature.color}-filled)` } as React.CSSProperties}
+                  >
+                    {feature.title}
+                  </Text>
+                </Group>
                 <Text fz="sm" c="dimmed" mt="sm">
                   {feature.description}
                 </Text>
@@ -284,7 +306,7 @@ function LandingPage() {
               </Button>
             </Link>
             <Link to="/guide">
-              <Button size="lg" variant="outline" radius="xl" color="white">
+              <Button size="lg" variant="outline" radius="xl" color="black">
                 Browse Directory
               </Button>
             </Link>

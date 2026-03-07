@@ -40,7 +40,7 @@
 }
 
 .carouselImage {
-  max-height: 120px;
+  max-height: 150px;
   object-fit: contain;
   border-radius: var(--mantine-radius-md);
 }

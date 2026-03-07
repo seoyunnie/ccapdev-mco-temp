@@ -55,6 +55,7 @@ export interface CarouselFeature {
   readonly background: CSSProperties["background"];
   readonly image: string;
   readonly color: DefaultMantineColor;
+  readonly to: LinkProps["to"];
 }
 
 export const CAROUSEL_FEATURES: readonly CarouselFeature[] = [
@@ -64,6 +65,7 @@ export const CAROUSEL_FEATURES: readonly CarouselFeature[] = [
     background: "linear-gradient(135deg, #fff0f6, #fcc2d7)",
     image: studyNookHero,
     color: "pink",
+    to: "/study-nook",
   },
   {
     title: "Virtual Lobby",
@@ -71,6 +73,7 @@ export const CAROUSEL_FEATURES: readonly CarouselFeature[] = [
     background: "linear-gradient(135deg, #f3f0ff, #d0bfff)",
     image: virtualLobbyHero,
     color: "grape",
+    to: "/lobby",
   },
   {
     title: "Survival Guide",
@@ -78,5 +81,6 @@ export const CAROUSEL_FEATURES: readonly CarouselFeature[] = [
     background: "linear-gradient(135deg, #e6fcf5, #96f2d7)",
     image: survivalGuideHero,
     color: "teal",
+    to: "/guide",
   },
 ];
