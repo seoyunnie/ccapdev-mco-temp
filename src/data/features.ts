@@ -4,12 +4,20 @@ import type { CSSProperties, ForwardRefExoticComponent, RefAttributes } from "re
 
 import { IconBook, IconCompass, IconMessageCircle, type IconProps } from "@tabler/icons-react";
 
+import studyNookFeature from "../assets/features/study-nook.svg";
+import survivalGuideFeature from "../assets/features/survival-guide.svg";
+import virtualLobbyFeature from "../assets/features/virtual-lobby.svg";
+import studyNookHero from "../assets/heroes/study-nook-hero.svg";
+import survivalGuideHero from "../assets/heroes/survival-guide-hero.svg";
+import virtualLobbyHero from "../assets/heroes/virtual-lobby-hero.svg";
+
 export interface Feature {
   readonly title: string;
   readonly description: string;
   readonly to: LinkProps["to"];
   readonly color: DefaultMantineColor;
   readonly iconComponent: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
+  readonly image: string;
 }
 
 export const FEATURES: readonly Feature[] = [
@@ -20,6 +28,7 @@ export const FEATURES: readonly Feature[] = [
     to: "/study-nook",
     color: "pink",
     iconComponent: IconBook,
+    image: studyNookFeature,
   },
   {
     title: "The Virtual Lobby",
@@ -28,6 +37,7 @@ export const FEATURES: readonly Feature[] = [
     to: "/lobby",
     color: "grape",
     iconComponent: IconMessageCircle,
+    image: virtualLobbyFeature,
   },
   {
     title: "The Survival Guide",
@@ -35,6 +45,7 @@ export const FEATURES: readonly Feature[] = [
     to: "/guide",
     color: "teal",
     iconComponent: IconCompass,
+    image: survivalGuideFeature,
   },
 ];
 
@@ -42,6 +53,9 @@ export interface CarouselFeature {
   readonly title: string;
   readonly description: string;
   readonly background: CSSProperties["background"];
+  readonly image: string;
+  readonly color: DefaultMantineColor;
+  readonly to: LinkProps["to"];
 }
 
 export const CAROUSEL_FEATURES: readonly CarouselFeature[] = [
@@ -49,15 +63,24 @@ export const CAROUSEL_FEATURES: readonly CarouselFeature[] = [
     title: "Study Nook",
     description: "Book your ideal study spot with our interactive reservation system.",
     background: "linear-gradient(135deg, #fff0f6, #fcc2d7)",
+    image: studyNookHero,
+    color: "pink",
+    to: "/study-nook",
   },
   {
     title: "Virtual Lobby",
     description: "Stay connected with the dormitory community through discussions and posts.",
     background: "linear-gradient(135deg, #f3f0ff, #d0bfff)",
+    image: virtualLobbyHero,
+    color: "grape",
+    to: "/lobby",
   },
   {
     title: "Survival Guide",
     description: "Find the best local establishments near your dormitory.",
     background: "linear-gradient(135deg, #e6fcf5, #96f2d7)",
+    image: survivalGuideHero,
+    color: "teal",
+    to: "/guide",
   },
 ];

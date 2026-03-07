@@ -1,3 +1,7 @@
+:root {
+  --adormable-pink: #e64980;
+}
+
 *,
 *::before,
 *::after {
@@ -20,13 +24,13 @@ a {
     opacity 0.2s ease;
 }
 
-.mantine-Card-root {
+.mantine-Card-root:not(.mantine-Carousel-slide .mantine-Card-root) {
   transition:
     transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.mantine-Card-root:hover {
+.mantine-Card-root:not(.mantine-Carousel-slide .mantine-Card-root):hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08);
 }

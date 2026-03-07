@@ -1,0 +1,19 @@
+.title {
+  font-size: 34px;
+  font-weight: 800;
+
+  @mixin smaller-than $mantine-breakpoint-sm {
+    font-size: 24px;
+  }
+}
+
+.description {
+  max-width: 600px;
+}
+
+.underline {
+  display: block;
+  width: 45px;
+  height: 2px;
+  margin-top: var(--mantine-spacing-sm);
+}

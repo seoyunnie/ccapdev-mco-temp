@@ -13,11 +13,19 @@ import {
   Divider,
 } from "@mantine/core";
 import { IconArrowUp, IconArrowDown, IconEdit, IconTrash } from "@tabler/icons-react";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+
+import defaultAvatarFemale from "../../../assets/avatars/default-avatar-female.svg";
+import defaultAvatarMale from "../../../assets/avatars/default-avatar-male.svg";
+import threadPlaceholder from "../../../assets/lobby/thread-placeholder.svg";
+import { BackButton } from "../../../components/back-button.tsx";
+
+import imgStyles from "../../../components/shared-images.module.css";
 
 const post = {
   title: "Best study spots in the dorm?",
   author: "Maria Santos",
+  avatar: defaultAvatarFemale,
   time: "2 hours ago",
   tag: "Discussion",
   content: `I've been looking for quiet places to study after 9 PM. The main hall
@@ -35,6 +43,7 @@ const comments = [
   {
     id: "c1",
     author: "Juan Reyes",
+    avatar: defaultAvatarMale,
     time: "1 hour ago",
     content: "Try the rooftop area! It's usually empty after 8 PM and has decent lighting.",
     upvotes: 8,
@@ -42,6 +51,7 @@ const comments = [
       {
         id: "c1r1",
         author: "Maria Santos",
+        avatar: defaultAvatarFemale,
         time: "45 min ago",
         content: "Oh I didn't know we could go there! Thanks, I'll check it out!",
         upvotes: 2,
@@ -51,6 +61,7 @@ const comments = [
   {
     id: "c2",
     author: "Ava Cruz",
+    avatar: defaultAvatarFemale,
     time: "30 min ago",
     content: "The lobby lounge on the 2nd floor is pretty quiet at night. Plus it has power outlets everywhere.",
     upvotes: 5,
@@ -63,18 +74,13 @@ export const Route = createFileRoute("/_app/lobby/$threadId")({ component: Threa
 function ThreadViewPage() {
   return (
     <Container size="md" py="xl">
-      <Link to="/lobby">
-        <Button variant="subtle" color="pink" mb="md" size="sm">
-          ← Back to Lobby
-        </Button>
-      </Link>
+      <BackButton to="/lobby" label="Back to Lobby" color="grape" />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
+        <img src={threadPlaceholder} alt="Thread" className={imgStyles.cardImage} />
         <Group justify="space-between" mb="md">
           <Group>
-            <Avatar color="pink" radius="xl">
-              MS
-            </Avatar>
+            <Avatar src={post.avatar} alt={post.author} radius="xl" />
             <Stack gap={2}>
               <Group gap="xs">
                 <Text fw={700}>{post.title}</Text>
@@ -126,12 +132,7 @@ function ThreadViewPage() {
         {comments.map((comment) => (
           <Paper key={comment.id} withBorder p="md" radius="md">
             <Group mb="xs">
-              <Avatar color="pink" radius="xl" size="sm">
-                {comment.author
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </Avatar>
+              <Avatar src={comment.avatar} alt={comment.author} radius="xl" size="sm" />
               <Text size="sm" fw={600}>
                 {comment.author}
               </Text>
@@ -157,12 +158,7 @@ function ThreadViewPage() {
                 {comment.replies.map((reply) => (
                   <Paper key={reply.id} bg="pink.0" p="sm" radius="sm" ml="xl">
                     <Group mb={4}>
-                      <Avatar color="pink" radius="xl" size="xs">
-                        {reply.author
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </Avatar>
+                      <Avatar src={reply.avatar} alt={reply.author} radius="xl" size="xs" />
                       <Text size="xs" fw={600}>
                         {reply.author}
                       </Text>

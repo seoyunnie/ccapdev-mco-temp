@@ -15,6 +15,11 @@ import {
 import { IconEdit, IconTrash, IconPlus, IconSearch } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 
+import placeholder from "../../../assets/establishments/placeholder.svg";
+import { SectionHeader } from "../../../components/section-header.tsx";
+
+import imgStyles from "../../../components/shared-images.module.css";
+
 const establishments = [
   { id: "1", name: "Café Manila", category: "Coffee Shop", owner: "cafe_manila_owner", status: "Active" },
   { id: "2", name: "Kuya's Carinderia", category: "Filipino Food", owner: "—", status: "Active" },
@@ -31,14 +36,15 @@ function EstablishmentManagerPage() {
   return (
     <Container size="lg" py="xl">
       <Group justify="space-between" mb="xs">
-        <Title className="page-title">Establishment Manager</Title>
+        <SectionHeader
+          title="Establishment Manager"
+          description="Manage directory entries and assign owner accounts."
+          mb="xs"
+        />
         <Button leftSection={<IconPlus size={16} />} color="pink" radius="xl">
           Add Establishment
         </Button>
       </Group>
-      <Text c="dimmed" className="page-description" mb="xl">
-        Manage directory entries and assign owner accounts.
-      </Text>
 
       <TextInput placeholder="Search establishments..." leftSection={<IconSearch size={16} />} mb="lg" />
 
@@ -96,6 +102,7 @@ function EstablishmentManagerPage() {
         <Title order={4} mb="md">
           Add New Establishment
         </Title>
+        <img src={placeholder} alt="Preview" className={imgStyles.previewImage} />
         <Stack>
           <Group grow>
             <TextInput label="Name" placeholder="Establishment name" />

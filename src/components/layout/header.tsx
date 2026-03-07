@@ -1,7 +1,11 @@
-import { AppShell, Avatar, Burger, Button, Container, Group, Menu, Text, Title } from "@mantine/core";
+import { AppShell, Avatar, Burger, Button, Container, Group, Menu } from "@mantine/core";
 import { IconChevronDown, IconLogout, IconSettings, IconShield, IconUser } from "@tabler/icons-react";
 import { Link, useLocation } from "@tanstack/react-router";
 
+import defaultAdmin from "../../assets/avatars/default-admin.svg";
+import defaultAvatarFemale from "../../assets/avatars/default-avatar-female.svg";
+import defaultConcierge from "../../assets/avatars/default-concierge.svg";
+import adormableLogo from "../../assets/logos/adormable-logo.png";
 import { useAuth, UserRole } from "../../contexts/auth-context.tsx";
 import { NAV_ITEMS } from "../../data/nav-items.ts";
 import { LinkButton } from "../link-button.tsx";
@@ -17,6 +21,9 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
   const { isLoggedIn, role, name, logout } = useAuth();
   const isStaff = role === UserRole.CONCIERGE || role === UserRole.ADMIN;
   const isAdmin = role === UserRole.ADMIN;
+  // oxlint-disable-next-line unicorn/no-nested-ternary
+  const avatarSrc =
+    role === UserRole.ADMIN ? defaultAdmin : role === UserRole.CONCIERGE ? defaultConcierge : defaultAvatarFemale;
 
   const location = useLocation();
 
@@ -32,11 +39,7 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
             aria-label="Toggle navigation"
           />
           <Link to="/" style={{ textDecoration: "none" }}>
-            <Title order={3}>
-              <Text component="span" size="xl" fw={900} c="pink" style={{ letterSpacing: "-0.02em" }}>
-                Adormable
-              </Text>
-            </Title>
+            <img src={adormableLogo} alt="Adormable" height={44} style={{ display: "block" }} />
           </Link>
         </Group>
 
@@ -117,9 +120,7 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
             <Menu>
               <Menu.Target>
                 <Button variant="subtle" color="dark" size="sm" radius="xl">
-                  <Avatar color="pink" radius="xl" size="sm" mr={8}>
-                    {name.slice(0, 2).toUpperCase()}
-                  </Avatar>
+                  <Avatar src={avatarSrc} alt={name} radius="xl" size="sm" mr={8} />
                   {name}
                   <IconChevronDown size={14} style={{ marginLeft: 4 }} />
                 </Button>

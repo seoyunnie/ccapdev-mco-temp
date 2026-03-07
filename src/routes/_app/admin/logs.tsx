@@ -1,6 +1,8 @@
-import { Container, Title, Text, Paper, Group, Table, Badge, Select, TextInput, Tabs } from "@mantine/core";
+import { Container, Text, Paper, Group, Table, Badge, Select, TextInput, Tabs } from "@mantine/core";
 import { IconSearch, IconUser, IconBug } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
+
+import { SectionHeader } from "../../../components/section-header.tsx";
 
 const activityLogs = [
   {
@@ -69,12 +71,7 @@ export const Route = createFileRoute("/_app/admin/logs")({
 function SystemLogsPage() {
   return (
     <Container size="lg" py="xl">
-      <Title className="page-title" mb="xs">
-        System Logs
-      </Title>
-      <Text c="dimmed" className="page-description" mb="xl">
-        Audit trails and technical error monitoring.
-      </Text>
+      <SectionHeader title="System Logs" description="Audit trails and technical error monitoring." />
 
       <Tabs defaultValue="activity">
         <Tabs.List>

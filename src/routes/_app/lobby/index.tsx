@@ -1,22 +1,16 @@
-import {
-  Container,
-  Title,
-  Text,
-  TextInput,
-  Select,
-  Card,
-  Group,
-  Stack,
-  Avatar,
-  Badge,
-  Button,
-  ActionIcon,
-} from "@mantine/core";
-import { IconSearch, IconArrowUp, IconPlus } from "@tabler/icons-react";
+import { Container, Text, Card, Group, Stack, Avatar, Badge, Button, ActionIcon } from "@mantine/core";
+import { IconArrowUp, IconPlus } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { TAG_COLORS } from "../../../features/lobby/lobby.constants.ts";
+import emptyState from "../../../assets/features/empty-state.svg";
+import threadPlaceholder from "../../../assets/lobby/thread-placeholder.svg";
+import { EmptyState } from "../../../components/empty-state.tsx";
+import { SearchBar } from "../../../components/search-bar.tsx";
+import { SectionHeader } from "../../../components/section-header.tsx";
+import { TAG_COLORS, TAG_ICONS } from "../../../features/lobby/lobby.constants.ts";
+
+import imgStyles from "../../../components/shared-images.module.css";
 
 const posts = [
   {
@@ -78,26 +72,28 @@ function ForumFeedPage() {
   return (
     <Container size="md" py="xl">
       <Group justify="space-between" mb="xs">
-        <Title className="page-title">The Virtual Lobby</Title>
-        <Button leftSection={<IconPlus size={16} />} color="pink" radius="xl">
+        <SectionHeader
+          title="The Virtual Lobby"
+          description="Discuss, share, and connect with fellow dormitory residents."
+          color="grape"
+          mb="xs"
+        />
+        <Button leftSection={<IconPlus size={16} />} color="grape" radius="xl">
           New Post
         </Button>
       </Group>
-      <Text c="dimmed" className="page-description" mb="xl">
-        Discuss, share, and connect with fellow dormitory residents.
-      </Text>
 
-      <Group mb="lg" grow>
-        <TextInput
-          placeholder="Search posts..."
-          leftSection={<IconSearch size={16} />}
-          value={search}
-          onChange={(e) => {
-            setSearch(e.currentTarget.value);
-          }}
-        />
-        <Select placeholder="Sort by" data={["Newest", "Most Popular"]} defaultValue="Newest" />
-      </Group>
+      <SearchBar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search posts..."
+        filterData={["Newest", "Most Popular"]}
+        filterPlaceholder="Sort by"
+        filterValue="Newest"
+        onFilterChange={() => {}}
+      />
+
+      {filtered.length === 0 && <EmptyState image={emptyState} message="No posts match your search." />}
 
       <Stack>
         {filtered.map((post) => (
@@ -111,6 +107,7 @@ function ForumFeedPage() {
             to={`/lobby/${post.id}`}
             style={{ textDecoration: "none", color: "inherit" }}
           >
+            <img src={threadPlaceholder} alt="" className={imgStyles.cardImageShort} />
             <Group justify="space-between" wrap="wrap">
               <Group>
                 <Avatar color="pink" radius="xl">
@@ -122,7 +119,16 @@ function ForumFeedPage() {
                 <Stack gap={2}>
                   <Group gap="xs">
                     <Text fw={600}>{post.title}</Text>
-                    <Badge color={TAG_COLORS[post.tag]} size="sm" variant="light">
+                    <Badge
+                      color={TAG_COLORS[post.tag]}
+                      size="sm"
+                      variant="light"
+                      leftSection={
+                        TAG_ICONS[post.tag] ? (
+                          <img src={TAG_ICONS[post.tag]} alt="" width={12} height={12} />
+                        ) : undefined
+                      }
+                    >
                       {post.tag}
                     </Badge>
                   </Group>

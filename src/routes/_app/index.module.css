@@ -72,7 +72,6 @@
 
 .sectionDescription {
   margin: auto;
-  max-width: 600px;
 
   &::after {
     background-color: var(--mantine-color-pink-filled);
@@ -102,7 +101,7 @@
 
 .featureCardTitle {
   &::after {
-    background-color: var(--mantine-color-pink-filled);
+    background-color: var(--feature-color, var(--mantine-color-pink-filled));
     content: "";
     display: block;
     height: 2px;

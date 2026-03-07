@@ -15,7 +15,13 @@ import {
   FileInput,
 } from "@mantine/core";
 import { IconThumbUp, IconPhoto } from "@tabler/icons-react";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+
+import cafeManila from "../../../assets/establishments/1-cafe-manila.svg";
+import catCoffeeShop from "../../../assets/establishments/cat-coffee-shop.svg";
+import { BackButton } from "../../../components/back-button.tsx";
+
+import imgStyles from "../../../components/shared-images.module.css";
 
 const establishment = {
   name: "Café Manila",
@@ -24,6 +30,8 @@ const establishment = {
   totalReviews: 32,
   description:
     "Cozy café with great drip coffee and pastries. Perfect for late-night study sessions. Open from 7 AM to 11 PM daily.",
+  image: cafeManila,
+  categoryIcon: catCoffeeShop,
 };
 
 const reviews = [
@@ -62,18 +70,19 @@ export const Route = createFileRoute("/_app/guide/$estId")({ component: Establis
 function EstablishmentDetailsPage() {
   return (
     <Container size="md" py="xl">
-      <Link to="/guide">
-        <Button variant="subtle" color="pink" mb="md" size="sm">
-          ← Back to Directory
-        </Button>
-      </Link>
+      <BackButton to="/guide" label="Back to Directory" color="teal" />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
+        <img src={establishment.image} alt={establishment.name} className={imgStyles.cardImageTall} />
         <Group justify="space-between" wrap="wrap">
           <Stack gap="xs">
             <Group>
               <Title order={2}>{establishment.name}</Title>
-              <Badge variant="light" size="lg">
+              <Badge
+                variant="light"
+                size="lg"
+                leftSection={<img src={establishment.categoryIcon} alt="" width={16} height={16} />}
+              >
                 {establishment.category}
               </Badge>
             </Group>
