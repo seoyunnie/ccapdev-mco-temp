@@ -21,5 +21,8 @@ export const theme = createTheme({
     lg: "0 8px 32px rgba(0, 0, 0, 0.08)",
     xl: "0 16px 48px rgba(0, 0, 0, 0.1)",
   },
-  other: { transitionDuration: "0.25s" },
+  other: {
+    transitionDuration: "0.25s",
+    featureColors: { studyNook: "pink", virtualLobby: "grape", survivalGuide: "teal" },
+  },
 });

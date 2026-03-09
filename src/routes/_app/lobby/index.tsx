@@ -1,9 +1,6 @@
 import {
   Container,
-  Title,
   Text,
-  TextInput,
-  Select,
   Card,
   Group,
   Stack,
@@ -13,13 +10,29 @@ import {
   ActionIcon,
   Modal,
   Textarea,
+  TextInput,
+  Select,
+  Chip,
+  Tabs,
+  Progress,
+  Paper,
+  ColorSwatch,
 } from "@mantine/core";
-import { IconSearch, IconArrowUp, IconPlus } from "@tabler/icons-react";
+import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
+import { IconArrowUp, IconPlus, IconSettings, IconEye } from "@tabler/icons-react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { TAG_COLORS } from "../../../features/lobby/lobby.constants.ts";
+import emptyState from "../../../assets/features/empty-state.svg";
+import { EmptyState } from "../../../components/empty-state.tsx";
+import { SearchBar } from "../../../components/search-bar.tsx";
+import { SectionHeader } from "../../../components/section-header.tsx";
+import { useAuth } from "../../../contexts/auth-context.tsx";
+import { TAG_COLORS, DEFAULT_TAGS, CATEGORY_COLOR_OPTIONS } from "../../../features/lobby/lobby.constants.ts";
 import { createThread, getThreads } from "../../../server/threads.ts";
+
+const MAX_CONTENT_LENGTH = 2000;
 
 export const Route = createFileRoute("/_app/lobby/")({
   head: () => ({ meta: [{ title: "Lobby | Adormable" }] }),
@@ -30,85 +43,234 @@ export const Route = createFileRoute("/_app/lobby/")({
 function ForumFeedPage() {
   const posts = Route.useLoaderData();
   const router = useRouter();
+  const { role } = useAuth();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<string | null>("Newest");
-  const [modalOpen, setModalOpen] = useState(false);
+  const [activeTag, setActiveTag] = useState<string>("All");
+
+  const [createOpened, { open: openCreate, close: closeCreate }] = useDisclosure(false);
+  const [catOpened, { open: openCat, close: closeCat }] = useDisclosure(false);
+  const [previewTab, setPreviewTab] = useState<string | null>("write");
+
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [newTag, setNewTag] = useState<string | null>(null);
 
+  const [categories, setCategories] = useState(DEFAULT_TAGS);
+  const [newCatName, setNewCatName] = useState("");
+  const [newCatColor, setNewCatColor] = useState<string | null>(null);
+
+  const allTags = ["All", ...categories.map((c) => c.name)];
+
   const filtered = posts
-    .filter(
-      (p) =>
-        p.title.toLowerCase().includes(search.toLowerCase()) || p.snippet.toLowerCase().includes(search.toLowerCase()),
-    )
+    .filter((p) => {
+      const matchSearch =
+        p.title.toLowerCase().includes(search.toLowerCase()) ||
+        p.snippet.toLowerCase().includes(search.toLowerCase());
+      const matchTag = activeTag === "All" || p.tag === activeTag;
+      return matchSearch && matchTag;
+    })
     .sort((a, b) => (sort === "Most Popular" ? b.upvotes - a.upvotes : 0));
+
+  const handleCreate = async () => {
+    if (!newTitle.trim() || !newContent.trim()) return;
+    await createThread({ data: { title: newTitle, content: newContent, tag: newTag ?? undefined } });
+    setNewTitle("");
+    setNewContent("");
+    setNewTag(null);
+    closeCreate();
+    notifications.show({ title: "Post created!", message: "Your post is now live.", color: "green" });
+    router.invalidate();
+  };
+
+  const isPrivileged = role === "admin" || role === "concierge";
 
   return (
     <Container size="md" py="xl">
-      <Modal opened={modalOpen} onClose={() => setModalOpen(false)} title="Create New Post" centered>
+      {/* Create Post Modal */}
+      <Modal opened={createOpened} onClose={closeCreate} title="Create New Post" centered size="lg">
+        <Tabs value={previewTab} onChange={setPreviewTab}>
+          <Tabs.List mb="md">
+            <Tabs.Tab value="write">Write</Tabs.Tab>
+            <Tabs.Tab value="preview" leftSection={<IconEye size={14} />}>
+              Preview
+            </Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="write">
+            <Stack>
+              <TextInput
+                label="Title"
+                placeholder="Post title"
+                value={newTitle}
+                onChange={(e) => {
+                  setNewTitle(e.currentTarget.value);
+                }}
+              />
+              <Select
+                label="Tag"
+                placeholder="Select tag"
+                data={categories.map((c) => c.name)}
+                value={newTag}
+                onChange={setNewTag}
+              />
+              <Textarea
+                label="Content"
+                placeholder="Write your post..."
+                minRows={4}
+                maxLength={MAX_CONTENT_LENGTH}
+                value={newContent}
+                onChange={(e) => {
+                  setNewContent(e.currentTarget.value);
+                }}
+              />
+              <Group justify="space-between">
+                <Text size="xs" c="dimmed">
+                  {newContent.length}/{MAX_CONTENT_LENGTH}
+                </Text>
+                <Progress
+                  value={(newContent.length / MAX_CONTENT_LENGTH) * 100}
+                  size="xs"
+                  color={newContent.length > MAX_CONTENT_LENGTH * 0.9 ? "red" : "pink"}
+                  w={100}
+                />
+              </Group>
+              <Group justify="flex-end">
+                <Button color="pink" radius="xl" onClick={handleCreate}>
+                  Create Post
+                </Button>
+              </Group>
+            </Stack>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="preview">
+            <Paper p="md" withBorder radius="md">
+              <Text fw={700} size="lg" mb="xs">
+                {newTitle || "Untitled"}
+              </Text>
+              {newTag && (
+                <Badge color={TAG_COLORS[newTag as keyof typeof TAG_COLORS]} variant="light" mb="sm">
+                  {newTag}
+                </Badge>
+              )}
+              <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
+                {newContent || "No content yet..."}
+              </Text>
+            </Paper>
+          </Tabs.Panel>
+        </Tabs>
+      </Modal>
+
+      {/* Category Management Modal (admin/concierge) */}
+      <Modal opened={catOpened} onClose={closeCat} title="Manage Categories">
         <Stack>
+          {categories.map((cat) => (
+            <Group key={cat.name} justify="space-between">
+              <Group gap="xs">
+                <ColorSwatch color={`var(--mantine-color-${cat.color}-5)`} size={16} />
+                <Text size="sm">{cat.name}</Text>
+              </Group>
+              <Button
+                size="xs"
+                variant="subtle"
+                color="red"
+                onClick={() => {
+                  setCategories((prev) => prev.filter((c) => c.name !== cat.name));
+                }}
+              >
+                Remove
+              </Button>
+            </Group>
+          ))}
           <TextInput
-            label="Title"
-            placeholder="Post title"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.currentTarget.value)}
+            label="New Category"
+            placeholder="Category name"
+            value={newCatName}
+            onChange={(e) => {
+              setNewCatName(e.currentTarget.value);
+            }}
           />
           <Select
-            label="Tag"
-            placeholder="Select tag"
-            data={Object.keys(TAG_COLORS)}
-            value={newTag}
-            onChange={setNewTag}
+            label="Color"
+            data={CATEGORY_COLOR_OPTIONS}
+            value={newCatColor}
+            onChange={setNewCatColor}
+            placeholder="Pick a color"
           />
-          <Textarea
-            label="Content"
-            placeholder="Write your post..."
-            minRows={4}
-            value={newContent}
-            onChange={(e) => setNewContent(e.currentTarget.value)}
-          />
-          <Group justify="flex-end">
-            <Button
-              color="pink"
-              radius="xl"
-              onClick={async () => {
-                if (!newTitle.trim() || !newContent.trim()) return;
-                await createThread({ data: { title: newTitle, content: newContent, tag: newTag ?? undefined } });
-                setNewTitle("");
-                setNewContent("");
-                setNewTag(null);
-                setModalOpen(false);
-                router.invalidate();
-              }}
-            >
-              Create Post
-            </Button>
-          </Group>
+          <Button
+            color="pink"
+            onClick={() => {
+              if (newCatName.trim() && newCatColor) {
+                setCategories((prev) => [...prev, { name: newCatName.trim(), color: newCatColor }]);
+                setNewCatName("");
+                setNewCatColor(null);
+              }
+            }}
+          >
+            Add Category
+          </Button>
         </Stack>
       </Modal>
 
       <Group justify="space-between" mb="xs">
-        <Title className="page-title">The Virtual Lobby</Title>
-        <Button leftSection={<IconPlus size={16} />} color="pink" radius="xl" onClick={() => setModalOpen(true)}>
-          New Post
-        </Button>
-      </Group>
-      <Text c="dimmed" className="page-description" mb="xl">
-        Discuss, share, and connect with fellow dormitory residents.
-      </Text>
-
-      <Group mb="lg" grow>
-        <TextInput
-          placeholder="Search posts..."
-          leftSection={<IconSearch size={16} />}
-          value={search}
-          onChange={(e) => {
-            setSearch(e.currentTarget.value);
-          }}
+        <SectionHeader
+          title="The Virtual Lobby"
+          description="Discuss, share, and connect with fellow dormitory residents."
+          color="grape"
+          mb="xs"
         />
-        <Select placeholder="Sort by" data={["Newest", "Most Popular"]} value={sort} onChange={setSort} />
+        <Group>
+          {isPrivileged && (
+            <Button
+              variant="light"
+              color="gray"
+              leftSection={<IconSettings size={16} />}
+              radius="xl"
+              onClick={openCat}
+            >
+              Categories
+            </Button>
+          )}
+          <Button leftSection={<IconPlus size={16} />} color="pink" radius="xl" onClick={openCreate}>
+            New Post
+          </Button>
+        </Group>
       </Group>
+
+      <SearchBar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search posts..."
+        filterData={["Newest", "Most Popular"]}
+        filterValue={sort}
+        onFilterChange={setSort}
+        filterPlaceholder="Sort by"
+      />
+
+      <Chip.Group
+        value={activeTag}
+        onChange={(v) => {
+          if (typeof v === "string") {
+            setActiveTag(v);
+          }
+        }}
+      >
+        <Group gap="xs" mb="lg">
+          {allTags.map((tag) => (
+            <Chip
+              key={tag}
+              value={tag}
+              variant="light"
+              color={tag === "All" ? "gray" : (TAG_COLORS[tag as keyof typeof TAG_COLORS] ?? "gray")}
+              size="sm"
+            >
+              {tag}
+            </Chip>
+          ))}
+        </Group>
+      </Chip.Group>
+
+      {filtered.length === 0 && <EmptyState image={emptyState} message="No posts match your search." />}
 
       <Stack>
         {filtered.map((post) => (
@@ -133,7 +295,11 @@ function ForumFeedPage() {
                 <Stack gap={2}>
                   <Group gap="xs">
                     <Text fw={600}>{post.title}</Text>
-                    <Badge color={TAG_COLORS[post.tag as keyof typeof TAG_COLORS]} size="sm" variant="light">
+                    <Badge
+                      color={TAG_COLORS[post.tag as keyof typeof TAG_COLORS] ?? "gray"}
+                      size="sm"
+                      variant="light"
+                    >
                       {post.tag}
                     </Badge>
                   </Group>

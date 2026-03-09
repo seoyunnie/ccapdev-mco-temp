@@ -13,17 +13,30 @@ import {
   Badge,
   Table,
   ActionIcon,
+  Modal,
+  FileInput,
 } from "@mantine/core";
-import { IconUser, IconCalendar, IconHistory, IconEdit, IconTrash, IconCamera } from "@tabler/icons-react";
+import { useDisclosure } from "@mantine/hooks";
+import {
+  IconUser,
+  IconCalendar,
+  IconHistory,
+  IconEdit,
+  IconTrash,
+  IconCamera,
+  IconPhoto,
+} from "@tabler/icons-react";
 import { createFileRoute, useRouter, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { SectionHeader } from "../../components/section-header.tsx";
 import { getUserProfile, updateProfile, deleteAccount } from "../../server/profile.ts";
 import { cancelReservation } from "../../server/reservations.ts";
 
 const typeColors: Record<string, string> = { Reservation: "pink", Forum: "grape", Review: "teal" };
 
 export const Route = createFileRoute("/_app/profile")({
+  head: () => ({ meta: [{ title: "Profile | Adormable" }] }),
   loader: () => getUserProfile(),
   component: UserProfilePage,
 });
@@ -35,11 +48,13 @@ function UserProfilePage() {
   const [displayName, setDisplayName] = useState(profile.name);
   const [bio, setBio] = useState(profile.bio);
 
+  const [photoOpened, { open: openPhoto, close: closePhoto }] = useDisclosure(false);
+  const [deleteResOpened, { open: openDeleteRes, close: closeDeleteRes }] = useDisclosure(false);
+  const [deleteResId, setDeleteResId] = useState<string | null>(null);
+
   return (
     <Container size="md" py="xl">
-      <Title className="page-title" mb="xl">
-        My Profile
-      </Title>
+      <SectionHeader title="My Profile" description="Manage your account, reservations, and activity." />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Group wrap="wrap">
@@ -50,13 +65,26 @@ function UserProfilePage() {
                 .map((n: string) => n[0])
                 .join("")}
             </Avatar>
-            <Button variant="light" color="pink" size="xs" leftSection={<IconCamera size={14} />}>
+            <Button variant="light" color="pink" size="xs" leftSection={<IconCamera size={14} />} onClick={openPhoto}>
               Change Photo
             </Button>
           </Stack>
           <Stack style={{ flex: 1 }} gap="sm">
-            <TextInput label="Display Name" value={displayName} onChange={(e) => setDisplayName(e.currentTarget.value)} />
-            <Textarea label="Bio" value={bio} onChange={(e) => setBio(e.currentTarget.value)} minRows={2} />
+            <TextInput
+              label="Display Name"
+              value={displayName}
+              onChange={(e) => {
+                setDisplayName(e.currentTarget.value);
+              }}
+            />
+            <Textarea
+              label="Bio"
+              value={bio}
+              onChange={(e) => {
+                setBio(e.currentTarget.value);
+              }}
+              minRows={2}
+            />
             <TextInput label="Email" value={profile.email} disabled />
             <Group justify="flex-end">
               <Button
@@ -74,6 +102,47 @@ function UserProfilePage() {
         </Group>
       </Paper>
 
+      {/* Photo Upload Modal */}
+      <Modal opened={photoOpened} onClose={closePhoto} title="Upload Profile Photo">
+        <Stack>
+          <FileInput
+            placeholder="Choose an image"
+            leftSection={<IconPhoto size={16} />}
+            accept="image/*"
+          />
+          <Group justify="flex-end">
+            <Button variant="light" color="gray" onClick={closePhoto}>
+              Cancel
+            </Button>
+            <Button color="pink" onClick={closePhoto}>
+              Upload
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* Delete Reservation Confirmation */}
+      <Modal opened={deleteResOpened} onClose={closeDeleteRes} title="Cancel Reservation">
+        <Text mb="lg">Are you sure you want to cancel this reservation?</Text>
+        <Group justify="flex-end">
+          <Button variant="light" color="gray" onClick={closeDeleteRes}>
+            Keep
+          </Button>
+          <Button
+            color="red"
+            onClick={async () => {
+              if (deleteResId) {
+                await cancelReservation({ data: { reservationId: deleteResId } });
+                router.invalidate();
+              }
+              closeDeleteRes();
+            }}
+          >
+            Cancel Reservation
+          </Button>
+        </Group>
+      </Modal>
+
       <Tabs defaultValue="reservations">
         <Tabs.List>
           <Tabs.Tab value="reservations" leftSection={<IconCalendar size={16} />}>
@@ -89,8 +158,8 @@ function UserProfilePage() {
 
         <Tabs.Panel value="reservations" pt="md">
           <Stack>
-            {profile.reservations.map((res, i) => (
-              <Paper key={i} withBorder p="md" radius="md">
+            {profile.reservations.map((res) => (
+              <Paper key={res.id} withBorder p="md" radius="md">
                 <Group justify="space-between" wrap="wrap">
                   <Stack gap={2}>
                     <Text fw={600}>{res.zone}</Text>
@@ -102,16 +171,23 @@ function UserProfilePage() {
                     <Badge color={res.status === "Confirmed" ? "green" : "yellow"} variant="light">
                       {res.status}
                     </Badge>
-                    <ActionIcon variant="light" color="pink" size="sm" onClick={() => navigate({ to: "/study-nook" })}>
+                    <ActionIcon
+                      variant="light"
+                      color="pink"
+                      size="sm"
+                      onClick={() => {
+                        void navigate({ to: "/study-nook" });
+                      }}
+                    >
                       <IconEdit size={14} />
                     </ActionIcon>
                     <ActionIcon
                       variant="light"
                       color="red"
                       size="sm"
-                      onClick={async () => {
-                        await cancelReservation({ data: { reservationId: res.id } });
-                        router.invalidate();
+                      onClick={() => {
+                        setDeleteResId(res.id);
+                        openDeleteRes();
                       }}
                     >
                       <IconTrash size={14} />
@@ -169,7 +245,7 @@ function UserProfilePage() {
                 onClick={async () => {
                   if (!confirm("Are you sure? This will permanently delete your account and all data.")) return;
                   await deleteAccount();
-                  router.navigate({ to: "/login" });
+                  void router.navigate({ to: "/login" });
                 }}
               >
                 Delete Account

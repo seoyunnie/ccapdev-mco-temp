@@ -1,8 +1,12 @@
 import type { DefaultMantineColor } from "@mantine/core";
 import type { LinkProps } from "@tanstack/react-router";
-import type { CSSProperties, ForwardRefExoticComponent, RefAttributes } from "react";
+import type { ForwardRefExoticComponent, RefAttributes } from "react";
 
 import { IconBook, IconCompass, IconMessageCircle, type IconProps } from "@tabler/icons-react";
+
+import studyNookFeature from "../assets/features/study-nook.svg";
+import survivalGuideFeature from "../assets/features/survival-guide.svg";
+import virtualLobbyFeature from "../assets/features/virtual-lobby.svg";
 
 export interface Feature {
   readonly title: string;
@@ -10,6 +14,7 @@ export interface Feature {
   readonly to: LinkProps["to"];
   readonly color: DefaultMantineColor;
   readonly iconComponent: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
+  readonly image: string;
 }
 
 export const FEATURES: readonly Feature[] = [
@@ -20,6 +25,7 @@ export const FEATURES: readonly Feature[] = [
     to: "/study-nook",
     color: "pink",
     iconComponent: IconBook,
+    image: studyNookFeature,
   },
   {
     title: "The Virtual Lobby",
@@ -28,6 +34,7 @@ export const FEATURES: readonly Feature[] = [
     to: "/lobby",
     color: "grape",
     iconComponent: IconMessageCircle,
+    image: virtualLobbyFeature,
   },
   {
     title: "The Survival Guide",
@@ -35,29 +42,6 @@ export const FEATURES: readonly Feature[] = [
     to: "/guide",
     color: "teal",
     iconComponent: IconCompass,
-  },
-];
-
-export interface CarouselFeature {
-  readonly title: string;
-  readonly description: string;
-  readonly background: CSSProperties["background"];
-}
-
-export const CAROUSEL_FEATURES: readonly CarouselFeature[] = [
-  {
-    title: "Study Nook",
-    description: "Book your ideal study spot with our interactive reservation system.",
-    background: "linear-gradient(135deg, #fff0f6, #fcc2d7)",
-  },
-  {
-    title: "Virtual Lobby",
-    description: "Stay connected with the dormitory community through discussions and posts.",
-    background: "linear-gradient(135deg, #f3f0ff, #d0bfff)",
-  },
-  {
-    title: "Survival Guide",
-    description: "Find the best local establishments near your dormitory.",
-    background: "linear-gradient(135deg, #e6fcf5, #96f2d7)",
+    image: survivalGuideFeature,
   },
 ];

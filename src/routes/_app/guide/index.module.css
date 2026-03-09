@@ -1,0 +1,12 @@
+.estCard {
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--mantine-shadow-lg);
+  }
+}

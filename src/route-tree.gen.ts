@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppTermsRouteImport } from './routes/_app/terms'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
 import { Route as AppModerationRouteImport } from './routes/_app/moderation'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -44,6 +45,11 @@ const AppRouteRoute = AppRouteRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppTermsRoute = AppTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppProfileRoute = AppProfileRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/moderation': typeof AppModerationRoute
   '/profile': typeof AppProfileRoute
+  '/terms': typeof AppTermsRoute
   '/admin/establishments': typeof AppAdminEstablishmentsRoute
   '/admin/logs': typeof AppAdminLogsRoute
   '/guide/$estId': typeof AppGuideEstIdRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/moderation': typeof AppModerationRoute
   '/profile': typeof AppProfileRoute
+  '/terms': typeof AppTermsRoute
   '/': typeof AppIndexRoute
   '/admin/establishments': typeof AppAdminEstablishmentsRoute
   '/admin/logs': typeof AppAdminLogsRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/moderation': typeof AppModerationRoute
   '/_app/profile': typeof AppProfileRoute
+  '/_app/terms': typeof AppTermsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/admin/establishments': typeof AppAdminEstablishmentsRoute
   '/_app/admin/logs': typeof AppAdminLogsRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/moderation'
     | '/profile'
+    | '/terms'
     | '/admin/establishments'
     | '/admin/logs'
     | '/guide/$estId'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/moderation'
     | '/profile'
+    | '/terms'
     | '/'
     | '/admin/establishments'
     | '/admin/logs'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/moderation'
     | '/_app/profile'
+    | '/_app/terms'
     | '/_app/'
     | '/_app/admin/establishments'
     | '/_app/admin/logs'
@@ -260,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/terms': {
+      id: '/_app/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof AppTermsRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/profile': {
@@ -361,6 +380,7 @@ interface AppRouteRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppModerationRoute: typeof AppModerationRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppTermsRoute: typeof AppTermsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppAdminEstablishmentsRoute: typeof AppAdminEstablishmentsRoute
   AppAdminLogsRoute: typeof AppAdminLogsRoute
@@ -378,6 +398,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppModerationRoute: AppModerationRoute,
   AppProfileRoute: AppProfileRoute,
+  AppTermsRoute: AppTermsRoute,
   AppIndexRoute: AppIndexRoute,
   AppAdminEstablishmentsRoute: AppAdminEstablishmentsRoute,
   AppAdminLogsRoute: AppAdminLogsRoute,

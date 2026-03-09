@@ -14,14 +14,19 @@ import {
   Badge,
   Tooltip,
 } from "@mantine/core";
-import { Link, createFileRoute, useRouter } from "@tanstack/react-router";
+import { IconCheck } from "@tabler/icons-react";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { BackButton } from "../../../components/back-button.tsx";
 import { TIME_SLOTS, WEEK_DAYS } from "../../../features/study-nook/study-nook.constants.ts";
 import { createReservation } from "../../../server/reservations.ts";
 import { getZone } from "../../../server/zones.ts";
 
+import styles from "./$zoneId.module.css";
+
 export const Route = createFileRoute("/_app/study-nook/$zoneId")({
+  head: () => ({ meta: [{ title: "Reserve a Seat | Adormable" }] }),
   loader: ({ params }) => getZone({ data: { zoneId: params.zoneId } }),
   component: ReservationPage,
 });
@@ -31,11 +36,12 @@ function ReservationPage() {
   const router = useRouter();
   const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
-  const [startTime, setStartTime] = useState<string | null>(null);
-  const [endTime, setEndTime] = useState<string | null>(null);
+  const [selectedStartTime, setSelectedStartTime] = useState<string | null>(null);
+  const [selectedEndTime, setSelectedEndTime] = useState<string | null>(null);
   const [anonymous, setAnonymous] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
 
-  // group seats into rows by letter prefix
+  // Group seats into rows by letter prefix
   const seatRows: { id: string; label: string; taken: boolean }[][] = [];
   let currentRow: typeof seatRows[0] = [];
   let currentLetter = "";
@@ -52,13 +58,7 @@ function ReservationPage() {
 
   return (
     <Container size="lg" py="xl">
-      <Group mb="md">
-        <Link to="/study-nook">
-          <Button variant="subtle" color="pink" size="sm">
-            ← Back to Zones
-          </Button>
-        </Link>
-      </Group>
+      <BackButton to="/study-nook" label="Back to Zones" />
 
       <Title className="page-title" mb="xs">
         {zone.name} - Reserve a Seat
@@ -75,21 +75,15 @@ function ReservationPage() {
             </Text>
             <Group justify="center" mb="md" gap="lg">
               <Group gap={6}>
-                <div
-                  style={{ width: 16, height: 16, borderRadius: 4, backgroundColor: "var(--mantine-color-green-5)" }}
-                />
+                <div className={styles.legendDot} style={{ backgroundColor: "var(--mantine-color-green-5)" }} />
                 <Text size="xs">Available</Text>
               </Group>
               <Group gap={6}>
-                <div
-                  style={{ width: 16, height: 16, borderRadius: 4, backgroundColor: "var(--mantine-color-red-5)" }}
-                />
+                <div className={styles.legendDot} style={{ backgroundColor: "var(--mantine-color-gray-5)" }} />
                 <Text size="xs">Taken</Text>
               </Group>
               <Group gap={6}>
-                <div
-                  style={{ width: 16, height: 16, borderRadius: 4, backgroundColor: "var(--mantine-color-pink-5)" }}
-                />
+                <div className={styles.legendDot} style={{ backgroundColor: "var(--mantine-color-pink-5)" }} />
                 <Text size="xs">Selected</Text>
               </Group>
             </Group>
@@ -101,20 +95,24 @@ function ReservationPage() {
                   </Text>
                   {row.map((seat) => {
                     const isSelected = selectedSeat === seat.id;
+                    // oxlint-disable-next-line no-nested-ternary
+                    const status = isSelected ? "Selected" : seat.taken ? "Taken" : "Available";
                     return (
-                      <Tooltip key={seat.id} label={seat.label}>
+                      <Tooltip key={seat.id} label={`Seat ${seat.label} — ${status}`}>
                         <ActionIcon
                           size="md"
                           variant="filled"
-                          // oxlint-disable-next-line unicorn/no-nested-ternary
-                          color={isSelected ? "pink" : seat.taken ? "red" : "green"}
+                          // oxlint-disable-next-line unicorn/no-nested-ternary, no-nested-ternary
+                          color={isSelected ? "pink" : seat.taken ? "gray" : "green"}
                           onClick={() => {
                             if (!seat.taken) {
                               setSelectedSeat(seat.id);
+                              setConfirmed(false);
                             }
                           }}
                           disabled={seat.taken}
-                          style={{ cursor: seat.taken ? "not-allowed" : "pointer" }}
+                          aria-label={`Seat ${seat.label} — ${status}`}
+                          className={styles.seatButton}
                         >
                           <Text size="xs" fw={600}>
                             {seat.label.slice(1)}
@@ -147,8 +145,20 @@ function ReservationPage() {
                   </Button>
                 ))}
               </SimpleGrid>
-              <Select label="Start Time" placeholder="Select time" data={TIME_SLOTS} value={startTime} onChange={setStartTime} />
-              <Select label="End Time" placeholder="Select time" data={TIME_SLOTS} value={endTime} onChange={setEndTime} />
+              <Select
+                label="Start Time"
+                placeholder="Select time"
+                data={[...TIME_SLOTS]}
+                value={selectedStartTime}
+                onChange={setSelectedStartTime}
+              />
+              <Select
+                label="End Time"
+                placeholder="Select time"
+                data={[...TIME_SLOTS]}
+                value={selectedEndTime}
+                onChange={setSelectedEndTime}
+              />
               <Switch
                 label="Anonymous Reservation"
                 description="Your name won't be visible to others"
@@ -157,20 +167,40 @@ function ReservationPage() {
                   setAnonymous(e.currentTarget.checked);
                 }}
               />
-              {selectedSeat !== null && (
+              {selectedSeat != null && (
                 <Paper bg="pink.0" p="sm" radius="md">
                   <Text size="sm">
-                    Selected seat: <Badge>{zone.seats.find((s: (typeof zone.seats)[number]) => s.id === selectedSeat)?.label ?? selectedSeat}</Badge>
+                    Selected seat:{" "}
+                    <Badge>
+                      {zone.seats.find((s) => s.id === selectedSeat)?.label ?? selectedSeat}
+                    </Badge>
+                    {selectedStartTime != null && selectedEndTime != null && (
+                      <>
+                        {" "}
+                        · {WEEK_DAYS[selectedDay]} · {selectedStartTime} – {selectedEndTime}
+                      </>
+                    )}
                   </Text>
+                </Paper>
+              )}
+              {confirmed && (
+                <Paper bg="green.0" p="sm" radius="md">
+                  <Group gap="xs">
+                    <IconCheck size={16} color="var(--mantine-color-green-6)" />
+                    <Text size="sm" c="green.7" fw={600}>
+                      Reservation confirmed for seat{" "}
+                      {zone.seats.find((s) => s.id === selectedSeat)?.label ?? selectedSeat}!
+                    </Text>
+                  </Group>
                 </Paper>
               )}
               <Button
                 fullWidth
-                disabled={selectedSeat === null || !startTime || !endTime}
+                disabled={selectedSeat == null || !selectedStartTime || !selectedEndTime}
                 color="pink"
                 radius="xl"
                 onClick={async () => {
-                  if (!selectedSeat || !startTime || !endTime) return;
+                  if (!selectedSeat || !selectedStartTime || !selectedEndTime) return;
                   const baseDate = new Date();
                   baseDate.setDate(baseDate.getDate() + ((selectedDay - baseDate.getDay() + 7) % 7 || 7));
                   const dateStr = baseDate.toISOString().slice(0, 10);
@@ -179,11 +209,12 @@ function ReservationPage() {
                       zoneId: zone.id,
                       seatId: selectedSeat,
                       date: `${dateStr}T00:00:00.000Z`,
-                      startTime: `${dateStr}T${to24h(startTime)}:00.000Z`,
-                      endTime: `${dateStr}T${to24h(endTime)}:00.000Z`,
+                      startTime: `${dateStr}T${to24h(selectedStartTime)}:00.000Z`,
+                      endTime: `${dateStr}T${to24h(selectedEndTime)}:00.000Z`,
                       isAnonymous: anonymous,
                     },
                   });
+                  setConfirmed(true);
                   router.invalidate();
                 }}
               >

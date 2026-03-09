@@ -2,6 +2,7 @@ import { Button, Divider, Drawer, NavLink, Stack } from "@mantine/core";
 import { IconSettings, IconShield } from "@tabler/icons-react";
 import { Link, useLocation } from "@tanstack/react-router";
 
+import adormableLogo from "../../assets/logos/adormable-logo.png";
 import { useAuth, UserRole } from "../../contexts/auth-context.tsx";
 import { NAV_ITEMS } from "../../data/nav-items.ts";
 import { LinkButton } from "../link-button.tsx";
@@ -19,7 +20,12 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
   const location = useLocation();
 
   return (
-    <Drawer opened={isOpen} onClose={onToggle} size="xs" title="Adormable">
+    <Drawer
+      opened={isOpen}
+      onClose={onToggle}
+      size="xs"
+      title={<img src={adormableLogo} alt="Adormable" height={36} />}
+    >
       <Stack gap={0}>
         {NAV_ITEMS[isLoggedIn ? "auth" : "guest"].map((item) => (
           <NavLink

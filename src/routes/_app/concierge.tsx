@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Container,
   Title,
   Text,
@@ -16,6 +17,9 @@ import { IconTrash, IconPlus } from "@tabler/icons-react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
+import defaultConcierge from "../../assets/avatars/default-concierge.svg";
+import { SectionHeader } from "../../components/section-header.tsx";
+import { TIME_SLOTS } from "../../features/study-nook/study-nook.constants.ts";
 import {
   getAllReservations,
   purgeExpiredReservations,
@@ -23,6 +27,8 @@ import {
   createWalkInReservation,
 } from "../../server/reservations.ts";
 import { getZones } from "../../server/zones.ts";
+
+const FEEDBACK_TIMEOUT_MS = 2000;
 
 export const Route = createFileRoute("/_app/concierge")({
   head: () => ({ meta: [{ title: "Concierge | Adormable" }] }),
@@ -39,17 +45,21 @@ function ConciergeDashboardPage() {
   const zoneNames = zones.map((z) => z.name);
   const [studentName, setStudentName] = useState("");
   const [studentId, setStudentId] = useState("");
-  const [walkInZone, setWalkInZone] = useState<string | null>(null);
+  const [selectedZone, setSelectedZone] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<string | null>(null);
   const [endTime, setEndTime] = useState<string | null>(null);
+  const [bookingCreated, setBookingCreated] = useState(false);
+
   return (
     <Container size="lg" py="xl">
-      <Title className="page-title" mb="xs">
-        Concierge Dashboard
-      </Title>
-      <Text c="dimmed" className="page-description" mb="xl">
-        Manage walk-in bookings and handle no-show reservations.
-      </Text>
+      <Group gap="md" mb="xs">
+        <Avatar src={defaultConcierge} alt="Concierge" size={48} radius="xl" />
+        <SectionHeader
+          title="Concierge Dashboard"
+          description="Manage walk-in bookings and handle no-show reservations."
+          mb="xs"
+        />
+      </Group>
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Title order={4} mb="md">
@@ -60,33 +70,58 @@ function ConciergeDashboardPage() {
         </Title>
         <Stack>
           <Group grow>
-            <TextInput label="Student Name" placeholder="Enter student name" value={studentName} onChange={(e) => setStudentName(e.currentTarget.value)} />
-            <TextInput label="Student ID" placeholder="e.g. 2021-12345" value={studentId} onChange={(e) => setStudentId(e.currentTarget.value)} />
+            <TextInput
+              label="Student Name"
+              placeholder="Enter student name"
+              value={studentName}
+              onChange={(e) => {
+                setStudentName(e.currentTarget.value);
+              }}
+            />
+            <TextInput
+              label="Student ID"
+              placeholder="e.g. 2021-12345"
+              value={studentId}
+              onChange={(e) => {
+                setStudentId(e.currentTarget.value);
+              }}
+            />
           </Group>
           <Group grow>
-            <Select label="Zone" placeholder="Select zone" data={zoneNames} value={walkInZone} onChange={setWalkInZone} />
+            <Select
+              label="Zone"
+              placeholder="Select zone"
+              data={zoneNames}
+              value={selectedZone}
+              onChange={setSelectedZone}
+            />
             <Select
               label="Start Time"
               placeholder="Select"
-              data={["8:00 AM", "8:30 AM", "9:00 AM", "9:30 AM", "10:00 AM"]}
+              data={[...TIME_SLOTS]}
               value={startTime}
               onChange={setStartTime}
             />
             <Select
               label="End Time"
               placeholder="Select"
-              data={["10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM"]}
+              data={[...TIME_SLOTS]}
               value={endTime}
               onChange={setEndTime}
             />
           </Group>
-          <Group justify="flex-end">
+          <Group justify="flex-end" gap="sm">
+            {bookingCreated && (
+              <Text size="sm" c="green.6" fw={600}>
+                Booking created!
+              </Text>
+            )}
             <Button
               color="pink"
               radius="xl"
               onClick={async () => {
-                if (!studentName || !studentId || !walkInZone || !startTime || !endTime) return;
-                const zone = zones.find((z) => z.name === walkInZone);
+                if (!studentName.trim() || !studentId.trim() || !selectedZone || !startTime || !endTime) return;
+                const zone = zones.find((z) => z.name === selectedZone);
                 if (!zone) return;
                 const today = new Date().toISOString().slice(0, 10);
                 await createWalkInReservation({
@@ -100,9 +135,13 @@ function ConciergeDashboardPage() {
                 });
                 setStudentName("");
                 setStudentId("");
-                setWalkInZone(null);
+                setSelectedZone(null);
                 setStartTime(null);
                 setEndTime(null);
+                setBookingCreated(true);
+                setTimeout(() => {
+                  setBookingCreated(false);
+                }, FEEDBACK_TIMEOUT_MS);
                 router.invalidate();
               }}
             >
@@ -158,19 +197,21 @@ function ConciergeDashboardPage() {
             ))}
           </Table.Tbody>
         </Table>
-        <Group justify="flex-end" mt="md">
-          <Button
-            color="red"
-            variant="light"
-            radius="xl"
-            onClick={async () => {
-              await purgeExpiredReservations();
-              router.invalidate();
-            }}
-          >
-            Purge All Expired
-          </Button>
-        </Group>
+        {reservations.length > 0 && (
+          <Group justify="flex-end" mt="md">
+            <Button
+              color="red"
+              variant="light"
+              radius="xl"
+              onClick={async () => {
+                await purgeExpiredReservations();
+                router.invalidate();
+              }}
+            >
+              Purge All Expired
+            </Button>
+          </Group>
+        )}
       </Paper>
     </Container>
   );

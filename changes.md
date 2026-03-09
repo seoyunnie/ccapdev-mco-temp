@@ -1,6 +1,6 @@
 # Backend Changes — `db-auth` branch
 
-> **Note:** This branch is purely backend. The frontend is on a separate branch (merged to main as of 03/09/26).
+> **Note:** This branch implements the full backend. The frontend was on `main` and has been merged into this branch (all 20 merge conflicts resolved, `tsc --noEmit` clean).
 
 Audit, analysis, todo/roadmap creation, and debugging all done by AI.
 
@@ -50,12 +50,12 @@ This branch implements the full backend layer for Adormable: database schema, us
 | File                                       | What changed                                                                                        |
 | ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | `vite.config.ts`                           | Added `serverOnlyStubPlugin()` + `betterAuthVitePlugin()` -- see Bundling section below for details |
-| `src/routes/login.tsx`                     | Uses `authClient.signIn.email()`, `getSessionFn()` in `beforeLoad` for SSR-safe redirect            |
-| `src/routes/signup.tsx`                    | Uses `authClient.signUp.email()`, `getSessionFn()` in `beforeLoad`                                  |
+| `src/routes/login.tsx`                     | Combined login/register page with toggle; uses `authClient.signIn.email()` + `authClient.signUp.email()`, `getSessionFn()` in `beforeLoad` |
+| `src/routes/signup.tsx`                    | Standalone signup page (kept for backward compat); uses `authClient.signUp.email()`, `getSessionFn()` in `beforeLoad` |
 | `src/routes/_app/route.tsx`                | Uses `getSessionFn()` in `beforeLoad` for SSR-safe auth + role gating                               |
 | `src/routes/_app/dashboard.tsx`            | Loads `getMyReservations`; Manage button links to `/profile`                                        |
 | `src/routes/_app/profile.tsx`              | Loads `getUserProfile`, calls `updateProfile`, `cancelReservation`, `deleteAccount`; Delete Account and Edit reservation wired |
-| `src/routes/_app/guide/$estId.tsx`         | Loads `getEstablishment`, calls `createReview`; Helpful thumbs-up toggle wired (client-side)        |
+| `src/routes/_app/guide/$estId.tsx`         | Loads `getEstablishment`, calls `createReview`, `createOwnerReply`; Helpful thumbs-up toggle wired (client-side), owner reply inline form |
 | `src/routes/_app/lobby/index.tsx`          | Loads `getThreads`, calls `createThread`; New Post → modal, Sort Select wired                       |
 | `src/routes/_app/lobby/$threadId.tsx`      | Loads `getThread`, calls `createComment`, `voteThread`, `voteComment`, `updateThread`, `deleteThread`; Edit/Delete/Reply/upvote wired |
 | `src/routes/_app/study-nook/index.tsx`     | Loads `getZones`; availability filter Select wired                                                  |
@@ -99,7 +99,7 @@ Roles: `guest` (default on signup) → `resident` → `concierge` → `admin`. R
 - **Input validation**: role whitelist on `updateUserRole`, rating 1–5 on `createReview`, ban duration 1–365 days on `createBan`, content-not-empty checks on `createOwnerReply`, `createReport` requires at least one of `threadId`/`commentId`.
 - **Seat double-booking prevention**: `createReservation` uses `prisma.$transaction()` for atomic check + create + seat update (no race condition).
 - **Ownership checks**: `cancelReservation` verifies the user owns the reservation (or is concierge/admin). `deleteThread`/`deleteComment` verify authorship (or admin). `updateThread` verifies authorship. `createOwnerReply` verifies the user is the establishment owner.
-- **Activity logging**: 17 of 22 mutations log to `ActivityLog` for audit trail. 5 mutations (`updateThread`, `deleteComment`, `createOwnerReply`, `deleteEstablishment`, `updateEstablishment`) do not yet log — these are low-severity gaps since their auth checks are all in place.
+- **Activity logging**: All 22 mutation functions log to `ActivityLog` for full audit trail.
 
 ---
 

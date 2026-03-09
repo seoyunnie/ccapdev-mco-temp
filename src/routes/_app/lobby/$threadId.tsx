@@ -16,11 +16,15 @@ import {
   Select,
 } from "@mantine/core";
 import { IconArrowUp, IconArrowDown, IconEdit, IconTrash, IconFlag } from "@tabler/icons-react";
-import { Link, createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
+import emptyState from "../../../assets/features/empty-state.svg";
+import { BackButton } from "../../../components/back-button.tsx";
+import { EmptyState } from "../../../components/empty-state.tsx";
 import { useAuth } from "../../../contexts/auth-context.tsx";
 import { TAG_COLORS } from "../../../features/lobby/lobby.constants.ts";
+import { createReport } from "../../../server/moderation.ts";
 import {
   getThread,
   createComment,
@@ -29,10 +33,12 @@ import {
   deleteThread,
   updateThread,
 } from "../../../server/threads.ts";
-import { createReport } from "../../../server/moderation.ts";
 
 export const Route = createFileRoute("/_app/lobby/$threadId")({
   loader: ({ params }) => getThread({ data: { threadId: params.threadId } }),
+  errorComponent: () => (
+    <EmptyState image={emptyState} message="Thread not found." />
+  ),
   component: ThreadViewPage,
 });
 
@@ -50,13 +56,15 @@ function ThreadViewPage() {
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportTarget, setReportTarget] = useState<{ threadId?: string; commentId?: string }>({});
+
   return (
     <Container size="md" py="xl">
-      <Modal opened={editOpen} onClose={() => setEditOpen(false)} title="Edit Thread" centered>
+      {/* Edit Thread Modal */}
+      <Modal opened={editOpen} onClose={() => { setEditOpen(false); }} title="Edit Thread" centered>
         <Stack>
-          <TextInput label="Title" value={editTitle} onChange={(e) => setEditTitle(e.currentTarget.value)} />
+          <TextInput label="Title" value={editTitle} onChange={(e) => { setEditTitle(e.currentTarget.value); }} />
           <Select label="Tag" data={Object.keys(TAG_COLORS)} value={editTag} onChange={setEditTag} />
-          <Textarea label="Content" minRows={4} value={editContent} onChange={(e) => setEditContent(e.currentTarget.value)} />
+          <Textarea label="Content" minRows={4} value={editContent} onChange={(e) => { setEditContent(e.currentTarget.value); }} />
           <Group justify="flex-end">
             <Button
               color="pink"
@@ -73,11 +81,25 @@ function ThreadViewPage() {
         </Stack>
       </Modal>
 
-      <Modal opened={reportOpen} onClose={() => { setReportOpen(false); setReportReason(""); }} title="Report Content" centered>
+      {/* Report Modal */}
+      <Modal
+        opened={reportOpen}
+        onClose={() => { setReportOpen(false); setReportReason(""); }}
+        title="Report Content"
+        centered
+      >
         <Stack>
-          <Textarea label="Reason" placeholder="Why are you reporting this?" minRows={3} value={reportReason} onChange={(e) => setReportReason(e.currentTarget.value)} />
+          <Textarea
+            label="Reason"
+            placeholder="Why are you reporting this?"
+            minRows={3}
+            value={reportReason}
+            onChange={(e) => { setReportReason(e.currentTarget.value); }}
+          />
           <Group justify="flex-end">
-            <Button variant="light" color="gray" onClick={() => { setReportOpen(false); setReportReason(""); }}>Cancel</Button>
+            <Button variant="light" color="gray" onClick={() => { setReportOpen(false); setReportReason(""); }}>
+              Cancel
+            </Button>
             <Button
               color="red"
               radius="xl"
@@ -94,12 +116,9 @@ function ThreadViewPage() {
         </Stack>
       </Modal>
 
-      <Link to="/lobby">
-        <Button variant="subtle" color="pink" mb="md" size="sm">
-          ← Back to Lobby
-        </Button>
-      </Link>
+      <BackButton to="/lobby" label="Back to Lobby" color="grape" />
 
+      {/* Thread Content */}
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
         <Group justify="space-between" mb="md">
           <Group>
@@ -112,7 +131,7 @@ function ThreadViewPage() {
             <Stack gap={2}>
               <Group gap="xs">
                 <Text fw={700}>{data.title}</Text>
-                <Badge color="pink" size="sm" variant="light">
+                <Badge color={TAG_COLORS[data.tag as keyof typeof TAG_COLORS] ?? "gray"} size="sm" variant="light">
                   {data.tag}
                 </Badge>
               </Group>
@@ -123,7 +142,7 @@ function ThreadViewPage() {
           </Group>
           {data.isAuthor && (
             <Group gap="xs">
-              <ActionIcon variant="light" color="pink" size="sm" onClick={() => setEditOpen(true)}>
+              <ActionIcon variant="light" color="pink" size="sm" onClick={() => { setEditOpen(true); }}>
                 <IconEdit size={14} />
               </ActionIcon>
               <ActionIcon
@@ -133,7 +152,7 @@ function ThreadViewPage() {
                 onClick={async () => {
                   if (!confirm("Delete this thread?")) return;
                   await deleteThread({ data: { threadId: data.id } });
-                  router.navigate({ to: "/lobby" });
+                  void router.navigate({ to: "/lobby" });
                 }}
               >
                 <IconTrash size={14} />
@@ -181,13 +200,14 @@ function ThreadViewPage() {
         </Group>
       </Paper>
 
+      {/* Reply Box */}
       <Paper shadow="sm" p="md" radius="md" className="content-card" mb="lg">
         <Textarea
           placeholder="Write a reply..."
           minRows={3}
           mb="sm"
           value={replyContent}
-          onChange={(e) => setReplyContent(e.currentTarget.value)}
+          onChange={(e) => { setReplyContent(e.currentTarget.value); }}
         />
         <Button
           size="sm"
@@ -204,6 +224,7 @@ function ThreadViewPage() {
         </Button>
       </Paper>
 
+      {/* Comments */}
       <Title order={4} mb="md">
         Comments ({data.comments.length})
       </Title>
@@ -242,7 +263,7 @@ function ThreadViewPage() {
               <Button
                 variant="subtle"
                 size="xs"
-                onClick={() => setCommentReplyId(commentReplyId === comment.id ? null : comment.id)}
+                onClick={() => { setCommentReplyId(commentReplyId === comment.id ? null : comment.id); }}
               >
                 Reply
               </Button>
@@ -267,7 +288,7 @@ function ThreadViewPage() {
                   minRows={2}
                   size="sm"
                   value={commentReplyContent}
-                  onChange={(e) => setCommentReplyContent(e.currentTarget.value)}
+                  onChange={(e) => { setCommentReplyContent(e.currentTarget.value); }}
                 />
                 <Group>
                   <Button
@@ -284,7 +305,7 @@ function ThreadViewPage() {
                   >
                     Post Reply
                   </Button>
-                  <Button size="xs" variant="subtle" color="gray" onClick={() => setCommentReplyId(null)}>
+                  <Button size="xs" variant="subtle" color="gray" onClick={() => { setCommentReplyId(null); }}>
                     Cancel
                   </Button>
                 </Group>

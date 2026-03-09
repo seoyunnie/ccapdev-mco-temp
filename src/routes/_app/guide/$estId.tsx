@@ -15,13 +15,39 @@ import {
   FileInput,
 } from "@mantine/core";
 import { IconThumbUp, IconPhoto } from "@tabler/icons-react";
-import { Link, createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { getEstablishment, createReview } from "../../../server/establishments.ts";
+import catCoffeeShop from "../../../assets/establishments/cat-coffee-shop.svg";
+import catConvenienceStore from "../../../assets/establishments/cat-convenience-store.svg";
+import catFilipinoFood from "../../../assets/establishments/cat-filipino-food.svg";
+import catKoreanBbq from "../../../assets/establishments/cat-korean-bbq.svg";
+import catServices from "../../../assets/establishments/cat-services.svg";
+import emptyState from "../../../assets/features/empty-state.svg";
+import { BackButton } from "../../../components/back-button.tsx";
+import { EmptyState } from "../../../components/empty-state.tsx";
+
+import imgStyles from "../../../components/shared-images.module.css";
+
+import { getEstablishment, createReview, createOwnerReply } from "../../../server/establishments.ts";
+
+const CATEGORY_ICONS: Record<string, string> = {
+  "Coffee Shop": catCoffeeShop,
+  "Filipino Food": catFilipinoFood,
+  Services: catServices,
+  "Korean BBQ": catKoreanBbq,
+  "Convenience Store": catConvenienceStore,
+};
 
 export const Route = createFileRoute("/_app/guide/$estId")({
+  head: () => ({ meta: [{ title: "Establishment | Adormable" }] }),
   loader: ({ params }) => getEstablishment({ data: { estId: params.estId } }),
+  errorComponent: () => (
+    <Container size="md" py="xl">
+      <BackButton to="/guide" label="Back to Directory" color="teal" />
+      <EmptyState image={emptyState} message="Establishment not found." />
+    </Container>
+  ),
   component: EstablishmentDetailsPage,
 });
 
@@ -29,23 +55,44 @@ function EstablishmentDetailsPage() {
   const data = Route.useLoaderData();
   const { estId } = Route.useParams();
   const router = useRouter();
-  const [rating, setRating] = useState(0);
+  const [reviewRating, setReviewRating] = useState(0);
   const [reviewContent, setReviewContent] = useState("");
   const [helpfulSet, setHelpfulSet] = useState<Set<string>>(new Set());
+  const [replyText, setReplyText] = useState<Record<string, string>>({});
+
+  const categoryIcon = CATEGORY_ICONS[data.category];
+
+  const toggleHelpful = (reviewId: string) => {
+    setHelpfulSet((prev) => {
+      const next = new Set(prev);
+      if (next.has(reviewId)) {
+        next.delete(reviewId);
+      } else {
+        next.add(reviewId);
+      }
+      return next;
+    });
+  };
+
   return (
     <Container size="md" py="xl">
-      <Link to="/guide">
-        <Button variant="subtle" color="pink" mb="md" size="sm">
-          ← Back to Directory
-        </Button>
-      </Link>
+      <BackButton to="/guide" label="Back to Directory" color="teal" />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
+        <img
+          src={categoryIcon ?? catServices}
+          alt={data.name}
+          className={imgStyles.cardImageTall}
+        />
         <Group justify="space-between" wrap="wrap">
           <Stack gap="xs">
             <Group>
               <Title order={2}>{data.name}</Title>
-              <Badge variant="light" size="lg">
+              <Badge
+                variant="light"
+                size="lg"
+                leftSection={categoryIcon ? <img src={categoryIcon} alt="" width={16} height={16} /> : undefined}
+              >
                 {data.category}
               </Badge>
             </Group>
@@ -70,7 +117,7 @@ function EstablishmentDetailsPage() {
         <Stack>
           <Group>
             <Text size="sm">Your Rating:</Text>
-            <Rating size="lg" value={rating} onChange={setRating} />
+            <Rating size="lg" value={reviewRating} onChange={setReviewRating} />
           </Group>
           <Textarea
             placeholder="Share your experience..."
@@ -84,9 +131,9 @@ function EstablishmentDetailsPage() {
               color="pink"
               radius="xl"
               onClick={async () => {
-                if (!rating || !reviewContent.trim()) return;
-                await createReview({ data: { establishmentId: estId, rating, content: reviewContent } });
-                setRating(0);
+                if (!reviewRating || !reviewContent.trim()) return;
+                await createReview({ data: { establishmentId: estId, rating: reviewRating, content: reviewContent } });
+                setReviewRating(0);
                 setReviewContent("");
                 router.invalidate();
               }}
@@ -101,66 +148,91 @@ function EstablishmentDetailsPage() {
         Reviews ({data.reviews.length})
       </Title>
       <Stack>
-        {data.reviews.map((review: (typeof data.reviews)[number]) => (
-          <Paper key={review.id} withBorder p="md" radius="md">
-            <Group justify="space-between" mb="sm">
-              <Group>
-                <Avatar color="pink" radius="xl">
-                  {review.author
-                    .split(" ")
-                    .map((n: string) => n[0])
-                    .join("")}
-                </Avatar>
-                <Stack gap={2}>
-                  <Text fw={600}>{review.author}</Text>
-                  <Text size="xs" c="dimmed">
-                    {review.time}
-                  </Text>
-                </Stack>
-              </Group>
-              <Rating value={review.rating} readOnly size="sm" />
-            </Group>
-            <Text size="sm" mb="sm">
-              {review.content}
-            </Text>
-            <Group>
-              <ActionIcon
-                variant="subtle"
-                color={helpfulSet.has(review.id) ? "pink" : "pink"}
-                size="sm"
-                onClick={() => {
-                  setHelpfulSet((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(review.id)) next.delete(review.id);
-                    else next.add(review.id);
-                    return next;
-                  });
-                }}
-              >
-                <IconThumbUp size={14} />
-              </ActionIcon>
-              <Text size="xs" c="dimmed">
-                {review.helpful + (helpfulSet.has(review.id) ? 1 : 0)} found helpful
-              </Text>
-            </Group>
-            {review.ownerReply !== null && (
-              <>
-                <Divider my="sm" />
-                <Paper bg="pink.0" p="sm" radius="sm">
-                  <Group gap="xs" mb={4}>
-                    <Badge size="xs" color="pink">
-                      Owner
-                    </Badge>
+        {data.reviews.map((review: (typeof data.reviews)[number]) => {
+          const isHelpful = helpfulSet.has(review.id);
+          return (
+            <Paper key={review.id} withBorder p="md" radius="md">
+              <Group justify="space-between" mb="sm">
+                <Group>
+                  <Avatar color="pink" radius="xl">
+                    {review.author
+                      .split(" ")
+                      .map((n: string) => n[0])
+                      .join("")}
+                  </Avatar>
+                  <Stack gap={2}>
+                    <Text fw={600}>{review.author}</Text>
                     <Text size="xs" c="dimmed">
-                      {data.ownerName}
+                      {review.time}
                     </Text>
-                  </Group>
-                  <Text size="sm">{review.ownerReply}</Text>
-                </Paper>
-              </>
-            )}
-          </Paper>
-        ))}
+                  </Stack>
+                </Group>
+                <Rating value={review.rating} readOnly size="sm" />
+              </Group>
+              <Text size="sm" mb="sm">
+                {review.content}
+              </Text>
+              <Group>
+                <ActionIcon
+                  variant={isHelpful ? "filled" : "subtle"}
+                  color="pink"
+                  size="sm"
+                  onClick={() => {
+                    toggleHelpful(review.id);
+                  }}
+                >
+                  <IconThumbUp size={14} />
+                </ActionIcon>
+                <Text size="xs" c="dimmed">
+                  {review.helpful + (isHelpful ? 1 : 0)} found helpful
+                </Text>
+              </Group>
+              {review.ownerReply !== null && (
+                <>
+                  <Divider my="sm" />
+                  <Paper bg="pink.0" p="sm" radius="sm">
+                    <Group gap="xs" mb={4}>
+                      <Badge size="xs" color="pink">
+                        Owner
+                      </Badge>
+                      <Text size="xs" c="dimmed">
+                        {data.ownerName}
+                      </Text>
+                    </Group>
+                    <Text size="sm">{review.ownerReply}</Text>
+                  </Paper>
+                </>
+              )}
+              {review.ownerReply === null && (
+                <Group mt="xs" gap="xs">
+                  <Textarea
+                    placeholder="Reply as owner..."
+                    size="xs"
+                    style={{ flex: 1 }}
+                    value={replyText[review.id] ?? ""}
+                    onChange={(e) =>
+                      setReplyText((prev) => ({ ...prev, [review.id]: e.currentTarget.value }))
+                    }
+                  />
+                  <Button
+                    size="xs"
+                    variant="light"
+                    color="pink"
+                    onClick={async () => {
+                      const text = replyText[review.id]?.trim();
+                      if (!text) return;
+                      await createOwnerReply({ data: { reviewId: review.id, reply: text } });
+                      setReplyText((prev) => ({ ...prev, [review.id]: "" }));
+                      router.invalidate();
+                    }}
+                  >
+                    Reply
+                  </Button>
+                </Group>
+              )}
+            </Paper>
+          );
+        })}
       </Stack>
     </Container>
   );

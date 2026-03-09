@@ -9,13 +9,14 @@ import "@fontsource/quicksand/500.css";
 import "@fontsource/quicksand/600.css";
 import "@fontsource/quicksand/700.css";
 import "@mantine/core/styles.css";
-import "@mantine/carousel/styles.css";
+import "@mantine/notifications/styles.css";
 import "../globals.css";
 
 import type { ReactNode } from "react";
 
 import { ColorSchemeScript, mantineHtmlProps, MantineProvider } from "@mantine/core";
-import { createRootRoute, HeadContent, Outlet } from "@tanstack/react-router";
+import { Notifications } from "@mantine/notifications";
+import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 
 import { AuthProvider } from "../contexts/auth-provider.tsx";
 import { theme } from "../theme.ts";
@@ -29,12 +30,13 @@ export const Route = createRootRoute({
       { charSet: "utf8" },
       { name: "viewport", content: "width=device-width, initial-scale=1.0" },
     ],
+    links: [{ href: "/favicon.svg", type: "image/svg", rel: "icon" }],
   }),
-  shellComponent: RootComponent,
+  shellComponent: RootShell,
   component: RootLayout,
 });
 
-function RootComponent({ children }: { children: ReactNode }) {
+function RootShell({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
@@ -42,9 +44,8 @@ function RootComponent({ children }: { children: ReactNode }) {
         <ColorSchemeScript forceColorScheme="light" />
       </head>
       <body>
-        <MantineProvider theme={theme} forceColorScheme="light">
-          {children}
-        </MantineProvider>
+        {children}
+        <Scripts />
       </body>
     </html>
   );
@@ -52,8 +53,11 @@ function RootComponent({ children }: { children: ReactNode }) {
 
 function RootLayout() {
   return (
-    <AuthProvider>
-      <Outlet />
-    </AuthProvider>
+    <MantineProvider theme={theme} forceColorScheme="light">
+      <Notifications position="top-right" />
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    </MantineProvider>
   );
 }

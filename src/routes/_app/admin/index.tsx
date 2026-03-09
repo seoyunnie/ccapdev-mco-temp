@@ -1,16 +1,15 @@
 import {
+  Avatar,
   Container,
-  Title,
   Text,
-  SimpleGrid,
   Paper,
   Group,
-  Stack,
+  SimpleGrid,
   Table,
   Badge,
   TextInput,
-  RingProgress,
   ActionIcon,
+  Title,
 } from "@mantine/core";
 import {
   IconUsers,
@@ -24,10 +23,15 @@ import {
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { ROLE_COLORS } from "../../../features/admin/admin.constants.ts";
+import defaultAdmin from "../../../assets/avatars/default-admin.svg";
+import { SectionHeader } from "../../../components/section-header.tsx";
+import { StatCard } from "../../../components/stat-card.tsx";
 import type { UserRole } from "../../../contexts/auth-context.tsx";
+import { ROLE_COLORS } from "../../../features/admin/admin.constants.ts";
 import { getAdminStats, getUsers, updateUserRole } from "../../../server/admin.ts";
 import { createBan } from "../../../server/moderation.ts";
+
+import styles from "./index.module.css";
 
 const STAT_META = [
   { key: "users" as const, label: "Total Users", icon: IconUsers, color: "pink" },
@@ -48,48 +52,45 @@ export const Route = createFileRoute("/_app/admin/")({
 function AdminControlPanelPage() {
   const { stats, users } = Route.useLoaderData();
   const router = useRouter();
-  const [search, setSearch] = useState("");
-  const filtered = users.filter(
+  const [userSearch, setUserSearch] = useState("");
+
+  const filteredUsers = users.filter(
     (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase()),
+      u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.email.toLowerCase().includes(userSearch.toLowerCase()),
   );
+
   return (
     <Container size="lg" py="xl">
-      <Title className="page-title" mb="xs">
-        Admin Control Panel
-      </Title>
-      <Text c="dimmed" className="page-description" mb="xl">
-        System overview and user management.
-      </Text>
+      <Group gap="md" mb="xs">
+        <Avatar src={defaultAdmin} alt="Admin" size={48} radius="xl" />
+        <SectionHeader title="Admin Control Panel" description="System overview and user management." mb="xs" />
+      </Group>
 
       <SimpleGrid cols={{ base: 2, md: 4 }} mb="xl">
         {STAT_META.map((stat) => (
-          <Paper key={stat.label} shadow="md" p="md" radius="md" className="content-card">
-            <Group justify="space-between">
-              <Stack gap={4}>
-                <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
-                  {stat.label}
-                </Text>
-                <Text size="xl" fw={700}>
-                  {stats[stat.key].toLocaleString()}
-                </Text>
-              </Stack>
-              <RingProgress
-                size={60}
-                thickness={5}
-                sections={[{ value: 65, color: stat.color }]}
-                label={<stat.icon size={20} style={{ display: "block", margin: "auto" }} />}
-              />
-            </Group>
-          </Paper>
+          <StatCard
+            key={stat.label}
+            label={stat.label}
+            value={String(stats[stat.key])}
+            color={stat.color}
+            iconComponent={stat.icon}
+          />
         ))}
       </SimpleGrid>
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Group justify="space-between" mb="md">
           <Title order={4}>User Management</Title>
-          <TextInput placeholder="Search users..." leftSection={<IconSearch size={16} />} size="sm" value={search} onChange={(e) => setSearch(e.currentTarget.value)} />
+          <TextInput
+            placeholder="Search users..."
+            leftSection={<IconSearch size={16} />}
+            size="sm"
+            value={userSearch}
+            onChange={(e) => {
+              setUserSearch(e.currentTarget.value);
+            }}
+          />
         </Group>
         <Table>
           <Table.Thead>
@@ -102,8 +103,8 @@ function AdminControlPanelPage() {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {filtered.map((user) => (
-              <Table.Tr key={user.id}>
+            {filteredUsers.map((user) => (
+              <Table.Tr key={user.id} className={styles.tableRow}>
                 <Table.Td fw={500}>{user.name}</Table.Td>
                 <Table.Td>
                   <Text size="sm" c="dimmed">
@@ -126,6 +127,7 @@ function AdminControlPanelPage() {
                       variant="light"
                       size="sm"
                       color="pink"
+                      aria-label="Cycle role"
                       onClick={async () => {
                         const nextRole =
                           user.role === "resident"
@@ -139,17 +141,34 @@ function AdminControlPanelPage() {
                     >
                       <IconRefresh size={14} />
                     </ActionIcon>
-                    <ActionIcon
-                      variant="light"
-                      size="sm"
-                      color="red"
-                      onClick={async () => {
-                        await createBan({ data: { userId: user.id, reason: "Admin action", durationDays: 7 } });
-                        router.invalidate();
-                      }}
-                    >
-                      <IconBan size={14} />
-                    </ActionIcon>
+                    {user.status === "Banned" ? (
+                      <ActionIcon
+                        variant="light"
+                        size="sm"
+                        color="green"
+                        aria-label="Restore user"
+                        onClick={async () => {
+                          // Restore by cycling role (no unban endpoint yet)
+                          await updateUserRole({ data: { userId: user.id, role: user.role } });
+                          router.invalidate();
+                        }}
+                      >
+                        <IconRefresh size={14} />
+                      </ActionIcon>
+                    ) : (
+                      <ActionIcon
+                        variant="light"
+                        size="sm"
+                        color="red"
+                        aria-label="Ban user"
+                        onClick={async () => {
+                          await createBan({ data: { userId: user.id, reason: "Admin action", durationDays: 7 } });
+                          router.invalidate();
+                        }}
+                      >
+                        <IconBan size={14} />
+                      </ActionIcon>
+                    )}
                   </Group>
                 </Table.Td>
               </Table.Tr>
@@ -163,7 +182,7 @@ function AdminControlPanelPage() {
           Site Diagnostics
         </Title>
         <SimpleGrid cols={{ base: 1, sm: 3 }}>
-          <Paper bg="green.0" p="md" radius="md">
+          <Paper bg="green.0" p="md" radius="md" className={styles.diagnosticCard}>
             <Text size="sm" fw={600}>
               API Status
             </Text>
@@ -171,7 +190,7 @@ function AdminControlPanelPage() {
               Operational
             </Badge>
           </Paper>
-          <Paper bg="green.0" p="md" radius="md">
+          <Paper bg="green.0" p="md" radius="md" className={styles.diagnosticCard}>
             <Text size="sm" fw={600}>
               Database
             </Text>
@@ -179,7 +198,7 @@ function AdminControlPanelPage() {
               Connected
             </Badge>
           </Paper>
-          <Paper bg="yellow.0" p="md" radius="md">
+          <Paper bg="yellow.0" p="md" radius="md" className={styles.diagnosticCard}>
             <Text size="sm" fw={600}>
               Storage
             </Text>

@@ -1,12 +1,29 @@
-import { Container, Title, Text, Paper, Group, Stack, Badge, Button, Avatar, ActionIcon, Select } from "@mantine/core";
+import {
+  Container,
+  Title,
+  Text,
+  Paper,
+  Group,
+  Stack,
+  Badge,
+  Button,
+  Avatar,
+  ActionIcon,
+  Select,
+  Modal,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { IconTrash, IconBan } from "@tabler/icons-react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { getReports, resolveReport, createBan } from "../../server/moderation.ts";
+import { SectionHeader } from "../../components/section-header.tsx";
 import { getUsers } from "../../server/admin.ts";
+import { getReports, resolveReport, createBan } from "../../server/moderation.ts";
 
 const reasonColors: Record<string, string> = { Harassment: "red", Spam: "orange", Misinformation: "yellow" };
+
+const FEEDBACK_TIMEOUT_MS = 2000;
 
 export const Route = createFileRoute("/_app/moderation")({
   head: () => ({ meta: [{ title: "Moderation | Adormable" }] }),
@@ -20,8 +37,12 @@ export const Route = createFileRoute("/_app/moderation")({
 function ForumModerationPage() {
   const { reports: flaggedPosts, users } = Route.useLoaderData();
   const router = useRouter();
+  type FlaggedPost = (typeof flaggedPosts)[number];
+  const [reviewTarget, setReviewTarget] = useState<FlaggedPost | null>(null);
+  const [reviewOpened, { open: openReview, close: closeReview }] = useDisclosure(false);
   const [banUser, setBanUser] = useState<string | null>(null);
   const [banDuration, setBanDuration] = useState<string | null>(null);
+  const [banIssued, setBanIssued] = useState(false);
 
   const durationMap: Record<string, number> = {
     "1 Day": 1,
@@ -30,14 +51,58 @@ function ForumModerationPage() {
     "14 Days": 14,
     "30 Days": 30,
   };
+
+  const handleReview = (post: FlaggedPost) => {
+    setReviewTarget(post);
+    openReview();
+  };
+
   return (
     <Container size="lg" py="xl">
-      <Title className="page-title" mb="xs">
-        Forum Moderation
-      </Title>
-      <Text c="dimmed" className="page-description" mb="xl">
-        Review flagged content and manage user behavior.
-      </Text>
+      <SectionHeader title="Forum Moderation" description="Review flagged content and manage user behavior." />
+
+      <Modal opened={reviewOpened} onClose={closeReview} title="Review Flagged Content" centered size="lg">
+        {reviewTarget && (
+          <Stack>
+            <Group>
+              <Badge color={reasonColors[reviewTarget.reason]} variant="light">
+                {reviewTarget.reason}
+              </Badge>
+              <Text size="sm" c="dimmed">
+                {reviewTarget.reports} reports · {reviewTarget.date}
+              </Text>
+            </Group>
+            <Text fw={600}>{reviewTarget.title}</Text>
+            <Text size="sm" c="dimmed">
+              Posted by {reviewTarget.author}
+            </Text>
+            <Group justify="flex-end">
+              <Button
+                variant="light"
+                color="gray"
+                onClick={async () => {
+                  await resolveReport({ data: { reportId: reviewTarget.id, action: "dismiss" } });
+                  closeReview();
+                  router.invalidate();
+                }}
+              >
+                Dismiss
+              </Button>
+              <Button
+                color="red"
+                radius="xl"
+                onClick={async () => {
+                  await resolveReport({ data: { reportId: reviewTarget.id, action: "delete" } });
+                  closeReview();
+                  router.invalidate();
+                }}
+              >
+                Remove Content
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Title order={4} mb="md">
@@ -50,6 +115,7 @@ function ForumModerationPage() {
               <Group justify="space-between" wrap="wrap">
                 <Group>
                   <Avatar color="red" radius="xl" size="sm">
+                    {/* oxlint-disable-next-line no-magic-numbers */}
                     {post.author.slice(0, 2).toUpperCase()}
                   </Avatar>
                   <Stack gap={2}>
@@ -67,9 +133,8 @@ function ForumModerationPage() {
                     size="xs"
                     variant="light"
                     color="pink"
-                    onClick={async () => {
-                      await resolveReport({ data: { reportId: post.id, action: "resolve" } });
-                      router.invalidate();
+                    onClick={() => {
+                      handleReview(post);
                     }}
                   >
                     Review
@@ -89,6 +154,11 @@ function ForumModerationPage() {
               </Group>
             </Paper>
           ))}
+          {flaggedPosts.length === 0 && (
+            <Text c="dimmed" ta="center" py="md">
+              No flagged content to review.
+            </Text>
+          )}
         </Stack>
       </Paper>
 
@@ -116,7 +186,12 @@ function ForumModerationPage() {
             onChange={setBanDuration}
           />
         </Group>
-        <Group justify="flex-end" mt="md">
+        <Group justify="flex-end" mt="md" gap="sm">
+          {banIssued && (
+            <Text size="sm" c="green.6" fw={600}>
+              Ban issued!
+            </Text>
+          )}
           <Button
             color="red"
             radius="xl"
@@ -125,6 +200,10 @@ function ForumModerationPage() {
               await createBan({ data: { userId: banUser, reason: "Manual ban", durationDays: durationMap[banDuration] } });
               setBanUser(null);
               setBanDuration(null);
+              setBanIssued(true);
+              setTimeout(() => {
+                setBanIssued(false);
+              }, FEEDBACK_TIMEOUT_MS);
               router.invalidate();
             }}
           >
