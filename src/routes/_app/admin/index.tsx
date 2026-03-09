@@ -23,10 +23,11 @@ import {
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
+import type { UserRole } from "../../../contexts/auth-context.tsx";
+
 import defaultAdmin from "../../../assets/avatars/default-admin.svg";
 import { SectionHeader } from "../../../components/section-header.tsx";
 import { StatCard } from "../../../components/stat-card.tsx";
-import type { UserRole } from "../../../contexts/auth-context.tsx";
 import { ROLE_COLORS } from "../../../features/admin/admin.constants.ts";
 import { getAdminStats, getUsers, updateUserRole } from "../../../server/admin.ts";
 import { createBan } from "../../../server/moderation.ts";
@@ -41,11 +42,11 @@ const STAT_META = [
 ];
 
 export const Route = createFileRoute("/_app/admin/")({
-  head: () => ({ meta: [{ title: "Admin | Adormable" }] }),
   loader: async () => {
     const [stats, users] = await Promise.all([getAdminStats(), getUsers()]);
     return { stats, users };
   },
+  head: () => ({ meta: [{ title: "Admin | Adormable" }] }),
   component: AdminControlPanelPage,
 });
 
@@ -130,13 +131,9 @@ function AdminControlPanelPage() {
                       aria-label="Cycle role"
                       onClick={async () => {
                         const nextRole =
-                          user.role === "resident"
-                            ? "concierge"
-                            : user.role === "concierge"
-                              ? "admin"
-                              : "resident";
+                          user.role === "resident" ? "concierge" : user.role === "concierge" ? "admin" : "resident";
                         await updateUserRole({ data: { userId: user.id, role: nextRole } });
-                        router.invalidate();
+                        void router.invalidate();
                       }}
                     >
                       <IconRefresh size={14} />
@@ -150,7 +147,7 @@ function AdminControlPanelPage() {
                         onClick={async () => {
                           // Restore by cycling role (no unban endpoint yet)
                           await updateUserRole({ data: { userId: user.id, role: user.role } });
-                          router.invalidate();
+                          void router.invalidate();
                         }}
                       >
                         <IconRefresh size={14} />
@@ -163,7 +160,7 @@ function AdminControlPanelPage() {
                         aria-label="Ban user"
                         onClick={async () => {
                           await createBan({ data: { userId: user.id, reason: "Admin action", durationDays: 7 } });
-                          router.invalidate();
+                          void router.invalidate();
                         }}
                       >
                         <IconBan size={14} />

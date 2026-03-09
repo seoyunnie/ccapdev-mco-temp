@@ -35,8 +35,8 @@ import { createThread, getThreads } from "../../../server/threads.ts";
 const MAX_CONTENT_LENGTH = 2000;
 
 export const Route = createFileRoute("/_app/lobby/")({
-  head: () => ({ meta: [{ title: "Lobby | Adormable" }] }),
   loader: () => getThreads(),
+  head: () => ({ meta: [{ title: "Lobby | Adormable" }] }),
   component: ForumFeedPage,
 });
 
@@ -65,8 +65,7 @@ function ForumFeedPage() {
   const filtered = posts
     .filter((p) => {
       const matchSearch =
-        p.title.toLowerCase().includes(search.toLowerCase()) ||
-        p.snippet.toLowerCase().includes(search.toLowerCase());
+        p.title.toLowerCase().includes(search.toLowerCase()) || p.snippet.toLowerCase().includes(search.toLowerCase());
       const matchTag = activeTag === "All" || p.tag === activeTag;
       return matchSearch && matchTag;
     })
@@ -80,7 +79,7 @@ function ForumFeedPage() {
     setNewTag(null);
     closeCreate();
     notifications.show({ title: "Post created!", message: "Your post is now live.", color: "green" });
-    router.invalidate();
+    void router.invalidate();
   };
 
   const isPrivileged = role === "admin" || role === "concierge";
@@ -221,13 +220,7 @@ function ForumFeedPage() {
         />
         <Group>
           {isPrivileged && (
-            <Button
-              variant="light"
-              color="gray"
-              leftSection={<IconSettings size={16} />}
-              radius="xl"
-              onClick={openCat}
-            >
+            <Button variant="light" color="gray" leftSection={<IconSettings size={16} />} radius="xl" onClick={openCat}>
               Categories
             </Button>
           )}
@@ -295,11 +288,7 @@ function ForumFeedPage() {
                 <Stack gap={2}>
                   <Group gap="xs">
                     <Text fw={600}>{post.title}</Text>
-                    <Badge
-                      color={TAG_COLORS[post.tag as keyof typeof TAG_COLORS] ?? "gray"}
-                      size="sm"
-                      variant="light"
-                    >
+                    <Badge color={TAG_COLORS[post.tag as keyof typeof TAG_COLORS] ?? "gray"} size="sm" variant="light">
                       {post.tag}
                     </Badge>
                   </Group>

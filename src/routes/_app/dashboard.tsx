@@ -29,8 +29,8 @@ const QUICK_ACTION_ICON_BOX = rem(50);
 const QUICK_ACTION_ICON_SIZE = rem(26);
 
 export const Route = createFileRoute("/_app/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard | Adormable" }] }),
   loader: () => getMyReservations(),
+  head: () => ({ meta: [{ title: "Dashboard | Adormable" }] }),
   component: DashboardPage,
 });
 

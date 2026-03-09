@@ -31,11 +31,11 @@ import { getZones } from "../../server/zones.ts";
 const FEEDBACK_TIMEOUT_MS = 2000;
 
 export const Route = createFileRoute("/_app/concierge")({
-  head: () => ({ meta: [{ title: "Concierge | Adormable" }] }),
   loader: async () => {
     const [reservations, zones] = await Promise.all([getAllReservations(), getZones()]);
     return { reservations, zones };
   },
+  head: () => ({ meta: [{ title: "Concierge | Adormable" }] }),
   component: ConciergeDashboardPage,
 });
 
@@ -142,7 +142,7 @@ function ConciergeDashboardPage() {
                 setTimeout(() => {
                   setBookingCreated(false);
                 }, FEEDBACK_TIMEOUT_MS);
-                router.invalidate();
+                void router.invalidate();
               }}
             >
               Create Booking
@@ -187,7 +187,7 @@ function ConciergeDashboardPage() {
                     size="sm"
                     onClick={async () => {
                       await cancelReservation({ data: { reservationId: booking.id } });
-                      router.invalidate();
+                      void router.invalidate();
                     }}
                   >
                     <IconTrash size={14} />
@@ -205,7 +205,7 @@ function ConciergeDashboardPage() {
               radius="xl"
               onClick={async () => {
                 await purgeExpiredReservations();
-                router.invalidate();
+                void router.invalidate();
               }}
             >
               Purge All Expired

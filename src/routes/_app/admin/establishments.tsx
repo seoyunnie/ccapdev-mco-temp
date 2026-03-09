@@ -20,25 +20,25 @@ import { useRef, useState } from "react";
 
 import placeholder from "../../../assets/establishments/placeholder.svg";
 import { SectionHeader } from "../../../components/section-header.tsx";
-import imgStyles from "../../../components/shared-images.module.css";
+import { getUsers } from "../../../server/admin.ts";
 import {
   getEstablishments,
   createEstablishment,
   deleteEstablishment,
   updateEstablishment,
 } from "../../../server/establishments.ts";
-import { getUsers } from "../../../server/admin.ts";
 
+import imgStyles from "../../../components/shared-images.module.css";
 import styles from "./index.module.css";
 
 const FEEDBACK_TIMEOUT_MS = 2000;
 
 export const Route = createFileRoute("/_app/admin/establishments")({
-  head: () => ({ meta: [{ title: "Establishments | Adormable" }] }),
   loader: async () => {
     const [establishments, users] = await Promise.all([getEstablishments(), getUsers()]);
     return { establishments, users };
   },
+  head: () => ({ meta: [{ title: "Establishments | Adormable" }] }),
   component: EstablishmentManagerPage,
 });
 
@@ -77,7 +77,7 @@ function EstablishmentManagerPage() {
       await deleteEstablishment({ data: { establishmentId: selectedEst.id } });
       setSelectedEst(null);
       closeDelete();
-      router.invalidate();
+      void router.invalidate();
     }
   };
 
@@ -287,7 +287,7 @@ function EstablishmentManagerPage() {
                 setTimeout(() => {
                   setSuccessMsg("");
                 }, FEEDBACK_TIMEOUT_MS);
-                router.invalidate();
+                void router.invalidate();
               }}
             >
               {editId ? "Save Changes" : "Save Establishment"}

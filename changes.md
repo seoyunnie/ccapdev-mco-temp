@@ -39,34 +39,35 @@ This branch implements the full backend layer for Adormable: database schema, us
 | `src/server.ts`                  | Custom production server entry — intercepts `/api/auth/*` and routes to Better Auth before delegating to TanStack Start's default stream handler                                    |
 | `src/server/threads.ts`          | Forum: `getThreads`, `getThread`, `createThread`, `createComment`, `voteThread`, `voteComment`, `deleteThread`, `updateThread`, `deleteComment`                                     |
 | `src/server/zones.ts`            | Study nook: `getZones`, `getZone`                                                                                                                                                   |
-| `src/server/reservations.ts`     | Reservations: `getMyReservations`, `getAllReservations`, `createReservation`, `cancelReservation`, `purgeExpiredReservations`, `createWalkInReservation`                             |
-| `src/server/establishments.ts`   | Guide: `getEstablishments`, `getEstablishment`, `createEstablishment`, `createReview`, `createOwnerReply`, `deleteEstablishment`, `updateEstablishment`                              |
+| `src/server/reservations.ts`     | Reservations: `getMyReservations`, `getAllReservations`, `createReservation`, `cancelReservation`, `purgeExpiredReservations`, `createWalkInReservation`                            |
+| `src/server/establishments.ts`   | Guide: `getEstablishments`, `getEstablishment`, `createEstablishment`, `createReview`, `createOwnerReply`, `deleteEstablishment`, `updateEstablishment`                             |
 | `src/server/profile.ts`          | Profile: `getUserProfile`, `updateProfile`, `deleteAccount`                                                                                                                         |
 | `src/server/moderation.ts`       | Moderation: `getReports`, `resolveReport`, `createBan`, `createReport`                                                                                                              |
 | `src/server/admin.ts`            | Admin: `getAdminStats`, `getUsers`, `updateUserRole`, `getActivityLogs`                                                                                                             |
 
 ### Modified files
 
-| File                                       | What changed                                                                                        |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| `vite.config.ts`                           | Added `serverOnlyStubPlugin()` + `betterAuthVitePlugin()` -- see Bundling section below for details |
-| `src/routes/login.tsx`                     | Combined login/register page with toggle; uses `authClient.signIn.email()` + `authClient.signUp.email()`, `getSessionFn()` in `beforeLoad` |
-| `src/routes/signup.tsx`                    | Standalone signup page (kept for backward compat); uses `authClient.signUp.email()`, `getSessionFn()` in `beforeLoad` |
-| `src/routes/_app/route.tsx`                | Uses `getSessionFn()` in `beforeLoad` for SSR-safe auth + role gating                               |
-| `src/routes/_app/dashboard.tsx`            | Loads `getMyReservations`; Manage button links to `/profile`                                        |
-| `src/routes/_app/profile.tsx`              | Loads `getUserProfile`, calls `updateProfile`, `cancelReservation`, `deleteAccount`; Delete Account and Edit reservation wired |
-| `src/routes/_app/guide/$estId.tsx`         | Loads `getEstablishment`, calls `createReview`, `createOwnerReply`; Helpful thumbs-up toggle wired (client-side), owner reply inline form |
-| `src/routes/_app/lobby/index.tsx`          | Loads `getThreads`, calls `createThread`; New Post → modal, Sort Select wired                       |
-| `src/routes/_app/lobby/$threadId.tsx`      | Loads `getThread`, calls `createComment`, `voteThread`, `voteComment`, `updateThread`, `deleteThread`; Edit/Delete/Reply/upvote wired |
-| `src/routes/_app/study-nook/index.tsx`     | Loads `getZones`; availability filter Select wired                                                  |
-| `src/routes/_app/study-nook/$zoneId.tsx`   | Loads `getZone`, calls `createReservation`                                                          |
-| `src/routes/_app/guide/index.tsx`          | Loads `getEstablishments`; search wired                                                             |
-| `src/routes/_app/concierge.tsx`            | Loads `getAllReservations`, calls `cancelReservation`, `purgeExpiredReservations`, `createWalkInReservation`; walk-in form fully wired with state |
-| `src/routes/_app/moderation.tsx`           | Loads `getReports`, calls `resolveReport`, `createBan`                                              |
-| `src/routes/_app/admin/index.tsx`          | Loads `getAdminStats` + `getUsers`; `updateUserRole`, `createBan` wired; search/filter users wired  |
-| `src/routes/_app/admin/establishments.tsx` | Loads `getEstablishments`, calls `createEstablishment`, `deleteEstablishment`, `updateEstablishment`; search, Edit/Delete/Assign/Cancel wired |
-| `src/routes/_app/admin/logs.tsx`           | Loads `getActivityLogs`; search + type filter wired with `useState` + `.filter()`                   |
-| `package.json`                             | Added `better-auth`, `@better-auth/prisma-adapter`, `@prisma/client`, `prisma`, `dotenv`            |
+| File                                       | What changed                                                                                                                                                 |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- |
+| `vite.config.ts`                           | Added `serverOnlyStubPlugin()` + `betterAuthVitePlugin()` -- see Bundling section below for details                                                          |
+| `src/routes/login.tsx`                     | Combined login/register page with toggle; uses `authClient.signIn.email()` + `authClient.signUp.email()`, `getSessionFn()` in `beforeLoad`                   |
+| `src/routes/signup.tsx`                    | Standalone signup page (kept for backward compat); uses `authClient.signUp.email()`, `getSessionFn()` in `beforeLoad`                                        |
+| `src/routes/_app/route.tsx`                | Uses `getSessionFn()` in `beforeLoad` for SSR-safe auth + role gating                                                                                        |
+| `src/routes/_app/dashboard.tsx`            | Loads `getMyReservations`; Manage button links to `/profile`                                                                                                 |
+| `src/routes/_app/profile.tsx`              | Loads `getUserProfile`, calls `updateProfile`, `cancelReservation`, `deleteAccount`; Delete Account and Edit reservation wired                               |
+| `src/routes/_app/guide/$estId.tsx`         | Loads `getEstablishment`, calls `createReview`, `createOwnerReply`; Helpful thumbs-up toggle wired (client-side), owner reply inline form                    |
+| `src/routes/_app/lobby/index.tsx`          | Loads `getThreads`, calls `createThread`; New Post → modal, Sort Select wired                                                                                |
+| `src/routes/_app/lobby/$threadId.tsx`      | Loads `getThread`, calls `createComment`, `voteThread`, `voteComment`, `updateThread`, `deleteThread`, `createReport`; Edit/Delete/Reply/upvote/Report wired |
+| `src/routes/_app/study-nook/index.tsx`     | Loads `getZones`; availability filter Select wired                                                                                                           |
+| `src/routes/_app/study-nook/$zoneId.tsx`   | Loads `getZone`, calls `createReservation`                                                                                                                   |
+| `src/routes/_app/guide/index.tsx`          | Loads `getEstablishments`; search wired                                                                                                                      |
+| `src/routes/_app/guide/$estId.tsx`         | Loads `getEstablishment`, calls `createReview`, `createOwnerReply`; owner reply form gated to owner via `isOwner` flag                                       |     |
+| `src/routes/_app/concierge.tsx`            | Loads `getAllReservations`, calls `cancelReservation`, `purgeExpiredReservations`, `createWalkInReservation`; walk-in form fully wired with state            |
+| `src/routes/_app/moderation.tsx`           | Loads `getReports`, calls `resolveReport`, `createBan`                                                                                                       |
+| `src/routes/_app/admin/index.tsx`          | Loads `getAdminStats` + `getUsers`; `updateUserRole`, `createBan` wired; search/filter users wired                                                           |
+| `src/routes/_app/admin/establishments.tsx` | Loads `getEstablishments`, calls `createEstablishment`, `deleteEstablishment`, `updateEstablishment`; search, Edit/Delete/Assign/Cancel wired                |
+| `src/routes/_app/admin/logs.tsx`           | Loads `getActivityLogs`; search + type filter wired with `useState` + `.filter()`                                                                            |
+| `package.json`                             | Added `better-auth`, `@better-auth/prisma-adapter`, `@prisma/client`, `prisma`, `dotenv`                                                                     |
 
 ---
 

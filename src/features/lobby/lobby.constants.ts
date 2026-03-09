@@ -19,7 +19,12 @@ export const TAG_COLORS: Readonly<Record<Capitalize<string>, DefaultMantineColor
   "Lost & Found": "yellow",
 };
 
-export const DEFAULT_TAGS = ["Discussion", "Issue", "Event", "Lost & Found"] as const;
+export const DEFAULT_TAGS: { name: string; color: DefaultMantineColor }[] = [
+  { name: "Discussion", color: "pink" },
+  { name: "Issue", color: "red" },
+  { name: "Event", color: "grape" },
+  { name: "Lost & Found", color: "yellow" },
+];
 
 export const CATEGORY_COLOR_OPTIONS: DefaultMantineColor[] = [
   "pink",

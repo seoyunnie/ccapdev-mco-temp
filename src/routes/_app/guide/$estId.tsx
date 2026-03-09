@@ -26,10 +26,9 @@ import catServices from "../../../assets/establishments/cat-services.svg";
 import emptyState from "../../../assets/features/empty-state.svg";
 import { BackButton } from "../../../components/back-button.tsx";
 import { EmptyState } from "../../../components/empty-state.tsx";
+import { getEstablishment, createReview, createOwnerReply } from "../../../server/establishments.ts";
 
 import imgStyles from "../../../components/shared-images.module.css";
-
-import { getEstablishment, createReview, createOwnerReply } from "../../../server/establishments.ts";
 
 const CATEGORY_ICONS: Record<string, string> = {
   "Coffee Shop": catCoffeeShop,
@@ -40,8 +39,8 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export const Route = createFileRoute("/_app/guide/$estId")({
-  head: () => ({ meta: [{ title: "Establishment | Adormable" }] }),
   loader: ({ params }) => getEstablishment({ data: { estId: params.estId } }),
+  head: () => ({ meta: [{ title: "Establishment | Adormable" }] }),
   errorComponent: () => (
     <Container size="md" py="xl">
       <BackButton to="/guide" label="Back to Directory" color="teal" />
@@ -79,11 +78,7 @@ function EstablishmentDetailsPage() {
       <BackButton to="/guide" label="Back to Directory" color="teal" />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
-        <img
-          src={categoryIcon ?? catServices}
-          alt={data.name}
-          className={imgStyles.cardImageTall}
-        />
+        <img src={categoryIcon ?? catServices} alt={data.name} className={imgStyles.cardImageTall} />
         <Group justify="space-between" wrap="wrap">
           <Stack gap="xs">
             <Group>
@@ -135,7 +130,7 @@ function EstablishmentDetailsPage() {
                 await createReview({ data: { establishmentId: estId, rating: reviewRating, content: reviewContent } });
                 setReviewRating(0);
                 setReviewContent("");
-                router.invalidate();
+                void router.invalidate();
               }}
             >
               Submit Review
@@ -203,16 +198,14 @@ function EstablishmentDetailsPage() {
                   </Paper>
                 </>
               )}
-              {review.ownerReply === null && (
+              {review.ownerReply === null && data.isOwner && (
                 <Group mt="xs" gap="xs">
                   <Textarea
                     placeholder="Reply as owner..."
                     size="xs"
                     style={{ flex: 1 }}
                     value={replyText[review.id] ?? ""}
-                    onChange={(e) =>
-                      setReplyText((prev) => ({ ...prev, [review.id]: e.currentTarget.value }))
-                    }
+                    onChange={(e) => setReplyText((prev) => ({ ...prev, [review.id]: e.currentTarget.value }))}
                   />
                   <Button
                     size="xs"
@@ -223,7 +216,7 @@ function EstablishmentDetailsPage() {
                       if (!text) return;
                       await createOwnerReply({ data: { reviewId: review.id, reply: text } });
                       setReplyText((prev) => ({ ...prev, [review.id]: "" }));
-                      router.invalidate();
+                      void router.invalidate();
                     }}
                   >
                     Reply

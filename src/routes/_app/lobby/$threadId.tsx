@@ -36,9 +36,8 @@ import {
 
 export const Route = createFileRoute("/_app/lobby/$threadId")({
   loader: ({ params }) => getThread({ data: { threadId: params.threadId } }),
-  errorComponent: () => (
-    <EmptyState image={emptyState} message="Thread not found." />
-  ),
+  head: () => ({ meta: [{ title: "Thread | Adormable" }] }),
+  errorComponent: () => <EmptyState image={emptyState} message="Thread not found." />,
   component: ThreadViewPage,
 });
 
@@ -60,19 +59,41 @@ function ThreadViewPage() {
   return (
     <Container size="md" py="xl">
       {/* Edit Thread Modal */}
-      <Modal opened={editOpen} onClose={() => { setEditOpen(false); }} title="Edit Thread" centered>
+      <Modal
+        opened={editOpen}
+        onClose={() => {
+          setEditOpen(false);
+        }}
+        title="Edit Thread"
+        centered
+      >
         <Stack>
-          <TextInput label="Title" value={editTitle} onChange={(e) => { setEditTitle(e.currentTarget.value); }} />
+          <TextInput
+            label="Title"
+            value={editTitle}
+            onChange={(e) => {
+              setEditTitle(e.currentTarget.value);
+            }}
+          />
           <Select label="Tag" data={Object.keys(TAG_COLORS)} value={editTag} onChange={setEditTag} />
-          <Textarea label="Content" minRows={4} value={editContent} onChange={(e) => { setEditContent(e.currentTarget.value); }} />
+          <Textarea
+            label="Content"
+            minRows={4}
+            value={editContent}
+            onChange={(e) => {
+              setEditContent(e.currentTarget.value);
+            }}
+          />
           <Group justify="flex-end">
             <Button
               color="pink"
               radius="xl"
               onClick={async () => {
-                await updateThread({ data: { threadId: data.id, title: editTitle, content: editContent, tag: editTag ?? undefined } });
+                await updateThread({
+                  data: { threadId: data.id, title: editTitle, content: editContent, tag: editTag ?? undefined },
+                });
                 setEditOpen(false);
-                router.invalidate();
+                void router.invalidate();
               }}
             >
               Save Changes
@@ -84,7 +105,10 @@ function ThreadViewPage() {
       {/* Report Modal */}
       <Modal
         opened={reportOpen}
-        onClose={() => { setReportOpen(false); setReportReason(""); }}
+        onClose={() => {
+          setReportOpen(false);
+          setReportReason("");
+        }}
         title="Report Content"
         centered
       >
@@ -94,10 +118,19 @@ function ThreadViewPage() {
             placeholder="Why are you reporting this?"
             minRows={3}
             value={reportReason}
-            onChange={(e) => { setReportReason(e.currentTarget.value); }}
+            onChange={(e) => {
+              setReportReason(e.currentTarget.value);
+            }}
           />
           <Group justify="flex-end">
-            <Button variant="light" color="gray" onClick={() => { setReportOpen(false); setReportReason(""); }}>
+            <Button
+              variant="light"
+              color="gray"
+              onClick={() => {
+                setReportOpen(false);
+                setReportReason("");
+              }}
+            >
               Cancel
             </Button>
             <Button
@@ -142,7 +175,14 @@ function ThreadViewPage() {
           </Group>
           {data.isAuthor && (
             <Group gap="xs">
-              <ActionIcon variant="light" color="pink" size="sm" onClick={() => { setEditOpen(true); }}>
+              <ActionIcon
+                variant="light"
+                color="pink"
+                size="sm"
+                onClick={() => {
+                  setEditOpen(true);
+                }}
+              >
                 <IconEdit size={14} />
               </ActionIcon>
               <ActionIcon
@@ -169,7 +209,7 @@ function ThreadViewPage() {
             color="pink"
             onClick={async () => {
               await voteThread({ data: { threadId: data.id, value: 1 } });
-              router.invalidate();
+              void router.invalidate();
             }}
           >
             <IconArrowUp size={16} />
@@ -180,7 +220,7 @@ function ThreadViewPage() {
             color="gray"
             onClick={async () => {
               await voteThread({ data: { threadId: data.id, value: -1 } });
-              router.invalidate();
+              void router.invalidate();
             }}
           >
             <IconArrowDown size={16} />
@@ -207,7 +247,9 @@ function ThreadViewPage() {
           minRows={3}
           mb="sm"
           value={replyContent}
-          onChange={(e) => { setReplyContent(e.currentTarget.value); }}
+          onChange={(e) => {
+            setReplyContent(e.currentTarget.value);
+          }}
         />
         <Button
           size="sm"
@@ -217,7 +259,7 @@ function ThreadViewPage() {
             if (!replyContent.trim()) return;
             await createComment({ data: { threadId: data.id, content: replyContent } });
             setReplyContent("");
-            router.invalidate();
+            void router.invalidate();
           }}
         >
           Post Reply
@@ -254,7 +296,7 @@ function ThreadViewPage() {
                 size="xs"
                 onClick={async () => {
                   await voteComment({ data: { commentId: comment.id, value: 1 } });
-                  router.invalidate();
+                  void router.invalidate();
                 }}
               >
                 <IconArrowUp size={12} />
@@ -263,7 +305,9 @@ function ThreadViewPage() {
               <Button
                 variant="subtle"
                 size="xs"
-                onClick={() => { setCommentReplyId(commentReplyId === comment.id ? null : comment.id); }}
+                onClick={() => {
+                  setCommentReplyId(commentReplyId === comment.id ? null : comment.id);
+                }}
               >
                 Reply
               </Button>
@@ -288,7 +332,9 @@ function ThreadViewPage() {
                   minRows={2}
                   size="sm"
                   value={commentReplyContent}
-                  onChange={(e) => { setCommentReplyContent(e.currentTarget.value); }}
+                  onChange={(e) => {
+                    setCommentReplyContent(e.currentTarget.value);
+                  }}
                 />
                 <Group>
                   <Button
@@ -297,15 +343,24 @@ function ThreadViewPage() {
                     radius="xl"
                     onClick={async () => {
                       if (!commentReplyContent.trim()) return;
-                      await createComment({ data: { threadId: data.id, content: commentReplyContent, parentId: comment.id } });
+                      await createComment({
+                        data: { threadId: data.id, content: commentReplyContent, parentId: comment.id },
+                      });
                       setCommentReplyContent("");
                       setCommentReplyId(null);
-                      router.invalidate();
+                      void router.invalidate();
                     }}
                   >
                     Post Reply
                   </Button>
-                  <Button size="xs" variant="subtle" color="gray" onClick={() => { setCommentReplyId(null); }}>
+                  <Button
+                    size="xs"
+                    variant="subtle"
+                    color="gray"
+                    onClick={() => {
+                      setCommentReplyId(null);
+                    }}
+                  >
                     Cancel
                   </Button>
                 </Group>

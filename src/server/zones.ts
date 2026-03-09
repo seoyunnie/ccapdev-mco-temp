@@ -33,10 +33,6 @@ export const getZone = createServerFn({ method: "GET" })
       id: zone.id,
       name: zone.name,
       capacity: zone.capacity,
-      seats: zone.seats.map((s) => ({
-        id: s.id,
-        label: s.label,
-        taken: s.isTaken,
-      })),
+      seats: zone.seats.map((s) => ({ id: s.id, label: s.label, taken: s.isTaken })),
     };
   });

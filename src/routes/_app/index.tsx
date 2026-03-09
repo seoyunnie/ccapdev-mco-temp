@@ -32,7 +32,10 @@ import { FadeInSection } from "../../hooks/use-fade-in.tsx";
 import imgStyles from "../../components/shared-images.module.css";
 import styles from "./index.module.css";
 
-export const Route = createFileRoute("/_app/")({ component: LandingPage });
+export const Route = createFileRoute("/_app/")({
+  head: () => ({ meta: [{ title: "Adormable | Your Dormitory Companion" }] }),
+  component: LandingPage,
+});
 
 const STEP_IMAGES = [step1Browse, step2Reserve, step3Rate];
 

@@ -26,11 +26,11 @@ const reasonColors: Record<string, string> = { Harassment: "red", Spam: "orange"
 const FEEDBACK_TIMEOUT_MS = 2000;
 
 export const Route = createFileRoute("/_app/moderation")({
-  head: () => ({ meta: [{ title: "Moderation | Adormable" }] }),
   loader: async () => {
     const [reports, users] = await Promise.all([getReports(), getUsers()]);
     return { reports, users };
   },
+  head: () => ({ meta: [{ title: "Moderation | Adormable" }] }),
   component: ForumModerationPage,
 });
 
@@ -44,13 +44,7 @@ function ForumModerationPage() {
   const [banDuration, setBanDuration] = useState<string | null>(null);
   const [banIssued, setBanIssued] = useState(false);
 
-  const durationMap: Record<string, number> = {
-    "1 Day": 1,
-    "3 Days": 3,
-    "7 Days": 7,
-    "14 Days": 14,
-    "30 Days": 30,
-  };
+  const durationMap: Record<string, number> = { "1 Day": 1, "3 Days": 3, "7 Days": 7, "14 Days": 14, "30 Days": 30 };
 
   const handleReview = (post: FlaggedPost) => {
     setReviewTarget(post);
@@ -83,7 +77,7 @@ function ForumModerationPage() {
                 onClick={async () => {
                   await resolveReport({ data: { reportId: reviewTarget.id, action: "dismiss" } });
                   closeReview();
-                  router.invalidate();
+                  void router.invalidate();
                 }}
               >
                 Dismiss
@@ -94,7 +88,7 @@ function ForumModerationPage() {
                 onClick={async () => {
                   await resolveReport({ data: { reportId: reviewTarget.id, action: "delete" } });
                   closeReview();
-                  router.invalidate();
+                  void router.invalidate();
                 }}
               >
                 Remove Content
@@ -145,7 +139,7 @@ function ForumModerationPage() {
                     size="sm"
                     onClick={async () => {
                       await resolveReport({ data: { reportId: post.id, action: "delete" } });
-                      router.invalidate();
+                      void router.invalidate();
                     }}
                   >
                     <IconTrash size={14} />
@@ -197,14 +191,16 @@ function ForumModerationPage() {
             radius="xl"
             onClick={async () => {
               if (!banUser || !banDuration) return;
-              await createBan({ data: { userId: banUser, reason: "Manual ban", durationDays: durationMap[banDuration] } });
+              await createBan({
+                data: { userId: banUser, reason: "Manual ban", durationDays: durationMap[banDuration] },
+              });
               setBanUser(null);
               setBanDuration(null);
               setBanIssued(true);
               setTimeout(() => {
                 setBanIssued(false);
               }, FEEDBACK_TIMEOUT_MS);
-              router.invalidate();
+              void router.invalidate();
             }}
           >
             Issue Ban

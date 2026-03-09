@@ -20,8 +20,8 @@ const errorLogs = [
 ];
 
 export const Route = createFileRoute("/_app/admin/logs")({
-  head: () => ({ meta: [{ title: "Logs | Adormable" }] }),
   loader: () => getActivityLogs(),
+  head: () => ({ meta: [{ title: "Logs | Adormable" }] }),
   component: SystemLogsPage,
 });
 

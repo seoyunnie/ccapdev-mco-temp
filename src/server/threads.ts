@@ -1,27 +1,25 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { prisma } from "../db.ts";
-import { getSession, requireRole, requireSession } from "./auth.ts";
+import { getSession, requireSession } from "./auth.ts";
 import { formatRelative } from "./utils.ts";
 
-export const getThreads = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const rows = await prisma.thread.findMany({
-      include: { author: true, _count: { select: { comments: true } } },
-      orderBy: { createdAt: "desc" },
-    });
-    return rows.map((t) => ({
-      id: t.id,
-      title: t.title,
-      author: t.author.name,
-      snippet: t.content.length > 120 ? t.content.slice(0, 120) + "…" : t.content,
-      upvotes: t.upvotes,
-      comments: t._count.comments,
-      tag: t.tag ?? "General",
-      time: formatRelative(t.createdAt),
-    }));
-  },
-);
+export const getThreads = createServerFn({ method: "GET" }).handler(async () => {
+  const rows = await prisma.thread.findMany({
+    include: { author: true, _count: { select: { comments: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+  return rows.map((t) => ({
+    id: t.id,
+    title: t.title,
+    author: t.author.name,
+    snippet: t.content.length > 120 ? t.content.slice(0, 120) + "…" : t.content,
+    upvotes: t.upvotes,
+    comments: t._count.comments,
+    tag: t.tag ?? "General",
+    time: formatRelative(t.createdAt),
+  }));
+});
 
 export const getThread = createServerFn({ method: "GET" })
   .inputValidator((d: { threadId: string }) => d)
@@ -33,10 +31,7 @@ export const getThread = createServerFn({ method: "GET" })
         author: true,
         comments: {
           where: { parentId: null },
-          include: {
-            author: true,
-            replies: { include: { author: true }, orderBy: { createdAt: "asc" } },
-          },
+          include: { author: true, replies: { include: { author: true }, orderBy: { createdAt: "asc" } } },
           orderBy: { createdAt: "asc" },
         },
       },
@@ -96,9 +91,7 @@ export const createThread = createServerFn({ method: "POST" })
   });
 
 export const createComment = createServerFn({ method: "POST" })
-  .inputValidator(
-    (d: { threadId: string; content: string; parentId?: string }) => d,
-  )
+  .inputValidator((d: { threadId: string; content: string; parentId?: string }) => d)
   .handler(async ({ data }) => {
     const session = await requireSession();
     const comment = await prisma.comment.create({
@@ -127,40 +120,21 @@ export const voteThread = createServerFn({ method: "POST" })
   .inputValidator((d: { threadId: string; value: 1 | -1 }) => d)
   .handler(async ({ data }) => {
     const session = await requireSession();
-    const existing = await prisma.vote.findFirst({
-      where: { userId: session.user.id, threadId: data.threadId },
-    });
+    const existing = await prisma.vote.findFirst({ where: { userId: session.user.id, threadId: data.threadId } });
 
     if (existing) {
       if (existing.value === data.value) {
         await prisma.vote.delete({ where: { id: existing.id } });
-        await prisma.thread.update({
-          where: { id: data.threadId },
-          data: { upvotes: { increment: -data.value } },
-        });
+        await prisma.thread.update({ where: { id: data.threadId }, data: { upvotes: { increment: -data.value } } });
       } else {
-        await prisma.vote.update({
-          where: { id: existing.id },
-          data: { value: data.value },
-        });
-        await prisma.thread.update({
-          where: { id: data.threadId },
-          data: { upvotes: { increment: data.value * 2 } },
-        });
+        await prisma.vote.update({ where: { id: existing.id }, data: { value: data.value } });
+        await prisma.thread.update({ where: { id: data.threadId }, data: { upvotes: { increment: data.value * 2 } } });
       }
     } else {
       await prisma.vote.create({
-        data: {
-          id: crypto.randomUUID(),
-          userId: session.user.id,
-          threadId: data.threadId,
-          value: data.value,
-        },
+        data: { id: crypto.randomUUID(), userId: session.user.id, threadId: data.threadId, value: data.value },
       });
-      await prisma.thread.update({
-        where: { id: data.threadId },
-        data: { upvotes: { increment: data.value } },
-      });
+      await prisma.thread.update({ where: { id: data.threadId }, data: { upvotes: { increment: data.value } } });
     }
 
     await prisma.activityLog.create({
@@ -177,22 +151,14 @@ export const voteComment = createServerFn({ method: "POST" })
   .inputValidator((d: { commentId: string; value: 1 | -1 }) => d)
   .handler(async ({ data }) => {
     const session = await requireSession();
-    const existing = await prisma.vote.findFirst({
-      where: { userId: session.user.id, commentId: data.commentId },
-    });
+    const existing = await prisma.vote.findFirst({ where: { userId: session.user.id, commentId: data.commentId } });
 
     if (existing) {
       if (existing.value === data.value) {
         await prisma.vote.delete({ where: { id: existing.id } });
-        await prisma.comment.update({
-          where: { id: data.commentId },
-          data: { upvotes: { increment: -data.value } },
-        });
+        await prisma.comment.update({ where: { id: data.commentId }, data: { upvotes: { increment: -data.value } } });
       } else {
-        await prisma.vote.update({
-          where: { id: existing.id },
-          data: { value: data.value },
-        });
+        await prisma.vote.update({ where: { id: existing.id }, data: { value: data.value } });
         await prisma.comment.update({
           where: { id: data.commentId },
           data: { upvotes: { increment: data.value * 2 } },
@@ -200,17 +166,9 @@ export const voteComment = createServerFn({ method: "POST" })
       }
     } else {
       await prisma.vote.create({
-        data: {
-          id: crypto.randomUUID(),
-          userId: session.user.id,
-          commentId: data.commentId,
-          value: data.value,
-        },
+        data: { id: crypto.randomUUID(), userId: session.user.id, commentId: data.commentId, value: data.value },
       });
-      await prisma.comment.update({
-        where: { id: data.commentId },
-        data: { upvotes: { increment: data.value } },
-      });
+      await prisma.comment.update({ where: { id: data.commentId }, data: { upvotes: { increment: data.value } } });
     }
 
     await prisma.activityLog.create({
@@ -227,14 +185,9 @@ export const deleteThread = createServerFn({ method: "POST" })
   .inputValidator((d: { threadId: string }) => d)
   .handler(async ({ data }) => {
     const session = await requireSession();
-    const thread = await prisma.thread.findUnique({
-      where: { id: data.threadId },
-    });
+    const thread = await prisma.thread.findUnique({ where: { id: data.threadId } });
     if (!thread) throw new Error("Thread not found");
-    if (
-      thread.authorId !== session.user.id &&
-      !["admin"].includes(session.user.role as string)
-    )
+    if (thread.authorId !== session.user.id && !["admin"].includes(session.user.role as string))
       throw new Error("Forbidden");
 
     await prisma.thread.delete({ where: { id: data.threadId } });
@@ -250,15 +203,10 @@ export const deleteThread = createServerFn({ method: "POST" })
   });
 
 export const updateThread = createServerFn({ method: "POST" })
-  .inputValidator(
-    (d: { threadId: string; title: string; content: string; tag?: string }) =>
-      d,
-  )
+  .inputValidator((d: { threadId: string; title: string; content: string; tag?: string }) => d)
   .handler(async ({ data }) => {
     const session = await requireSession();
-    const thread = await prisma.thread.findUnique({
-      where: { id: data.threadId },
-    });
+    const thread = await prisma.thread.findUnique({ where: { id: data.threadId } });
     if (!thread) throw new Error("Thread not found");
     if (thread.authorId !== session.user.id) throw new Error("Forbidden");
 
@@ -283,14 +231,9 @@ export const deleteComment = createServerFn({ method: "POST" })
   .inputValidator((d: { commentId: string }) => d)
   .handler(async ({ data }) => {
     const session = await requireSession();
-    const comment = await prisma.comment.findUnique({
-      where: { id: data.commentId },
-    });
+    const comment = await prisma.comment.findUnique({ where: { id: data.commentId } });
     if (!comment) throw new Error("Comment not found");
-    if (
-      comment.authorId !== session.user.id &&
-      !["admin"].includes(session.user.role as string)
-    )
+    if (comment.authorId !== session.user.id && !["admin"].includes(session.user.role as string))
       throw new Error("Forbidden");
 
     await prisma.comment.delete({ where: { id: data.commentId } });

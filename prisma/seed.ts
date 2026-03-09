@@ -5,7 +5,7 @@ import { PrismaClient } from "../generated/prisma/client";
 
 const prisma = new PrismaClient();
 
-async function main() {
+async function main(): Promise<void> {
   console.log("Seeding database...");
 
   // ── Users
@@ -75,7 +75,7 @@ async function main() {
     create: { id: "zone-main", name: "Main Hall", capacity: 30, image: null },
   });
 
-  const groupRoom = await prisma.studyZone.upsert({
+  await prisma.studyZone.upsert({
     where: { id: "zone-group" },
     update: {},
     create: { id: "zone-group", name: "Group Study Room B", capacity: 8, image: null },

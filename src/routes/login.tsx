@@ -73,10 +73,7 @@ function LoginRegisterPage() {
   const handleLogin = async (values: typeof loginForm.values) => {
     setError("");
     setLoading(true);
-    const { error: authError } = await authClient.signIn.email({
-      email: values.email,
-      password: values.password,
-    });
+    const { error: authError } = await authClient.signIn.email({ email: values.email, password: values.password });
     setLoading(false);
     if (authError) {
       setError(authError.message ?? "Login failed. Please try again.");

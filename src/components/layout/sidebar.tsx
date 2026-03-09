@@ -93,7 +93,7 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
             fullWidth
             radius="xl"
             onClick={() => {
-              signOut();
+              void signOut();
               onToggle();
             }}
           >

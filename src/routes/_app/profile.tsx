@@ -17,15 +17,7 @@ import {
   FileInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import {
-  IconUser,
-  IconCalendar,
-  IconHistory,
-  IconEdit,
-  IconTrash,
-  IconCamera,
-  IconPhoto,
-} from "@tabler/icons-react";
+import { IconUser, IconCalendar, IconHistory, IconEdit, IconTrash, IconCamera, IconPhoto } from "@tabler/icons-react";
 import { createFileRoute, useRouter, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -36,8 +28,8 @@ import { cancelReservation } from "../../server/reservations.ts";
 const typeColors: Record<string, string> = { Reservation: "pink", Forum: "grape", Review: "teal" };
 
 export const Route = createFileRoute("/_app/profile")({
-  head: () => ({ meta: [{ title: "Profile | Adormable" }] }),
   loader: () => getUserProfile(),
+  head: () => ({ meta: [{ title: "Profile | Adormable" }] }),
   component: UserProfilePage,
 });
 
@@ -92,7 +84,7 @@ function UserProfilePage() {
                 radius="xl"
                 onClick={async () => {
                   await updateProfile({ data: { name: displayName, bio } });
-                  router.invalidate();
+                  void router.invalidate();
                 }}
               >
                 Save Changes
@@ -105,11 +97,7 @@ function UserProfilePage() {
       {/* Photo Upload Modal */}
       <Modal opened={photoOpened} onClose={closePhoto} title="Upload Profile Photo">
         <Stack>
-          <FileInput
-            placeholder="Choose an image"
-            leftSection={<IconPhoto size={16} />}
-            accept="image/*"
-          />
+          <FileInput placeholder="Choose an image" leftSection={<IconPhoto size={16} />} accept="image/*" />
           <Group justify="flex-end">
             <Button variant="light" color="gray" onClick={closePhoto}>
               Cancel
@@ -133,7 +121,7 @@ function UserProfilePage() {
             onClick={async () => {
               if (deleteResId) {
                 await cancelReservation({ data: { reservationId: deleteResId } });
-                router.invalidate();
+                void router.invalidate();
               }
               closeDeleteRes();
             }}

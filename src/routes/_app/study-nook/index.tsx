@@ -12,10 +12,9 @@ import readingRoom from "../../../assets/study-nook/reading-room.svg";
 import { EmptyState } from "../../../components/empty-state.tsx";
 import { SearchBar } from "../../../components/search-bar.tsx";
 import { SectionHeader } from "../../../components/section-header.tsx";
+import { getZones } from "../../../server/zones.ts";
 
 import imgStyles from "../../../components/shared-images.module.css";
-
-import { getZones } from "../../../server/zones.ts";
 
 const TO_PERCENT = 100;
 const HIGH_OCCUPANCY_PCT = 80;
@@ -41,8 +40,8 @@ function getOccupancyColor(pct: number): string {
 }
 
 export const Route = createFileRoute("/_app/study-nook/")({
-  head: () => ({ meta: [{ title: "Study Nook | Adormable" }] }),
   loader: () => getZones(),
+  head: () => ({ meta: [{ title: "Study Nook | Adormable" }] }),
   component: ZoneSelectionPage,
 });
 

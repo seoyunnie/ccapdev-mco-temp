@@ -8,16 +8,11 @@ export function formatRelative(date: Date): string {
   if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 export function categorizeAction(action: string): string {
-  if (action.includes("reservation") || action.includes("purge"))
-    return "Reservation";
+  if (action.includes("reservation") || action.includes("purge")) return "Reservation";
   if (action.includes("thread") || action.includes("comment")) return "Forum";
   if (action.includes("review")) return "Review";
   return "Admin";

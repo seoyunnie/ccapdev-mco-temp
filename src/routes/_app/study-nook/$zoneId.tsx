@@ -26,8 +26,8 @@ import { getZone } from "../../../server/zones.ts";
 import styles from "./$zoneId.module.css";
 
 export const Route = createFileRoute("/_app/study-nook/$zoneId")({
-  head: () => ({ meta: [{ title: "Reserve a Seat | Adormable" }] }),
   loader: ({ params }) => getZone({ data: { zoneId: params.zoneId } }),
+  head: () => ({ meta: [{ title: "Reserve a Seat | Adormable" }] }),
   component: ReservationPage,
 });
 
@@ -43,7 +43,7 @@ function ReservationPage() {
 
   // Group seats into rows by letter prefix
   const seatRows: { id: string; label: string; taken: boolean }[][] = [];
-  let currentRow: typeof seatRows[0] = [];
+  let currentRow: (typeof seatRows)[0] = [];
   let currentLetter = "";
   for (const seat of zone.seats) {
     const letter = seat.label.charAt(0);
@@ -170,10 +170,7 @@ function ReservationPage() {
               {selectedSeat != null && (
                 <Paper bg="pink.0" p="sm" radius="md">
                   <Text size="sm">
-                    Selected seat:{" "}
-                    <Badge>
-                      {zone.seats.find((s) => s.id === selectedSeat)?.label ?? selectedSeat}
-                    </Badge>
+                    Selected seat: <Badge>{zone.seats.find((s) => s.id === selectedSeat)?.label ?? selectedSeat}</Badge>
                     {selectedStartTime != null && selectedEndTime != null && (
                       <>
                         {" "}
@@ -215,7 +212,7 @@ function ReservationPage() {
                     },
                   });
                   setConfirmed(true);
-                  router.invalidate();
+                  void router.invalidate();
                 }}
               >
                 Confirm Reservation

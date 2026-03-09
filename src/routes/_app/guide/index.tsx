@@ -11,11 +11,10 @@ import emptyState from "../../../assets/features/empty-state.svg";
 import { EmptyState } from "../../../components/empty-state.tsx";
 import { SearchBar } from "../../../components/search-bar.tsx";
 import { SectionHeader } from "../../../components/section-header.tsx";
+import { getEstablishments } from "../../../server/establishments.ts";
 
 import imgStyles from "../../../components/shared-images.module.css";
 import styles from "./index.module.css";
-
-import { getEstablishments } from "../../../server/establishments.ts";
 
 const CATEGORY_ICONS: Record<string, string> = {
   "Coffee Shop": catCoffeeShop,
@@ -36,8 +35,8 @@ const CATEGORY_COLORS: Record<string, string> = {
 const ALL_CATEGORIES = ["All", "Coffee Shop", "Filipino Food", "Services", "Korean BBQ", "Convenience Store"] as const;
 
 export const Route = createFileRoute("/_app/guide/")({
-  head: () => ({ meta: [{ title: "Survival Guide | Adormable" }] }),
   loader: () => getEstablishments(),
+  head: () => ({ meta: [{ title: "Survival Guide | Adormable" }] }),
   component: DirectoryListPage,
 });
 
@@ -84,11 +83,7 @@ function DirectoryListPage() {
       <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
         {filtered.map((est) => (
           <Card key={est.id} shadow="md" padding="lg" radius="md" className={styles.estCard}>
-            <img
-              src={CATEGORY_ICONS[est.category] ?? catServices}
-              alt={est.name}
-              className={imgStyles.cardImage}
-            />
+            <img src={CATEGORY_ICONS[est.category] ?? catServices} alt={est.name} className={imgStyles.cardImage} />
             <Stack gap="sm">
               <Group justify="space-between">
                 <Text fw={700} size="lg">

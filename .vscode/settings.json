@@ -16,8 +16,5 @@
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "prisma.pinToPrisma6": true,
-  "chat.tools.terminal.autoApprove": {
-    "npx tsc": true,
-    "pnpm": true
-  }
+  "chat.tools.terminal.autoApprove": { "npx tsc": true, "pnpm": true }
 }

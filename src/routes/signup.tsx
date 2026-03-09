@@ -23,13 +23,13 @@ import { getSessionFn } from "../server/auth.ts";
 import styles from "./login.module.css";
 
 export const Route = createFileRoute("/signup")({
-  head: () => ({ meta: [{ title: "Signup | Adormable" }] }),
   beforeLoad: async () => {
     const session = await getSessionFn();
     if (session?.user) {
       throw redirect({ to: "/dashboard" });
     }
   },
+  head: () => ({ meta: [{ title: "Signup | Adormable" }] }),
   component: SignupPage,
 });
 

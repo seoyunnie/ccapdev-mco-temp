@@ -1,56 +1,45 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { prisma } from "../db.ts";
-import { requireRole, requireSession } from "./auth.ts";
+import { getSession, requireRole, requireSession } from "./auth.ts";
 import { formatRelative } from "./utils.ts";
 
-export const getEstablishments = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const rows = await prisma.establishment.findMany({
-      include: {
-        reviews: { select: { rating: true } },
-        owner: { select: { name: true } },
-      },
-      orderBy: { name: "asc" },
-    });
-    return rows.map((e) => {
-      const avg =
-        e.reviews.length > 0
-          ? e.reviews.reduce((s, r) => s + r.rating, 0) / e.reviews.length
-          : 0;
-      return {
-        id: e.id,
-        name: e.name,
-        category: e.category,
-        description: e.description ?? "",
-        rating: Math.round(avg * 10) / 10,
-        reviews: e.reviews.length,
-        owner: e.owner.name,
-        status: e.status.charAt(0).toUpperCase() + e.status.slice(1),
-      };
-    });
-  },
-);
+export const getEstablishments = createServerFn({ method: "GET" }).handler(async () => {
+  const rows = await prisma.establishment.findMany({
+    include: { reviews: { select: { rating: true } }, owner: { select: { name: true } } },
+    orderBy: { name: "asc" },
+  });
+  return rows.map((e) => {
+    const avg = e.reviews.length > 0 ? e.reviews.reduce((s, r) => s + r.rating, 0) / e.reviews.length : 0;
+    return {
+      id: e.id,
+      name: e.name,
+      category: e.category,
+      description: e.description ?? "",
+      rating: Math.round(avg * 10) / 10,
+      reviews: e.reviews.length,
+      owner: e.owner.name,
+      status: e.status.charAt(0).toUpperCase() + e.status.slice(1),
+    };
+  });
+});
 
 export const getEstablishment = createServerFn({ method: "GET" })
   .inputValidator((d: { estId: string }) => d)
   .handler(async ({ data }) => {
-    const est = await prisma.establishment.findUnique({
-      where: { id: data.estId },
-      include: {
-        reviews: {
-          include: { author: true },
-          orderBy: { createdAt: "desc" },
+    const [est, session] = await Promise.all([
+      prisma.establishment.findUnique({
+        where: { id: data.estId },
+        include: {
+          reviews: { include: { author: true }, orderBy: { createdAt: "desc" } },
+          owner: { select: { name: true } },
         },
-        owner: { select: { name: true } },
-      },
-    });
+      }),
+      getSession(),
+    ]);
     if (!est) throw new Error("Establishment not found");
 
-    const avg =
-      est.reviews.length > 0
-        ? est.reviews.reduce((s, r) => s + r.rating, 0) / est.reviews.length
-        : 0;
+    const avg = est.reviews.length > 0 ? est.reviews.reduce((s, r) => s + r.rating, 0) / est.reviews.length : 0;
 
     return {
       name: est.name,
@@ -59,6 +48,7 @@ export const getEstablishment = createServerFn({ method: "GET" })
       totalReviews: est.reviews.length,
       description: est.description ?? "",
       ownerName: est.owner.name,
+      isOwner: session?.user?.id === est.ownerId,
       reviews: est.reviews.map((r) => ({
         id: r.id,
         author: r.author.name,
@@ -72,14 +62,7 @@ export const getEstablishment = createServerFn({ method: "GET" })
   });
 
 export const createEstablishment = createServerFn({ method: "POST" })
-  .inputValidator(
-    (d: {
-      name: string;
-      category: string;
-      description?: string;
-      ownerId: string;
-    }) => d,
-  )
+  .inputValidator((d: { name: string; category: string; description?: string; ownerId: string }) => d)
   .handler(async ({ data }) => {
     const session = await requireRole(["admin"]);
 
@@ -106,13 +89,11 @@ export const createEstablishment = createServerFn({ method: "POST" })
   });
 
 export const createReview = createServerFn({ method: "POST" })
-  .inputValidator(
-    (d: { establishmentId: string; rating: number; content: string }) => {
-      if (d.rating < 1 || d.rating > 5) throw new Error("Rating must be 1–5");
-      if (!d.content.trim()) throw new Error("Review content is required");
-      return d;
-    },
-  )
+  .inputValidator((d: { establishmentId: string; rating: number; content: string }) => {
+    if (d.rating < 1 || d.rating > 5) throw new Error("Rating must be 1–5");
+    if (!d.content.trim()) throw new Error("Review content is required");
+    return d;
+  })
   .handler(async ({ data }) => {
     const session = await requireSession();
     const review = await prisma.review.create({
@@ -149,13 +130,9 @@ export const createOwnerReply = createServerFn({ method: "POST" })
       include: { establishment: { select: { ownerId: true } } },
     });
     if (!review) throw new Error("Review not found");
-    if (review.establishment.ownerId !== session.user.id)
-      throw new Error("Forbidden");
+    if (review.establishment.ownerId !== session.user.id) throw new Error("Forbidden");
 
-    const updated = await prisma.review.update({
-      where: { id: data.reviewId },
-      data: { ownerReply: data.reply },
-    });
+    const updated = await prisma.review.update({ where: { id: data.reviewId }, data: { ownerReply: data.reply } });
 
     await prisma.activityLog.create({
       data: {
@@ -173,14 +150,10 @@ export const deleteEstablishment = createServerFn({ method: "POST" })
   .inputValidator((d: { establishmentId: string }) => d)
   .handler(async ({ data }) => {
     const session = await requireRole(["admin"]);
-    const est = await prisma.establishment.findUnique({
-      where: { id: data.establishmentId },
-    });
+    const est = await prisma.establishment.findUnique({ where: { id: data.establishmentId } });
     if (!est) throw new Error("Establishment not found");
 
-    await prisma.establishment.delete({
-      where: { id: data.establishmentId },
-    });
+    await prisma.establishment.delete({ where: { id: data.establishmentId } });
 
     await prisma.activityLog.create({
       data: {
@@ -194,21 +167,12 @@ export const deleteEstablishment = createServerFn({ method: "POST" })
 
 export const updateEstablishment = createServerFn({ method: "POST" })
   .inputValidator(
-    (d: {
-      establishmentId: string;
-      name?: string;
-      category?: string;
-      description?: string;
-      ownerId?: string;
-    }) => d,
+    (d: { establishmentId: string; name?: string; category?: string; description?: string; ownerId?: string }) => d,
   )
   .handler(async ({ data }) => {
     const session = await requireRole(["admin"]);
     const { establishmentId, ...updates } = data;
-    const updated = await prisma.establishment.update({
-      where: { id: establishmentId },
-      data: updates,
-    });
+    const updated = await prisma.establishment.update({ where: { id: establishmentId }, data: updates });
 
     await prisma.activityLog.create({
       data: {
