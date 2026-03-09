@@ -22,6 +22,7 @@ import {
   IconRefresh,
 } from "@tabler/icons-react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { ROLE_COLORS } from "../../../features/admin/admin.constants.ts";
 import type { UserRole } from "../../../contexts/auth-context.tsx";
@@ -47,6 +48,12 @@ export const Route = createFileRoute("/_app/admin/")({
 function AdminControlPanelPage() {
   const { stats, users } = Route.useLoaderData();
   const router = useRouter();
+  const [search, setSearch] = useState("");
+  const filtered = users.filter(
+    (u) =>
+      u.name.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase()),
+  );
   return (
     <Container size="lg" py="xl">
       <Title className="page-title" mb="xs">
@@ -82,7 +89,7 @@ function AdminControlPanelPage() {
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Group justify="space-between" mb="md">
           <Title order={4}>User Management</Title>
-          <TextInput placeholder="Search users..." leftSection={<IconSearch size={16} />} size="sm" />
+          <TextInput placeholder="Search users..." leftSection={<IconSearch size={16} />} size="sm" value={search} onChange={(e) => setSearch(e.currentTarget.value)} />
         </Group>
         <Table>
           <Table.Thead>
@@ -95,7 +102,7 @@ function AdminControlPanelPage() {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {users.map((user) => (
+            {filtered.map((user) => (
               <Table.Tr key={user.id}>
                 <Table.Td fw={500}>{user.name}</Table.Td>
                 <Table.Td>

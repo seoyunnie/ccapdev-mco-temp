@@ -60,33 +60,28 @@ export const createReservation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const session = await requireSession();
 
-    // Prevent double-booking: check if the seat is already taken
-    if (data.seatId) {
-      const seat = await prisma.seat.findUnique({ where: { id: data.seatId } });
-      if (!seat) throw new Error("Seat not found");
-      if (seat.isTaken) throw new Error("Seat is already taken");
-    }
+    const reservation = await prisma.$transaction(async (tx) => {
+      if (data.seatId) {
+        const seat = await tx.seat.findUnique({ where: { id: data.seatId } });
+        if (!seat) throw new Error("Seat not found");
+        if (seat.isTaken) throw new Error("Seat is already taken");
+        await tx.seat.update({ where: { id: data.seatId }, data: { isTaken: true } });
+      }
 
-    const reservation = await prisma.reservation.create({
-      data: {
-        id: crypto.randomUUID(),
-        userId: session.user.id,
-        zoneId: data.zoneId,
-        seatId: data.seatId,
-        date: new Date(data.date),
-        startTime: new Date(data.startTime),
-        endTime: new Date(data.endTime),
-        isAnonymous: data.isAnonymous ?? false,
-        status: "confirmed",
-      },
-    });
-
-    if (data.seatId) {
-      await prisma.seat.update({
-        where: { id: data.seatId },
-        data: { isTaken: true },
+      return tx.reservation.create({
+        data: {
+          id: crypto.randomUUID(),
+          userId: session.user.id,
+          zoneId: data.zoneId,
+          seatId: data.seatId,
+          date: new Date(data.date),
+          startTime: new Date(data.startTime),
+          endTime: new Date(data.endTime),
+          isAnonymous: data.isAnonymous ?? false,
+          status: "confirmed",
+        },
       });
-    }
+    });
 
     await prisma.activityLog.create({
       data: {
@@ -125,6 +120,15 @@ export const cancelReservation = createServerFn({ method: "POST" })
         data: { isTaken: false },
       });
     }
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "cancel_reservation",
+        detail: `Cancelled reservation ${data.reservationId}`,
+      },
+    });
   });
 
 export const purgeExpiredReservations = createServerFn({

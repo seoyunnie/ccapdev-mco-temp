@@ -60,23 +60,36 @@ export const updateProfile = createServerFn({ method: "POST" })
   .inputValidator((d: { name: string; bio: string }) => d)
   .handler(async ({ data }) => {
     const session = await requireSession();
-    return prisma.user.update({
+    const updated = await prisma.user.update({
       where: { id: session.user.id },
       data: { name: data.name, bio: data.bio },
     });
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "update_profile",
+        detail: `Updated profile`,
+      },
+    });
+
+    return updated;
   });
 
 export const deleteAccount = createServerFn({ method: "POST" }).handler(
   async () => {
     const session = await requireSession();
-    await prisma.user.delete({ where: { id: session.user.id } });
 
     await prisma.activityLog.create({
       data: {
         id: crypto.randomUUID(),
+        userId: session.user.id,
         action: "delete_account",
         detail: `User ${session.user.email} deleted their account`,
       },
     });
+
+    await prisma.user.delete({ where: { id: session.user.id } });
   },
 );

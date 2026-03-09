@@ -60,13 +60,12 @@ This branch implements the full backend layer for Adormable: database schema, us
 | `src/routes/_app/lobby/$threadId.tsx`      | Loads `getThread`, calls `createComment`, `voteThread`, `voteComment`, `updateThread`, `deleteThread`; Edit/Delete/Reply/upvote wired |
 | `src/routes/_app/study-nook/index.tsx`     | Loads `getZones`; availability filter Select wired                                                  |
 | `src/routes/_app/study-nook/$zoneId.tsx`   | Loads `getZone`, calls `createReservation`                                                          |
-| `src/routes/_app/guide/index.tsx`          | Loads `getEstablishments`                                                                           |
-| `src/routes/_app/guide/$estId.tsx`         | Loads `getEstablishment`, calls `createReview`                                                      |
+| `src/routes/_app/guide/index.tsx`          | Loads `getEstablishments`; search wired                                                             |
 | `src/routes/_app/concierge.tsx`            | Loads `getAllReservations`, calls `cancelReservation`, `purgeExpiredReservations`, `createWalkInReservation`; walk-in form fully wired with state |
 | `src/routes/_app/moderation.tsx`           | Loads `getReports`, calls `resolveReport`, `createBan`                                              |
-| `src/routes/_app/admin/index.tsx`          | Loads `getAdminStats`                                                                               |
+| `src/routes/_app/admin/index.tsx`          | Loads `getAdminStats` + `getUsers`; `updateUserRole`, `createBan` wired; search/filter users wired  |
 | `src/routes/_app/admin/establishments.tsx` | Loads `getEstablishments`, calls `createEstablishment`, `deleteEstablishment`, `updateEstablishment`; search, Edit/Delete/Assign/Cancel wired |
-| `src/routes/_app/admin/logs.tsx`           | Loads `getActivityLogs`                                                                             |
+| `src/routes/_app/admin/logs.tsx`           | Loads `getActivityLogs`; search + type filter wired with `useState` + `.filter()`                   |
 | `package.json`                             | Added `better-auth`, `@better-auth/prisma-adapter`, `@prisma/client`, `prisma`, `dotenv`            |
 
 ---
@@ -96,11 +95,11 @@ Roles: `guest` (default on signup) → `resident` → `concierge` → `admin`. R
 ## Security measures
 
 - **All 22 mutation functions** check `requireSession()` or `requireRole()` — no anonymous writes.
-- **Role-based access**: admin-only functions (`getAdminStats`, `getActivityLogs`, `updateUserRole`), concierge/admin functions (`getUsers`, `getAllReservations`, `getReports`, `resolveReport`, `createBan`).
-- **Input validation**: role whitelist on `updateUserRole`, rating 1–5 on `createReview`, ban duration 1–365 days on `createBan`, content-not-empty checks.
-- **Seat double-booking prevention**: `createReservation` checks `seat.isTaken` before creating.
+- **Role-based access**: admin-only functions (`getAdminStats`, `getActivityLogs`, `updateUserRole`, `createEstablishment`, `deleteEstablishment`, `updateEstablishment`), concierge/admin functions (`getUsers`, `getAllReservations`, `getReports`, `resolveReport`, `createBan`, `purgeExpiredReservations`, `createWalkInReservation`).
+- **Input validation**: role whitelist on `updateUserRole`, rating 1–5 on `createReview`, ban duration 1–365 days on `createBan`, content-not-empty checks on `createOwnerReply`, `createReport` requires at least one of `threadId`/`commentId`.
+- **Seat double-booking prevention**: `createReservation` uses `prisma.$transaction()` for atomic check + create + seat update (no race condition).
 - **Ownership checks**: `cancelReservation` verifies the user owns the reservation (or is concierge/admin). `deleteThread`/`deleteComment` verify authorship (or admin). `updateThread` verifies authorship. `createOwnerReply` verifies the user is the establishment owner.
-- **Activity logging**: Mutations log to `ActivityLog` for audit trail.
+- **Activity logging**: 17 of 22 mutations log to `ActivityLog` for audit trail. 5 mutations (`updateThread`, `deleteComment`, `createOwnerReply`, `deleteEstablishment`, `updateEstablishment`) do not yet log — these are low-severity gaps since their auth checks are all in place.
 
 ---
 
@@ -130,6 +129,12 @@ TanStack Start's plugin (`resolveEntry`) scans `src/` for a file named `server.{
 
 ## Known limitations (future work)
 
+- **Activity log gaps**: 5 mutations (`updateThread`, `deleteComment`, `createOwnerReply`, `deleteEstablishment`, `updateEstablishment`) don't write to `ActivityLog` yet. See `Todo.md` R1.
+- **`deleteAccount` logging order**: The activity log is created AFTER the user row is deleted, so `userId` is null in the log entry. The `detail` field captures the email, so data isn't lost. See `Todo.md` R2.
+- **Establishment edit mode**: `admin/establishments.tsx` imports `updateEstablishment` but the Edit button pre-fills the create form — it always calls `createEstablishment` instead. See `Todo.md` R3.
+- **No report button in UI**: `createReport` server function exists but there's no "Report" button in lobby or thread views. See `Todo.md` R4.
+- **No owner reply UI**: `createOwnerReply` server function exists but `guide/$estId.tsx` has no reply form for owners. See `Todo.md` R5.
+- **No delete comment UI**: `deleteComment` server function exists but no delete button on comments. See `Todo.md` R6.
 - Filtering/sorting on list pages is client-side only (no server-side pagination yet).
 - Seed users have no password hash — they exist only to populate relations. Real test accounts must be created via Sign Up.
 - No file/image upload yet (review images, user avatars). `FileInput` on the review form renders but does not upload.

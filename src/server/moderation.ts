@@ -38,7 +38,7 @@ export const getReports = createServerFn({ method: "GET" }).handler(
 export const resolveReport = createServerFn({ method: "POST" })
   .inputValidator((d: { reportId: string; action: "resolve" | "dismiss" | "delete" }) => d)
   .handler(async ({ data }) => {
-    await requireRole(["concierge", "admin"]);
+    const session = await requireRole(["concierge", "admin"]);
     const report = await prisma.report.findUnique({
       where: { id: data.reportId },
     });
@@ -52,10 +52,20 @@ export const resolveReport = createServerFn({ method: "POST" })
       }
     }
 
-    return prisma.report.update({
+    const updated = await prisma.report.update({
       where: { id: data.reportId },
       data: { status: data.action === "dismiss" ? "dismissed" : "resolved" },
     });
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "resolve_report",
+        detail: `${data.action} report ${data.reportId}`,
+      },
+    });
+
+    return updated;
   });
 
 export const createBan = createServerFn({ method: "POST" })
@@ -92,7 +102,10 @@ export const createBan = createServerFn({ method: "POST" })
 
 export const createReport = createServerFn({ method: "POST" })
   .inputValidator(
-    (d: { threadId?: string; commentId?: string; reason: string }) => d,
+    (d: { threadId?: string; commentId?: string; reason: string }) => {
+      if (!d.threadId && !d.commentId) throw new Error("Either threadId or commentId is required");
+      return d;
+    },
   )
   .handler(async ({ data }) => {
     const session = await requireRole(["resident", "concierge", "admin"]);

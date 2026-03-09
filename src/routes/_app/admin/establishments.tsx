@@ -42,6 +42,7 @@ function EstablishmentManagerPage() {
   const [description, setDescription] = useState("");
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
 
   const filtered = establishments.filter((e) =>
     e.name.toLowerCase().includes(search.toLowerCase()),
@@ -116,6 +117,7 @@ function EstablishmentManagerPage() {
                       size="sm"
                       color="pink"
                       onClick={() => {
+                        setEditId(est.id);
                         setName(est.name);
                         setCategory(est.category);
                         setDescription(est.description);
@@ -147,7 +149,7 @@ function EstablishmentManagerPage() {
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mt="xl" ref={formRef}>
         <Title order={4} mb="md">
-          Add New Establishment
+          {editId ? "Edit Establishment" : "Add New Establishment"}
         </Title>
         <Stack>
           <Group grow>
@@ -178,6 +180,7 @@ function EstablishmentManagerPage() {
               variant="light"
               color="gray"
               onClick={() => {
+                setEditId(null);
                 setName("");
                 setCategory(null);
                 setDescription("");
@@ -190,8 +193,13 @@ function EstablishmentManagerPage() {
               color="pink"
               radius="xl"
               onClick={async () => {
-                if (!name || !category || !ownerId) return;
-                await createEstablishment({ data: { name, category, description, ownerId } });
+                if (editId) {
+                  await updateEstablishment({ data: { establishmentId: editId, name: name || undefined, category: category || undefined, description: description || undefined, ownerId: ownerId || undefined } });
+                } else {
+                  if (!name || !category || !ownerId) return;
+                  await createEstablishment({ data: { name, category, description, ownerId } });
+                }
+                setEditId(null);
                 setName("");
                 setCategory(null);
                 setDescription("");
@@ -199,7 +207,7 @@ function EstablishmentManagerPage() {
                 router.invalidate();
               }}
             >
-              Save Establishment
+              {editId ? "Save Changes" : "Save Establishment"}
             </Button>
           </Group>
         </Stack>

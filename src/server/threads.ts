@@ -101,7 +101,7 @@ export const createComment = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const session = await requireSession();
-    return prisma.comment.create({
+    const comment = await prisma.comment.create({
       data: {
         id: crypto.randomUUID(),
         threadId: data.threadId,
@@ -110,6 +110,17 @@ export const createComment = createServerFn({ method: "POST" })
         content: data.content,
       },
     });
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "create_comment",
+        detail: `Commented on thread ${data.threadId}`,
+      },
+    });
+
+    return comment;
   });
 
 export const voteThread = createServerFn({ method: "POST" })
@@ -151,6 +162,15 @@ export const voteThread = createServerFn({ method: "POST" })
         data: { upvotes: { increment: data.value } },
       });
     }
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "vote_thread",
+        detail: `Voted ${data.value > 0 ? "up" : "down"} on thread ${data.threadId}`,
+      },
+    });
   });
 
 export const voteComment = createServerFn({ method: "POST" })
@@ -192,6 +212,15 @@ export const voteComment = createServerFn({ method: "POST" })
         data: { upvotes: { increment: data.value } },
       });
     }
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "vote_comment",
+        detail: `Voted ${data.value > 0 ? "up" : "down"} on comment ${data.commentId}`,
+      },
+    });
   });
 
 export const deleteThread = createServerFn({ method: "POST" })
@@ -233,10 +262,21 @@ export const updateThread = createServerFn({ method: "POST" })
     if (!thread) throw new Error("Thread not found");
     if (thread.authorId !== session.user.id) throw new Error("Forbidden");
 
-    return prisma.thread.update({
+    const updated = await prisma.thread.update({
       where: { id: data.threadId },
       data: { title: data.title, content: data.content, tag: data.tag },
     });
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "update_thread",
+        detail: `Updated thread "${data.title}"`,
+      },
+    });
+
+    return updated;
   });
 
 export const deleteComment = createServerFn({ method: "POST" })
@@ -254,4 +294,13 @@ export const deleteComment = createServerFn({ method: "POST" })
       throw new Error("Forbidden");
 
     await prisma.comment.delete({ where: { id: data.commentId } });
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "delete_comment",
+        detail: `Deleted comment ${data.commentId}`,
+      },
+    });
   });

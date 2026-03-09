@@ -39,11 +39,22 @@ export const updateUserRole = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    await requireRole(["admin"]);
-    return prisma.user.update({
+    const session = await requireRole(["admin"]);
+    const updated = await prisma.user.update({
       where: { id: data.userId },
       data: { role: data.role },
     });
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "update_user_role",
+        detail: `Changed user ${data.userId} role to ${data.role}`,
+      },
+    });
+
+    return updated;
   });
 
 export const getActivityLogs = createServerFn({ method: "GET" }).handler(

@@ -81,11 +81,9 @@ export const createEstablishment = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }) => {
-    const session = await requireSession();
-    if ((session.user.role as string) !== "admin")
-      throw new Error("Forbidden");
+    const session = await requireRole(["admin"]);
 
-    return prisma.establishment.create({
+    const est = await prisma.establishment.create({
       data: {
         id: crypto.randomUUID(),
         name: data.name,
@@ -94,6 +92,17 @@ export const createEstablishment = createServerFn({ method: "POST" })
         ownerId: data.ownerId,
       },
     });
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "create_establishment",
+        detail: `Created establishment "${data.name}"`,
+      },
+    });
+
+    return est;
   });
 
 export const createReview = createServerFn({ method: "POST" })
@@ -143,16 +152,27 @@ export const createOwnerReply = createServerFn({ method: "POST" })
     if (review.establishment.ownerId !== session.user.id)
       throw new Error("Forbidden");
 
-    return prisma.review.update({
+    const updated = await prisma.review.update({
       where: { id: data.reviewId },
       data: { ownerReply: data.reply },
     });
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "create_owner_reply",
+        detail: `Replied to review ${data.reviewId}`,
+      },
+    });
+
+    return updated;
   });
 
 export const deleteEstablishment = createServerFn({ method: "POST" })
   .inputValidator((d: { establishmentId: string }) => d)
   .handler(async ({ data }) => {
-    await requireRole(["admin"]);
+    const session = await requireRole(["admin"]);
     const est = await prisma.establishment.findUnique({
       where: { id: data.establishmentId },
     });
@@ -160,6 +180,15 @@ export const deleteEstablishment = createServerFn({ method: "POST" })
 
     await prisma.establishment.delete({
       where: { id: data.establishmentId },
+    });
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "delete_establishment",
+        detail: `Deleted establishment "${est.name}"`,
+      },
     });
   });
 
@@ -174,10 +203,21 @@ export const updateEstablishment = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }) => {
-    await requireRole(["admin"]);
+    const session = await requireRole(["admin"]);
     const { establishmentId, ...updates } = data;
-    return prisma.establishment.update({
+    const updated = await prisma.establishment.update({
       where: { id: establishmentId },
       data: updates,
     });
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "update_establishment",
+        detail: `Updated establishment "${updated.name}"`,
+      },
+    });
+
+    return updated;
   });

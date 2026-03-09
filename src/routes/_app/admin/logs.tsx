@@ -1,6 +1,7 @@
 import { Container, Title, Text, Paper, Group, Table, Badge, Select, TextInput, Tabs } from "@mantine/core";
 import { IconSearch, IconUser } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { getActivityLogs } from "../../../server/admin.ts";
 
@@ -14,6 +15,15 @@ export const Route = createFileRoute("/_app/admin/logs")({
 
 function SystemLogsPage() {
   const activityLogs = Route.useLoaderData();
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string | null>("All");
+  const filtered = activityLogs.filter((log) => {
+    const matchesSearch =
+      log.user.toLowerCase().includes(search.toLowerCase()) ||
+      log.action.toLowerCase().includes(search.toLowerCase());
+    const matchesType = !typeFilter || typeFilter === "All" || log.type === typeFilter;
+    return matchesSearch && matchesType;
+  });
   return (
     <Container size="lg" py="xl">
       <Title className="page-title" mb="xs">
@@ -33,11 +43,12 @@ function SystemLogsPage() {
         <Tabs.Panel value="activity" pt="md">
           <Paper shadow="md" radius="md" className="content-card">
             <Group p="md" justify="space-between">
-              <TextInput placeholder="Search logs..." leftSection={<IconSearch size={16} />} size="sm" />
+              <TextInput placeholder="Search logs..." leftSection={<IconSearch size={16} />} size="sm" value={search} onChange={(e) => setSearch(e.currentTarget.value)} />
               <Select
                 placeholder="Filter by type"
                 data={["All", "Reservation", "Forum", "Admin", "Review"]}
-                defaultValue="All"
+                value={typeFilter}
+                onChange={setTypeFilter}
                 size="sm"
               />
             </Group>
@@ -51,7 +62,7 @@ function SystemLogsPage() {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {activityLogs.map((log) => (
+                {filtered.map((log) => (
                   <Table.Tr key={log.id}>
                     <Table.Td>
                       <Text size="sm" c="dimmed" ff="monospace">

@@ -15,10 +15,11 @@ import {
   TextInput,
   Select,
 } from "@mantine/core";
-import { IconArrowUp, IconArrowDown, IconEdit, IconTrash } from "@tabler/icons-react";
+import { IconArrowUp, IconArrowDown, IconEdit, IconTrash, IconFlag } from "@tabler/icons-react";
 import { Link, createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { useAuth } from "../../../contexts/auth-context.tsx";
 import { TAG_COLORS } from "../../../features/lobby/lobby.constants.ts";
 import {
   getThread,
@@ -28,6 +29,7 @@ import {
   deleteThread,
   updateThread,
 } from "../../../server/threads.ts";
+import { createReport } from "../../../server/moderation.ts";
 
 export const Route = createFileRoute("/_app/lobby/$threadId")({
   loader: ({ params }) => getThread({ data: { threadId: params.threadId } }),
@@ -37,6 +39,7 @@ export const Route = createFileRoute("/_app/lobby/$threadId")({
 function ThreadViewPage() {
   const data = Route.useLoaderData();
   const router = useRouter();
+  const { isLoggedIn } = useAuth();
   const [replyContent, setReplyContent] = useState("");
   const [commentReplyId, setCommentReplyId] = useState<string | null>(null);
   const [commentReplyContent, setCommentReplyContent] = useState("");
@@ -44,6 +47,9 @@ function ThreadViewPage() {
   const [editTitle, setEditTitle] = useState(data.title);
   const [editContent, setEditContent] = useState(data.content);
   const [editTag, setEditTag] = useState<string | null>(data.tag);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportTarget, setReportTarget] = useState<{ threadId?: string; commentId?: string }>({});
   return (
     <Container size="md" py="xl">
       <Modal opened={editOpen} onClose={() => setEditOpen(false)} title="Edit Thread" centered>
@@ -62,6 +68,27 @@ function ThreadViewPage() {
               }}
             >
               Save Changes
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      <Modal opened={reportOpen} onClose={() => { setReportOpen(false); setReportReason(""); }} title="Report Content" centered>
+        <Stack>
+          <Textarea label="Reason" placeholder="Why are you reporting this?" minRows={3} value={reportReason} onChange={(e) => setReportReason(e.currentTarget.value)} />
+          <Group justify="flex-end">
+            <Button variant="light" color="gray" onClick={() => { setReportOpen(false); setReportReason(""); }}>Cancel</Button>
+            <Button
+              color="red"
+              radius="xl"
+              onClick={async () => {
+                if (!reportReason.trim()) return;
+                await createReport({ data: { ...reportTarget, reason: reportReason } });
+                setReportOpen(false);
+                setReportReason("");
+              }}
+            >
+              Submit Report
             </Button>
           </Group>
         </Stack>
@@ -139,6 +166,18 @@ function ThreadViewPage() {
           >
             <IconArrowDown size={16} />
           </ActionIcon>
+          {isLoggedIn && !data.isAuthor && (
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              onClick={() => {
+                setReportTarget({ threadId: data.id });
+                setReportOpen(true);
+              }}
+            >
+              <IconFlag size={16} />
+            </ActionIcon>
+          )}
         </Group>
       </Paper>
 
@@ -207,6 +246,19 @@ function ThreadViewPage() {
               >
                 Reply
               </Button>
+              {isLoggedIn && (
+                <ActionIcon
+                  variant="subtle"
+                  size="xs"
+                  color="red"
+                  onClick={() => {
+                    setReportTarget({ commentId: comment.id });
+                    setReportOpen(true);
+                  }}
+                >
+                  <IconFlag size={12} />
+                </ActionIcon>
+              )}
             </Group>
             {commentReplyId === comment.id && (
               <Stack mt="xs" gap="xs">
