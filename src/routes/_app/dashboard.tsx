@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Container,
   Title,
   Text,
@@ -12,13 +13,19 @@ import {
   Paper,
   rem,
 } from "@mantine/core";
-import { IconCalendar } from "@tabler/icons-react";
+import { IconCalendar, IconSun, IconMoon, IconSunrise } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
+import defaultAvatarFemale from "../../assets/avatars/default-avatar-female.svg";
 import { useAuth } from "../../contexts/auth-context.tsx";
 import { QUICK_ACTIONS } from "../../features/dashboard/data/quick-actions.ts";
 
 import styles from "./dashboard.module.css";
+
+// oxlint-disable-next-line no-magic-numbers
+const QUICK_ACTION_ICON_BOX = rem(50);
+// oxlint-disable-next-line no-magic-numbers
+const QUICK_ACTION_ICON_SIZE = rem(26);
 
 const upcomingReservations = [
   { zone: "Quiet Room A", date: "Feb 10, 2026", time: "2:00 PM - 4:00 PM", status: "Confirmed" },
@@ -30,17 +37,41 @@ export const Route = createFileRoute("/_app/dashboard")({
   component: DashboardPage,
 });
 
+const MORNING_START = 5;
+const AFTERNOON_START = 12;
+const EVENING_START = 17;
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour >= MORNING_START && hour < AFTERNOON_START) {
+    return { text: "Good morning", Icon: IconSunrise };
+  }
+  if (hour >= AFTERNOON_START && hour < EVENING_START) {
+    return { text: "Good afternoon", Icon: IconSun };
+  }
+  return { text: "Good evening", Icon: IconMoon };
+}
+
 function DashboardPage() {
   const { name } = useAuth();
+  const greeting = getGreeting();
 
   return (
     <Container size="lg" py="xl">
-      <Title order={2} mb="xs">
-        Welcome back, {name}!
-      </Title>
-      <Text c="dimmed" mb="xl">
-        Here&apos;s a quick overview of your Adormable activity.
-      </Text>
+      <Paper shadow="sm" p="lg" radius="md" className={styles.welcomeBanner} mb="xl">
+        <Group gap="md" wrap="nowrap">
+          <Avatar src={defaultAvatarFemale} alt={name} size="lg" radius="xl" />
+          <Stack gap={2}>
+            <Group gap="xs">
+              <greeting.Icon size={20} color="var(--mantine-color-pink-5)" />
+              <Title order={2}>
+                {greeting.text}, {name}!
+              </Title>
+            </Group>
+            <Text c="dimmed">Here&apos;s a quick overview of your Adormable activity.</Text>
+          </Stack>
+        </Group>
+      </Paper>
 
       <Text className={styles.sectionTitle} mb="md">
         Quick Actions
@@ -56,8 +87,8 @@ function DashboardPage() {
             component={Link}
             to={action.to}
           >
-            <ThemeIcon size={rem(50)} radius="md" variant="light" color={action.color} mb="md">
-              <action.iconComponent size={rem(26)} stroke={1.5} />
+            <ThemeIcon size={QUICK_ACTION_ICON_BOX} radius="md" variant="light" color={action.color} mb="md">
+              <action.iconComponent size={QUICK_ACTION_ICON_SIZE} stroke={1.5} />
             </ThemeIcon>
             <Text fz="lg" fw={500}>
               {action.title}
@@ -74,8 +105,8 @@ function DashboardPage() {
         <Text className={styles.sectionTitle}>My Upcoming Reservations</Text>
       </Group>
       <Stack gap="sm">
-        {upcomingReservations.map((res, i) => (
-          <Paper key={i} withBorder p="md" radius="md" className={styles.reservationContainer}>
+        {upcomingReservations.map((res) => (
+          <Paper key={res.zone + res.date} withBorder p="md" radius="md" className={styles.reservationContainer}>
             <Group justify="space-between" wrap="wrap">
               <Stack gap={2}>
                 <Text fw={600}>{res.zone}</Text>

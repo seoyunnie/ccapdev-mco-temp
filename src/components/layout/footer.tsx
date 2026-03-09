@@ -1,7 +1,8 @@
-import { ActionIcon, Container, Group, Text, Title } from "@mantine/core";
+import { ActionIcon, Container, Group, Text } from "@mantine/core";
 import { IconBrandFacebook, IconBrandInstagram, IconBrandTwitter } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 
+import adormableLogo from "../../assets/logos/adormable-logo.png";
 import { FOOTER_ITEMS } from "../../data/footer-items.ts";
 
 import styles from "./footer.module.css";
@@ -12,9 +13,7 @@ export function Footer() {
       <Container size="xl">
         <div className={styles.container}>
           <div className={styles.logoSection}>
-            <Title order={3} c="pink" style={{ letterSpacing: "-0.02em" }}>
-              Adormable
-            </Title>
+            <img src={adormableLogo} alt="Adormable" height={36} />
             <Text size="sm" c="dimmed" className={styles.description}>
               Your all-in-one dormitory companion since 2026.
             </Text>

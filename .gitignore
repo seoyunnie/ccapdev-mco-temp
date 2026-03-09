@@ -12,3 +12,5 @@ node_modules/
 
 # macOS
 **/.DS_Store
+
+/ignore

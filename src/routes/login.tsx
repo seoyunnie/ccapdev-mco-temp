@@ -12,9 +12,11 @@ import {
   Divider,
   Group,
 } from "@mantine/core";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
+import loginBg from "../assets/backgrounds/login-bg.svg";
+import adormableLogo from "../assets/logos/adormable-logo.png";
 import { useAuth } from "../contexts/auth-context.tsx";
 
 import styles from "./login.module.css";
@@ -35,13 +37,19 @@ function LoginRegisterPage() {
   const { register } = Route.useSearch();
   const [isRegister, setIsRegister] = useState(register === "true");
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   return (
-    <div className={styles.page}>
+    <div
+      className={styles.page}
+      style={{
+        backgroundImage: `linear-gradient(160deg, rgba(255,240,246,0.85) 0%, rgba(250,250,250,0.85) 50%, rgba(243,229,245,0.85) 100%), url(${loginBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <Container size={420} my={40}>
-        <Text ta="center" size="lg" fw={800} c="pink" mb={4}>
-          HELLO KUROMI.
-        </Text>
+        <img src={adormableLogo} alt="Adormable" style={{ display: "block", margin: "0 auto 8px auto", height: 64 }} />
         <Title ta="center" className={styles.title}>
           {isRegister ? "Create your account" : "Welcome back!"}
         </Title>
@@ -86,14 +94,14 @@ function LoginRegisterPage() {
             )}
 
             <Button
-              component={Link}
               fullWidth
               mt="xl"
               color="pink"
               radius="md"
-              to="/dashboard"
               onClick={() => {
-                login("admin", isRegister ? "New Resident" : "OPPENHEIMER");
+                // Note: will be replaced by authClient on merge with db-auth
+                login(isRegister ? "resident" : "admin", isRegister ? "New Resident" : "OPPENHEIMER");
+                void navigate({ to: "/dashboard" });
               }}
             >
               {isRegister ? "Create Account" : "Sign In"}
@@ -102,7 +110,11 @@ function LoginRegisterPage() {
             <Divider label="or" labelPosition="center" />
 
             <Text size="xs" c="dimmed" ta="center">
-              By continuing, you agree to our Terms of Service.
+              By continuing, you agree to our{" "}
+              <Anchor component={Link} to="/terms" size="xs" c="pink">
+                Terms of Service
+              </Anchor>
+              .
             </Text>
           </Stack>
         </Paper>

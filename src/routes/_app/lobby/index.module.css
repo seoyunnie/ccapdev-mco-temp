@@ -1,0 +1,24 @@
+.postCard {
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--mantine-shadow-md);
+  }
+}
+
+.voteColumn {
+  min-width: 40px;
+}
+
+.voteButton {
+  transition: transform 0.15s ease;
+
+  &:active {
+    transform: scale(1.2);
+  }
+}

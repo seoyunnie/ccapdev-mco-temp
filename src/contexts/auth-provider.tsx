@@ -4,7 +4,8 @@ import { type UserRole, AuthContext } from "./auth-context.tsx";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [role, setRole] = useState<UserRole>("guest");
+  // Note: will be replaced by authClient.useSession() on merge with db-auth
+  const [role, setRole] = useState<UserRole>("admin");
   const [name, setName] = useState("");
 
   const login = (r: UserRole, n = "Resident") => {

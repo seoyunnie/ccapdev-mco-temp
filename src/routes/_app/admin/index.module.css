@@ -1,0 +1,18 @@
+.tableRow {
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: light-dark(var(--mantine-color-pink-0), var(--mantine-color-dark-5));
+  }
+}
+
+.diagnosticCard {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--mantine-shadow-md);
+  }
+}

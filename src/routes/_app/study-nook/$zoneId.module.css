@@ -1,0 +1,13 @@
+.legendDot {
+  border-radius: 4px;
+  height: 16px;
+  width: 16px;
+}
+
+.seatButton {
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
