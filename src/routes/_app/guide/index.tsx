@@ -124,7 +124,9 @@ function DirectoryListPage() {
       <Chip.Group
         value={activeCategory}
         onChange={(v) => {
-          setActiveCategory(v as string);
+          if (typeof v === "string") {
+            setActiveCategory(v);
+          }
         }}
       >
         <Group gap="xs" mb="lg">

@@ -27,6 +27,7 @@ import studyNookHero from "../../assets/heroes/study-nook-hero.svg";
 import { LinkButton } from "../../components/link-button.tsx";
 import { FEATURES } from "../../data/features.ts";
 import { STATS } from "../../data/stats.ts";
+import { FadeInSection } from "../../hooks/use-fade-in.tsx";
 
 import imgStyles from "../../components/shared-images.module.css";
 import styles from "./index.module.css";
@@ -170,7 +171,7 @@ function LandingPage() {
       </div>
 
       <Container size="lg" mt={-40} mb="xl" style={{ position: "relative", zIndex: 1 }}>
-        <div
+        <FadeInSection
           className={styles.statisticsBar}
           style={{ backgroundImage: `url(${statsTexture})`, backgroundSize: "cover", backgroundBlendMode: "overlay" }}
         >
@@ -181,95 +182,99 @@ function LandingPage() {
               <Text className={styles.statisticDescription}>{stat.description}</Text>
             </div>
           ))}
-        </div>
+        </FadeInSection>
       </Container>
 
       <Box py={80} style={{ backgroundColor: "#f8f9fa" }}>
-        <Container size="lg">
-          <Title className={styles.sectionTitle} ta="center">
-            Everything You Need, In 3 Simple Steps
-          </Title>
-          <Text c="dimmed" className={styles.sectionDescription} ta="center" mt="md">
-            Getting started with Adormable is as easy as 1-2-3.
-          </Text>
+        <FadeInSection>
+          <Container size="lg">
+            <Title className={styles.sectionTitle} ta="center">
+              Everything You Need, In 3 Simple Steps
+            </Title>
+            <Text c="dimmed" className={styles.sectionDescription} ta="center" mt="md">
+              Getting started with Adormable is as easy as 1-2-3.
+            </Text>
 
-          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="xl" mt={50}>
-            {["Browse & Discover", "Reserve & Engage", "Rate & Connect"].map((title, i) => (
-              <Card key={title} shadow="md" radius="md" className={styles.stepCard} padding="xl">
-                <img src={STEP_IMAGES[i]} alt={title} className={imgStyles.stepImage} />
-                <div className={styles.stepNumber} style={{ marginTop: "var(--mantine-spacing-md)" }}>
-                  {i + 1}
-                </div>
-                <Text ta="center" fz="lg" fw={500} mt="sm">
-                  {title}
-                </Text>
-                <Text ta="center" fz="sm" c="dimmed" mt="sm">
-                  {i === 0
-                    ? "Explore study zones, forum posts, or local establishments — all in one platform."
-                    : // oxlint-disable-next-line unicorn/no-nested-ternary
-                      i === 1
-                      ? "Book your study spot, join conversations, or write reviews about your favorite stores."
-                      : "Share your experiences, help fellow residents, and build your dorm community together!"}
-                </Text>
-              </Card>
-            ))}
-          </SimpleGrid>
-        </Container>
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="xl" mt={50}>
+              {["Browse & Discover", "Reserve & Engage", "Rate & Connect"].map((title, i) => (
+                <Card key={title} shadow="md" radius="md" className={styles.stepCard} padding="xl">
+                  <img src={STEP_IMAGES[i]} alt={title} className={imgStyles.stepImage} />
+                  <div className={styles.stepNumber} style={{ marginTop: "var(--mantine-spacing-md)" }}>
+                    {i + 1}
+                  </div>
+                  <Text ta="center" fz="lg" fw={500} mt="sm">
+                    {title}
+                  </Text>
+                  <Text ta="center" fz="sm" c="dimmed" mt="sm">
+                    {i === 0
+                      ? "Explore study zones, forum posts, or local establishments — all in one platform."
+                      : // oxlint-disable-next-line unicorn/no-nested-ternary
+                        i === 1
+                        ? "Book your study spot, join conversations, or write reviews about your favorite stores."
+                        : "Share your experiences, help fellow residents, and build your dorm community together!"}
+                  </Text>
+                </Card>
+              ))}
+            </SimpleGrid>
+          </Container>
+        </FadeInSection>
       </Box>
 
       <Box py={80} style={{ backgroundColor: "#fff7fa" }} id="features">
-        <Container size="lg">
-          <Badge color="pink" variant="filled" size="lg" radius="xl" mx="auto" display="block" w="fit-content">
-            Our Features
-          </Badge>
-          <Title className={styles.sectionTitle} ta="center" mt="sm">
-            What Makes Adormable Special?
-          </Title>
-          <Text c="dimmed" className={styles.sectionDescription} ta="center" mt="md">
-            Three core modules designed to make your dorm life easier.
-          </Text>
+        <FadeInSection>
+          <Container size="lg">
+            <Badge color="pink" variant="filled" size="lg" radius="xl" mx="auto" display="block" w="fit-content">
+              Our Features
+            </Badge>
+            <Title className={styles.sectionTitle} ta="center" mt="sm">
+              What Makes Adormable Special?
+            </Title>
+            <Text c="dimmed" className={styles.sectionDescription} ta="center" mt="md">
+              Three core modules designed to make your dorm life easier.
+            </Text>
 
-          <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl" mt={50}>
-            {FEATURES.map((feature) => (
-              <Card
-                key={feature.title}
-                shadow="md"
-                radius="md"
-                className={styles.featureCard}
-                padding="xl"
-                component={Link}
-                to={feature.to}
-              >
-                <img src={feature.image} alt={feature.title} className={imgStyles.cardImageContained} />
-                <Group gap="xs" mt="md">
-                  <feature.iconComponent
-                    size={rem("24px")}
-                    stroke={1.5}
-                    color={`var(--mantine-color-${feature.color}-6)`}
-                  />
-                  <Text
-                    fz="lg"
-                    fw={500}
-                    className={styles.featureCardTitle}
-                    style={
-                      // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
-                      { "--feature-color": `var(--mantine-color-${feature.color}-filled)` } as React.CSSProperties
-                    }
-                  >
-                    {feature.title}
+            <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl" mt={50}>
+              {FEATURES.map((feature) => (
+                <Card
+                  key={feature.title}
+                  shadow="md"
+                  radius="md"
+                  className={styles.featureCard}
+                  padding="xl"
+                  component={Link}
+                  to={feature.to}
+                >
+                  <img src={feature.image} alt={feature.title} className={imgStyles.cardImageContained} />
+                  <Group gap="xs" mt="md">
+                    <feature.iconComponent
+                      size={rem("24px")}
+                      stroke={1.5}
+                      color={`var(--mantine-color-${feature.color}-6)`}
+                    />
+                    <Text
+                      fz="lg"
+                      fw={500}
+                      className={styles.featureCardTitle}
+                      style={
+                        // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
+                        { "--feature-color": `var(--mantine-color-${feature.color}-filled)` } as React.CSSProperties
+                      }
+                    >
+                      {feature.title}
+                    </Text>
+                  </Group>
+                  <Text fz="sm" c="dimmed" mt="sm">
+                    {feature.description}
                   </Text>
-                </Group>
-                <Text fz="sm" c="dimmed" mt="sm">
-                  {feature.description}
-                </Text>
-              </Card>
-            ))}
-          </SimpleGrid>
-        </Container>
+                </Card>
+              ))}
+            </SimpleGrid>
+          </Container>
+        </FadeInSection>
       </Box>
 
       <Container size="lg" py={80}>
-        <div className={styles.aboutContainer}>
+        <FadeInSection className={styles.aboutContainer}>
           <div className={styles.aboutImagePlaceholder}>
             <img src={aboutIllustration} alt="About Adormable" className={imgStyles.aboutImage} />
           </div>
@@ -311,18 +316,18 @@ function LandingPage() {
               Join Adormable
             </LinkButton>
           </div>
-        </div>
+        </FadeInSection>
       </Container>
 
       <Container size="lg" pb={80}>
-        <div
+        <FadeInSection
           className={styles.callToActionBanner}
           style={{ backgroundImage: `url(${ctaPattern})`, backgroundSize: "cover", backgroundBlendMode: "soft-light" }}
         >
-          <Title order={2} c="black" mb="md">
+          <Title order={2} c="white" mb="md">
             Ready to Make Dorm Life Better?
           </Title>
-          <Text c="black" maw={500} mx="auto" mb="xl" style={{ opacity: 0.9 }}>
+          <Text c="white" maw={500} mx="auto" mb="xl" style={{ opacity: 0.9 }}>
             Join hundreds of residents already using Adormable to reserve study spots, connect with neighbors, and
             discover local gems.
           </Text>
@@ -330,11 +335,11 @@ function LandingPage() {
             <LinkButton size="lg" variant="white" color="pink" radius="xl" to="/login" search={{ register: "true" }}>
               Join Now
             </LinkButton>
-            <LinkButton size="lg" variant="outline" radius="xl" color="black" to="/guide">
+            <LinkButton size="lg" variant="outline" radius="xl" color="white" to="/guide">
               Browse Directory
             </LinkButton>
           </Group>
-        </div>
+        </FadeInSection>
       </Container>
     </>
   );

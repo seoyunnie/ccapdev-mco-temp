@@ -12,7 +12,7 @@ import {
   Divider,
   Group,
 } from "@mantine/core";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import loginBg from "../assets/backgrounds/login-bg.svg";
@@ -37,6 +37,7 @@ function LoginRegisterPage() {
   const { register } = Route.useSearch();
   const [isRegister, setIsRegister] = useState(register === "true");
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div
@@ -93,14 +94,14 @@ function LoginRegisterPage() {
             )}
 
             <Button
-              component={Link}
               fullWidth
               mt="xl"
               color="pink"
               radius="md"
-              to="/dashboard"
               onClick={() => {
-                login("admin", isRegister ? "New Resident" : "OPPENHEIMER");
+                // Note: will be replaced by authClient on merge with db-auth
+                login(isRegister ? "resident" : "admin", isRegister ? "New Resident" : "OPPENHEIMER");
+                void navigate({ to: "/dashboard" });
               }}
             >
               {isRegister ? "Create Account" : "Sign In"}
@@ -109,7 +110,11 @@ function LoginRegisterPage() {
             <Divider label="or" labelPosition="center" />
 
             <Text size="xs" c="dimmed" ta="center">
-              By continuing, you agree to our Terms of Service.
+              By continuing, you agree to our{" "}
+              <Anchor component={Link} to="/terms" size="xs" c="pink">
+                Terms of Service
+              </Anchor>
+              .
             </Text>
           </Stack>
         </Paper>

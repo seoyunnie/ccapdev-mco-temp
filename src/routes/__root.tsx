@@ -9,13 +9,16 @@ import "@fontsource/quicksand/500.css";
 import "@fontsource/quicksand/600.css";
 import "@fontsource/quicksand/700.css";
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 import "../globals.css";
 
 import type { ReactNode } from "react";
 
 import { ColorSchemeScript, mantineHtmlProps, MantineProvider } from "@mantine/core";
-import { createRootRoute, HeadContent } from "@tanstack/react-router";
+import { Notifications } from "@mantine/notifications";
+import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 
+import { AuthProvider } from "../contexts/auth-provider.tsx";
 import { theme } from "../theme.ts";
 
 export const Route = createRootRoute({
@@ -29,10 +32,11 @@ export const Route = createRootRoute({
     ],
     links: [{ href: "/favicon.svg", type: "image/svg", rel: "icon" }],
   }),
-  shellComponent: RootComponent,
+  shellComponent: RootShell,
+  component: RootLayout,
 });
 
-function RootComponent({ children }: { children: ReactNode }) {
+function RootShell({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
@@ -40,10 +44,20 @@ function RootComponent({ children }: { children: ReactNode }) {
         <ColorSchemeScript forceColorScheme="light" />
       </head>
       <body>
-        <MantineProvider theme={theme} forceColorScheme="light">
-          {children}
-        </MantineProvider>
+        {children}
+        <Scripts />
       </body>
     </html>
+  );
+}
+
+function RootLayout() {
+  return (
+    <MantineProvider theme={theme} forceColorScheme="light">
+      <Notifications position="top-right" />
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    </MantineProvider>
   );
 }

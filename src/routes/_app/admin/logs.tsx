@@ -1,6 +1,7 @@
 import { Container, Text, Paper, Group, Table, Badge, Select, TextInput, Tabs } from "@mantine/core";
 import { IconSearch, IconUser, IconBug } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { SectionHeader } from "../../../components/section-header.tsx";
 
@@ -71,6 +72,27 @@ export const Route = createFileRoute("/_app/admin/logs")({
 });
 
 function SystemLogsPage() {
+  const [activitySearch, setActivitySearch] = useState("");
+  const [activityFilter, setActivityFilter] = useState<string | null>("All");
+  const [errorSearch, setErrorSearch] = useState("");
+  const [errorFilter, setErrorFilter] = useState<string | null>("All");
+
+  const filteredActivityLogs = activityLogs.filter((log) => {
+    const matchesSearch =
+      log.user.toLowerCase().includes(activitySearch.toLowerCase()) ||
+      log.action.toLowerCase().includes(activitySearch.toLowerCase());
+    const matchesType =
+      activityFilter == null || activityFilter === "" || activityFilter === "All" || log.type === activityFilter;
+    return matchesSearch && matchesType;
+  });
+
+  const filteredErrorLogs = errorLogs.filter((log) => {
+    const matchesSearch = log.message.toLowerCase().includes(errorSearch.toLowerCase());
+    const matchesLevel =
+      errorFilter == null || errorFilter === "" || errorFilter === "All" || log.level === errorFilter;
+    return matchesSearch && matchesLevel;
+  });
+
   return (
     <Container size="lg" py="xl">
       <SectionHeader title="System Logs" description="Audit trails and technical error monitoring." />
@@ -88,11 +110,20 @@ function SystemLogsPage() {
         <Tabs.Panel value="activity" pt="md">
           <Paper shadow="md" radius="md" className="content-card">
             <Group p="md" justify="space-between">
-              <TextInput placeholder="Search logs..." leftSection={<IconSearch size={16} />} size="sm" />
+              <TextInput
+                placeholder="Search logs..."
+                leftSection={<IconSearch size={16} />}
+                size="sm"
+                value={activitySearch}
+                onChange={(e) => {
+                  setActivitySearch(e.currentTarget.value);
+                }}
+              />
               <Select
                 placeholder="Filter by type"
                 data={["All", "Reservation", "Forum", "Admin", "Review"]}
-                defaultValue="All"
+                value={activityFilter}
+                onChange={setActivityFilter}
                 size="sm"
               />
             </Group>
@@ -106,7 +137,7 @@ function SystemLogsPage() {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {activityLogs.map((log) => (
+                {filteredActivityLogs.map((log) => (
                   <Table.Tr key={log.id} className={styles.tableRow}>
                     <Table.Td>
                       <Text size="sm" c="dimmed" ff="monospace">
@@ -132,11 +163,20 @@ function SystemLogsPage() {
         <Tabs.Panel value="errors" pt="md">
           <Paper shadow="md" radius="md" className="content-card">
             <Group p="md" justify="space-between">
-              <TextInput placeholder="Search errors..." leftSection={<IconSearch size={16} />} size="sm" />
+              <TextInput
+                placeholder="Search errors..."
+                leftSection={<IconSearch size={16} />}
+                size="sm"
+                value={errorSearch}
+                onChange={(e) => {
+                  setErrorSearch(e.currentTarget.value);
+                }}
+              />
               <Select
                 placeholder="Filter by level"
                 data={["All", "Error", "Warning", "Info"]}
-                defaultValue="All"
+                value={errorFilter}
+                onChange={setErrorFilter}
                 size="sm"
               />
             </Group>
@@ -149,7 +189,7 @@ function SystemLogsPage() {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {errorLogs.map((log) => (
+                {filteredErrorLogs.map((log) => (
                   <Table.Tr key={log.id} className={styles.tableRow}>
                     <Table.Td>
                       <Text size="sm" c="dimmed" ff="monospace">

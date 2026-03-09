@@ -47,14 +47,14 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
               leftSection={<IconShield size={18} />}
               component={Link}
               to="/concierge"
-              onClick={close}
+              onClick={onToggle}
             />
             <NavLink
               label="Moderation"
               leftSection={<IconShield size={18} />}
               component={Link}
               to="/moderation"
-              onClick={close}
+              onClick={onToggle}
             />
           </>
         )}
@@ -66,21 +66,21 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
               leftSection={<IconSettings size={18} />}
               component={Link}
               to="/admin"
-              onClick={close}
+              onClick={onToggle}
             />
             <NavLink
               label="Establishments"
               leftSection={<IconSettings size={18} />}
               component={Link}
               to="/admin/establishments"
-              onClick={close}
+              onClick={onToggle}
             />
             <NavLink
               label="System Logs"
               leftSection={<IconSettings size={18} />}
               component={Link}
               to="/admin/logs"
-              onClick={close}
+              onClick={onToggle}
             />
           </>
         )}
