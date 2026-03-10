@@ -166,7 +166,7 @@
 }
 
 .statisticCount {
-  color: var(--mantine-color-white);
+  color: var(--mantine-color-black);
   font-size: 32px;
   font-weight: 700;
   line-height: 1;
@@ -174,14 +174,14 @@
 }
 
 .statisticTitle {
-  color: var(--mantine-color-white);
+  color: var(--mantine-color-black);
   font-size: var(--mantine-font-size-sm);
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .statisticDescription {
-  color: var(--mantine-color-pink-0);
+  color: var(--mantine-color-black);
   font-size: var(--mantine-font-size-sm);
   margin-top: 5px;
 }

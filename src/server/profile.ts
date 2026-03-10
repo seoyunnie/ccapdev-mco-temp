@@ -7,7 +7,9 @@ import { categorizeAction } from "./utils.ts";
 export const getUserProfile = createServerFn({ method: "GET" }).handler(async () => {
   const session = await requireSession();
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (!user) {throw new Error("User not found");}
+  if (!user) {
+    throw new Error("User not found");
+  }
 
   const reservations = await prisma.reservation.findMany({
     where: { userId: user.id, status: { not: "cancelled" } },
@@ -42,6 +44,32 @@ export const getUserProfile = createServerFn({ method: "GET" }).handler(async ()
     })),
   };
 });
+
+const MAX_IMAGE_BYTES = 2_000_000;
+
+export const uploadProfilePhoto = createServerFn({ method: "POST" })
+  .inputValidator((d: { image: string }) => {
+    if (!d.image.startsWith("data:image/")) {
+      throw new Error("Invalid image data");
+    }
+    if (d.image.length > MAX_IMAGE_BYTES) {
+      throw new Error("Image must be under 1.5 MB");
+    }
+    return d;
+  })
+  .handler(async ({ data }) => {
+    const session = await requireSession();
+    await prisma.user.update({ where: { id: session.user.id }, data: { image: data.image } });
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "update_profile_photo",
+        detail: "Updated profile photo",
+      },
+    });
+  });
 
 export const updateProfile = createServerFn({ method: "POST" })
   .inputValidator((d: { name: string; bio: string }) => d)

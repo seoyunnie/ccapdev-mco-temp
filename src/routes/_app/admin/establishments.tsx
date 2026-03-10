@@ -35,8 +35,8 @@ const FEEDBACK_TIMEOUT_MS = 2000;
 
 export const Route = createFileRoute("/_app/admin/establishments")({
   loader: async () => {
-    const [establishments, users] = await Promise.all([getEstablishments(), getUsers()]);
-    return { establishments, users };
+    const [estResult, users] = await Promise.all([getEstablishments({ data: {} }), getUsers()]);
+    return { establishments: estResult.items, users };
   },
   head: () => ({ meta: [{ title: "Establishments | Adormable" }] }),
   component: EstablishmentManagerPage,
@@ -271,7 +271,9 @@ function EstablishmentManagerPage() {
               radius="xl"
               onClick={async () => {
                 if (editId == null) {
-                  if (!name || category == null || ownerId == null) {return;}
+                  if (!name || category == null || ownerId == null) {
+                    return;
+                  }
                   await createEstablishment({ data: { name, category, description, address, ownerId } });
                 } else {
                   await updateEstablishment({

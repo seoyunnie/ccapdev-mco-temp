@@ -22,7 +22,7 @@ import { createFileRoute, useRouter, useNavigate } from "@tanstack/react-router"
 import { useState } from "react";
 
 import { SectionHeader } from "../../components/section-header.tsx";
-import { getUserProfile, updateProfile, deleteAccount } from "../../server/profile.ts";
+import { getUserProfile, updateProfile, deleteAccount, uploadProfilePhoto } from "../../server/profile.ts";
 import { cancelReservation } from "../../server/reservations.ts";
 
 const typeColors: Record<string, string> = { Reservation: "pink", Forum: "grape", Review: "teal" };
@@ -43,6 +43,8 @@ function UserProfilePage() {
   const [photoOpened, { open: openPhoto, close: closePhoto }] = useDisclosure(false);
   const [deleteResOpened, { open: openDeleteRes, close: closeDeleteRes }] = useDisclosure(false);
   const [deleteResId, setDeleteResId] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
 
   return (
     <Container size="md" py="xl">
@@ -51,7 +53,7 @@ function UserProfilePage() {
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Group wrap="wrap">
           <Stack align="center">
-            <Avatar size={100} radius="xl" color="pink">
+            <Avatar size={100} radius="xl" color="pink" src={profile.image ?? undefined}>
               {profile.name
                 .split(" ")
                 .map((n: string) => n[0])
@@ -97,12 +99,48 @@ function UserProfilePage() {
       {/* Photo Upload Modal */}
       <Modal opened={photoOpened} onClose={closePhoto} title="Upload Profile Photo">
         <Stack>
-          <FileInput placeholder="Choose an image" leftSection={<IconPhoto size={16} />} accept="image/*" />
+          <FileInput
+            placeholder="Choose an image"
+            leftSection={<IconPhoto size={16} />}
+            accept="image/*"
+            value={photoFile}
+            onChange={setPhotoFile}
+          />
           <Group justify="flex-end">
             <Button variant="light" color="gray" onClick={closePhoto}>
               Cancel
             </Button>
-            <Button color="pink" onClick={closePhoto}>
+            <Button
+              color="pink"
+              loading={photoUploading}
+              disabled={!photoFile}
+              onClick={async () => {
+                if (!photoFile) {return;}
+                setPhotoUploading(true);
+                try {
+                  const reader = new FileReader();
+                  // oxlint-disable-next-line promise/avoid-new
+                  const dataUrl = await new Promise<string>((resolve, reject) => {
+                    reader.addEventListener("load", () => {
+                      const { result } = reader;
+                      if (typeof result !== "string") {
+                        reject(new Error("Unexpected FileReader result type"));
+                        return;
+                      }
+                      resolve(result);
+                    });
+                    reader.addEventListener("error", () => reject(reader.error ?? new Error("FileReader error")));
+                    reader.readAsDataURL(photoFile);
+                  });
+                  await uploadProfilePhoto({ data: { image: dataUrl } });
+                  void router.invalidate();
+                  closePhoto();
+                  setPhotoFile(null);
+                } finally {
+                  setPhotoUploading(false);
+                }
+              }}
+            >
               Upload
             </Button>
           </Group>
@@ -231,7 +269,9 @@ function UserProfilePage() {
                 w="fit-content"
                 radius="xl"
                 onClick={async () => {
-                  if (!confirm("Are you sure? This will permanently delete your account and all data.")) {return;}
+                  if (!confirm("Are you sure? This will permanently delete your account and all data.")) {
+                    return;
+                  }
                   await deleteAccount();
                   void router.navigate({ to: "/login" });
                 }}

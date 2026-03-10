@@ -104,7 +104,15 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
             <Button component={Link} to="/login" variant="default" fullWidth radius="xl" onClick={onToggle}>
               Log In
             </Button>
-            <LinkButton to="/login" search={{ register: "true" }} color="pink" fullWidth mt="xs" radius="xl" onClick={onToggle}>
+            <LinkButton
+              to="/login"
+              search={{ register: "true" }}
+              color="pink"
+              fullWidth
+              mt="xs"
+              radius="xl"
+              onClick={onToggle}
+            >
               Register
             </LinkButton>
           </>

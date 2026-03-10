@@ -26,7 +26,7 @@ import catServices from "../../../assets/establishments/cat-services.svg";
 import emptyState from "../../../assets/features/empty-state.svg";
 import { BackButton } from "../../../components/back-button.tsx";
 import { EmptyState } from "../../../components/empty-state.tsx";
-import { getEstablishment, createReview, createOwnerReply } from "../../../server/establishments.ts";
+import { getEstablishment, createReview, createOwnerReply, toggleHelpful } from "../../../server/establishments.ts";
 
 import imgStyles from "../../../components/shared-images.module.css";
 
@@ -56,21 +56,14 @@ function EstablishmentDetailsPage() {
   const router = useRouter();
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewContent, setReviewContent] = useState("");
-  const [helpfulSet, setHelpfulSet] = useState<Set<string>>(new Set());
+  const [reviewImages, setReviewImages] = useState<File[]>([]);
   const [replyText, setReplyText] = useState<Record<string, string>>({});
 
   const categoryIcon = CATEGORY_ICONS[data.category];
 
-  const toggleHelpful = (reviewId: string) => {
-    setHelpfulSet((prev) => {
-      const next = new Set(prev);
-      if (next.has(reviewId)) {
-        next.delete(reviewId);
-      } else {
-        next.add(reviewId);
-      }
-      return next;
-    });
+  const handleToggleHelpful = async (reviewId: string) => {
+    await toggleHelpful({ data: { reviewId } });
+    void router.invalidate();
   };
 
   return (
@@ -118,18 +111,51 @@ function EstablishmentDetailsPage() {
             placeholder="Share your experience..."
             minRows={4}
             value={reviewContent}
-            onChange={(e) =>{  setReviewContent(e.currentTarget.value); }}
+            onChange={(e) => {
+              setReviewContent(e.currentTarget.value);
+            }}
           />
           <Group>
-            <FileInput placeholder="Upload images" leftSection={<IconPhoto size={16} />} accept="image/*" multiple />
+            <FileInput
+              placeholder="Upload images"
+              leftSection={<IconPhoto size={16} />}
+              accept="image/*"
+              multiple
+              value={reviewImages}
+              onChange={setReviewImages}
+            />
             <Button
               color="pink"
               radius="xl"
               onClick={async () => {
-                if (!reviewRating || !reviewContent.trim()) {return;}
-                await createReview({ data: { establishmentId: estId, rating: reviewRating, content: reviewContent } });
+                if (!reviewRating || !reviewContent.trim()) {
+                  return;
+                }
+                // Convert images to base64
+                const imagePromises = reviewImages.map(
+                  (file) =>
+                    // oxlint-disable-next-line promise/avoid-new
+                    new Promise<string>((resolve, reject) => {
+                      const reader = new FileReader();
+                      reader.addEventListener("load", () => {
+                        const { result } = reader;
+                        if (typeof result !== "string") {
+                          reject(new Error("Unexpected FileReader result type"));
+                          return;
+                        }
+                        resolve(result);
+                      });
+                      reader.addEventListener("error", () => reject(reader.error ?? new Error("FileReader error")));
+                      reader.readAsDataURL(file);
+                    }),
+                );
+                const images = reviewImages.length > 0 ? await Promise.all(imagePromises) : undefined;
+                await createReview({
+                  data: { establishmentId: estId, rating: reviewRating, content: reviewContent, images },
+                });
                 setReviewRating(0);
                 setReviewContent("");
+                setReviewImages([]);
                 void router.invalidate();
               }}
             >
@@ -143,9 +169,7 @@ function EstablishmentDetailsPage() {
         Reviews ({data.reviews.length})
       </Title>
       <Stack>
-        {data.reviews.map((review: (typeof data.reviews)[number]) => {
-          const isHelpful = helpfulSet.has(review.id);
-          return (
+        {data.reviews.map((review: (typeof data.reviews)[number]) => (
             <Paper key={review.id} withBorder p="md" radius="md">
               <Group justify="space-between" mb="sm">
                 <Group>
@@ -167,19 +191,31 @@ function EstablishmentDetailsPage() {
               <Text size="sm" mb="sm">
                 {review.content}
               </Text>
+              {review.images.length > 0 && (
+                <Group gap="xs" mb="sm">
+                  {review.images.map((img: string, i: number) => (
+                    <img
+                      key={img}
+                      src={img}
+                      alt={`Review ${i + 1}`}
+                      style={{ maxWidth: 120, maxHeight: 90, borderRadius: 8, objectFit: "cover" }}
+                    />
+                  ))}
+                </Group>
+              )}
               <Group>
                 <ActionIcon
-                  variant={isHelpful ? "filled" : "subtle"}
+                  variant={review.isHelpful ? "filled" : "subtle"}
                   color="pink"
                   size="sm"
                   onClick={() => {
-                    toggleHelpful(review.id);
+                    void handleToggleHelpful(review.id);
                   }}
                 >
                   <IconThumbUp size={14} />
                 </ActionIcon>
                 <Text size="xs" c="dimmed">
-                  {review.helpful + (isHelpful ? 1 : 0)} found helpful
+                  {review.helpful} found helpful
                 </Text>
               </Group>
               {review.ownerReply !== null && (
@@ -205,7 +241,9 @@ function EstablishmentDetailsPage() {
                     size="xs"
                     style={{ flex: 1 }}
                     value={replyText[review.id] ?? ""}
-                    onChange={(e) =>{  setReplyText((prev) => ({ ...prev, [review.id]: e.currentTarget.value })); }}
+                    onChange={(e) => {
+                      setReplyText((prev) => ({ ...prev, [review.id]: e.currentTarget.value }));
+                    }}
                   />
                   <Button
                     size="xs"
@@ -213,7 +251,9 @@ function EstablishmentDetailsPage() {
                     color="pink"
                     onClick={async () => {
                       const text = replyText[review.id]?.trim();
-                      if (!text) {return;}
+                      if (!text) {
+                        return;
+                      }
                       await createOwnerReply({ data: { reviewId: review.id, reply: text } });
                       setReplyText((prev) => ({ ...prev, [review.id]: "" }));
                       void router.invalidate();
@@ -224,8 +264,7 @@ function EstablishmentDetailsPage() {
                 </Group>
               )}
             </Paper>
-          );
-        })}
+          ))}
       </Stack>
     </Container>
   );

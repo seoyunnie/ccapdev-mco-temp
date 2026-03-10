@@ -2,6 +2,7 @@ import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
+import type { auth as AuthHandler } from "./src/lib/auth.ts";
 
 // Stub server-only local modules in the client bundle.
 // CreateServerFn replaces handler bodies with RPC stubs on the client,
@@ -18,9 +19,13 @@ function serverOnlyStubPlugin(): Plugin {
     name: "server-only-stub",
     enforce: "pre",
     load(id) {
-      if (this.environment?.name !== "client") {return null;}
+      if (this.environment?.name !== "client") {
+        return null;
+      }
       for (const [suffix, code] of Object.entries(SERVER_STUBS)) {
-        if (id.endsWith(suffix)) {return code;}
+        if (id.endsWith(suffix)) {
+          return code;
+        }
       }
       return null;
     },
@@ -35,23 +40,32 @@ function betterAuthVitePlugin(): Plugin {
     configureServer(server) {
       // oxlint-disable-next-line no-async-endpoint-handlers, no-misused-promises
       server.middlewares.use(async (req, res, next) => {
-        if (req.url == null || !req.url.startsWith("/api/auth")) { next(); return;}
+        if (req.url == null || !req.url.startsWith("/api/auth")) {
+          next();
+          return;
+        }
 
-        // oxlint-disable-next-line no-unsafe-type-assertion, consistent-type-imports
-        const { auth } = (await server.ssrLoadModule("/src/lib/auth.ts")) as { auth: typeof import("./src/lib/auth.ts")["auth"] };
+        // oxlint-disable-next-line no-unsafe-type-assertion
+        const { auth } = (await server.ssrLoadModule("/src/lib/auth.ts")) as {
+          auth: typeof AuthHandler;
+        };
 
         const proto = req.headers["x-forwarded-proto"]?.toString() ?? "http";
         const host = req.headers.host ?? "localhost:5173";
         const url = new URL(req.url, `${proto}://${host}`);
 
         const bodyChunks: Buffer[] = [];
-        // oxlint-disable-next-line no-unsafe-type-assertion
-        for await (const chunk of req) {bodyChunks.push(chunk as Buffer);}
+        for await (const chunk of req) {
+          // oxlint-disable-next-line no-unsafe-argument
+          bodyChunks.push(Buffer.from(chunk));
+        }
         const body = Buffer.concat(bodyChunks);
 
         const headers = new Headers();
         for (const [key, val] of Object.entries(req.headers)) {
-          if (val != null) {headers.set(key, Array.isArray(val) ? val.join(", ") : val);}
+          if (val != null) {
+            headers.set(key, Array.isArray(val) ? val.join(", ") : val);
+          }
         }
 
         const webReq = new Request(url, {

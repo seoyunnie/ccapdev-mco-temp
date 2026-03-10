@@ -16,15 +16,15 @@ export const getReports = createServerFn({ method: "GET" }).handler(async () => 
   });
 
   return reports.map((r) => ({
-      id: r.id,
-      title: r.thread?.title ?? (r.comment ? `${r.comment.content.slice(0, 50)}…` : "Unknown"),
-      author: r.thread?.author.name ?? r.comment?.author.name ?? "Unknown",
-      reason: r.reason,
-      reports: 1,
-      date: r.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      threadId: r.threadId,
-      commentId: r.commentId,
-    }));
+    id: r.id,
+    title: r.thread?.title ?? (r.comment ? `${r.comment.content.slice(0, 50)}…` : "Unknown"),
+    author: r.thread?.author.name ?? r.comment?.author.name ?? "Unknown",
+    reason: r.reason,
+    reports: 1,
+    date: r.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    threadId: r.threadId,
+    commentId: r.commentId,
+  }));
 });
 
 export const resolveReport = createServerFn({ method: "POST" })
@@ -32,7 +32,9 @@ export const resolveReport = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const session = await requireRole(["concierge", "admin"]);
     const report = await prisma.report.findUnique({ where: { id: data.reportId } });
-    if (!report) {throw new Error("Report not found");}
+    if (!report) {
+      throw new Error("Report not found");
+    }
 
     if (data.action === "delete") {
       if (report.threadId != null) {
@@ -60,8 +62,12 @@ export const resolveReport = createServerFn({ method: "POST" })
 
 export const createBan = createServerFn({ method: "POST" })
   .inputValidator((d: { userId: string; reason: string; durationDays: number }) => {
-    if (d.durationDays < 1 || d.durationDays > 365) {throw new Error("Ban duration must be 1–365 days");}
-    if (!d.reason.trim()) {throw new Error("Ban reason is required");}
+    if (d.durationDays < 1 || d.durationDays > 365) {
+      throw new Error("Ban duration must be 1–365 days");
+    }
+    if (!d.reason.trim()) {
+      throw new Error("Ban reason is required");
+    }
     return d;
   })
   .handler(async ({ data }) => {
@@ -87,7 +93,9 @@ export const createBan = createServerFn({ method: "POST" })
 
 export const createReport = createServerFn({ method: "POST" })
   .inputValidator((d: { threadId?: string; commentId?: string; reason: string }) => {
-    if (d.threadId == null && d.commentId == null) {throw new Error("Either threadId or commentId is required");}
+    if (d.threadId == null && d.commentId == null) {
+      throw new Error("Either threadId or commentId is required");
+    }
     return d;
   })
   .handler(async ({ data }) => {

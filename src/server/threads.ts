@@ -4,22 +4,38 @@ import { prisma } from "../db.ts";
 import { getSession, requireSession } from "./auth.ts";
 import { formatRelative } from "./utils.ts";
 
-export const getThreads = createServerFn({ method: "GET" }).handler(async () => {
-  const rows = await prisma.thread.findMany({
-    include: { author: true, _count: { select: { comments: true } } },
-    orderBy: { createdAt: "desc" },
+const DEFAULT_PAGE_SIZE = 20;
+
+export const getThreads = createServerFn({ method: "GET" })
+  .inputValidator((d: { page?: number; pageSize?: number }) => d)
+  .handler(async ({ data }) => {
+    const page = data.page ?? 1;
+    const pageSize = data.pageSize ?? DEFAULT_PAGE_SIZE;
+    const [rows, total] = await Promise.all([
+      prisma.thread.findMany({
+        include: { author: true, _count: { select: { comments: true } } },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.thread.count(),
+    ]);
+    return {
+      items: rows.map((t) => ({
+        id: t.id,
+        title: t.title,
+        author: t.author.name,
+        snippet: t.content.length > 120 ? `${t.content.slice(0, 120)}…` : t.content,
+        upvotes: t.upvotes,
+        comments: t._count.comments,
+        tag: t.tag ?? "General",
+        time: formatRelative(t.createdAt),
+      })),
+      total,
+      page,
+      pageSize,
+    };
   });
-  return rows.map((t) => ({
-    id: t.id,
-    title: t.title,
-    author: t.author.name,
-    snippet: t.content.length > 120 ? `${t.content.slice(0, 120)}…` : t.content,
-    upvotes: t.upvotes,
-    comments: t._count.comments,
-    tag: t.tag ?? "General",
-    time: formatRelative(t.createdAt),
-  }));
-});
 
 export const getThread = createServerFn({ method: "GET" })
   .inputValidator((d: { threadId: string }) => d)
@@ -36,7 +52,9 @@ export const getThread = createServerFn({ method: "GET" })
         },
       },
     });
-    if (!thread) {throw new Error("Thread not found");}
+    if (!thread) {
+      throw new Error("Thread not found");
+    }
 
     return {
       id: thread.id,
@@ -187,9 +205,12 @@ export const deleteThread = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const session = await requireSession();
     const thread = await prisma.thread.findUnique({ where: { id: data.threadId } });
-    if (!thread) {throw new Error("Thread not found");}
-    if (thread.authorId !== session.user.id && !["admin"].includes(session.user.role as string))
-      {throw new Error("Forbidden");}
+    if (!thread) {
+      throw new Error("Thread not found");
+    }
+    if (thread.authorId !== session.user.id && !["admin"].includes(session.user.role as string)) {
+      throw new Error("Forbidden");
+    }
 
     await prisma.thread.delete({ where: { id: data.threadId } });
 
@@ -208,8 +229,12 @@ export const updateThread = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const session = await requireSession();
     const thread = await prisma.thread.findUnique({ where: { id: data.threadId } });
-    if (!thread) {throw new Error("Thread not found");}
-    if (thread.authorId !== session.user.id) {throw new Error("Forbidden");}
+    if (!thread) {
+      throw new Error("Thread not found");
+    }
+    if (thread.authorId !== session.user.id) {
+      throw new Error("Forbidden");
+    }
 
     const updated = await prisma.thread.update({
       where: { id: data.threadId },
@@ -233,9 +258,12 @@ export const deleteComment = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const session = await requireSession();
     const comment = await prisma.comment.findUnique({ where: { id: data.commentId } });
-    if (!comment) {throw new Error("Comment not found");}
-    if (comment.authorId !== session.user.id && !["admin"].includes(session.user.role as string))
-      {throw new Error("Forbidden");}
+    if (!comment) {
+      throw new Error("Comment not found");
+    }
+    if (comment.authorId !== session.user.id && !["admin"].includes(session.user.role as string)) {
+      throw new Error("Forbidden");
+    }
 
     await prisma.comment.delete({ where: { id: data.commentId } });
 

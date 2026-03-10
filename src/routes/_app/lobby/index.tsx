@@ -16,6 +16,7 @@ import {
   Tabs,
   Progress,
   Paper,
+  Pagination,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
@@ -33,13 +34,14 @@ import { createThread, getThreads } from "../../../server/threads.ts";
 const MAX_CONTENT_LENGTH = 2000;
 
 export const Route = createFileRoute("/_app/lobby/")({
-  loader: () => getThreads(),
+  loader: () => getThreads({ data: {} }),
   head: () => ({ meta: [{ title: "Lobby | Adormable" }] }),
   component: ForumFeedPage,
 });
 
 function ForumFeedPage() {
-  const posts = Route.useLoaderData();
+  const result = Route.useLoaderData();
+  const posts = result.items;
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<string | null>("Newest");
@@ -65,7 +67,9 @@ function ForumFeedPage() {
     .sort((a, b) => (sort === "Most Popular" ? b.upvotes - a.upvotes : 0));
 
   const handleCreate = async () => {
-    if (!newTitle.trim() || !newContent.trim()) {return;}
+    if (!newTitle.trim() || !newContent.trim()) {
+      return;
+    }
     await createThread({ data: { title: newTitle, content: newContent, tag: newTag ?? undefined } });
     setNewTitle("");
     setNewContent("");
@@ -126,7 +130,13 @@ function ForumFeedPage() {
                 />
               </Group>
               <Group justify="flex-end">
-                <Button color="pink" radius="xl" onClick={() => { void handleCreate(); }}>
+                <Button
+                  color="pink"
+                  radius="xl"
+                  onClick={() => {
+                    void handleCreate();
+                  }}
+                >
                   Create Post
                 </Button>
               </Group>
@@ -250,6 +260,12 @@ function ForumFeedPage() {
           </Card>
         ))}
       </Stack>
+
+      {result.total > result.pageSize && (
+        <Group justify="center" mt="xl">
+          <Pagination total={Math.ceil(result.total / result.pageSize)} value={result.page} color="pink" />
+        </Group>
+      )}
     </Container>
   );
 }

@@ -327,10 +327,10 @@ function LandingPage() {
           className={styles.callToActionBanner}
           style={{ backgroundImage: `url(${ctaPattern})`, backgroundSize: "cover", backgroundBlendMode: "soft-light" }}
         >
-          <Title order={2} c="white" mb="md">
+          <Title order={2} c="black" mb="md">
             Ready to Make Dorm Life Better?
           </Title>
-          <Text c="white" maw={500} mx="auto" mb="xl" style={{ opacity: 0.9 }}>
+          <Text c="black" maw={500} mx="auto" mb="xl" style={{ opacity: 0.9 }}>
             Join hundreds of residents already using Adormable to reserve study spots, connect with neighbors, and
             discover local gems.
           </Text>
@@ -338,7 +338,7 @@ function LandingPage() {
             <LinkButton size="lg" variant="white" color="pink" radius="xl" to="/login" search={{ register: "true" }}>
               Join Now
             </LinkButton>
-            <LinkButton size="lg" variant="outline" radius="xl" color="white" to="/guide">
+            <LinkButton size="lg" variant="outline" radius="xl" color="black" to="/guide">
               Browse Directory
             </LinkButton>
           </Group>

@@ -29,6 +29,7 @@ model User {
   reports        Report[]
   bans           Ban[]
   activityLogs   ActivityLog[]
+  helpfulVotes   HelpfulVote[]
 
   @@unique([email])
   @@map("user")
@@ -159,6 +160,8 @@ model Review {
   content         String
   ownerReply      String?
   images          String[]
+  helpful         Int           @default(0)
+  helpfulVotes    HelpfulVote[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -262,4 +265,27 @@ model ActivityLog {
 
   @@index([userId])
   @@map("activity_log")
+}
+
+model HelpfulVote {
+  id       String @id @map("_id")
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewId String
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reviewId])
+  @@index([userId])
+  @@index([reviewId])
+  @@map("helpful_vote")
+}
+
+model ErrorLog {
+  id        String   @id @map("_id")
+  level     String // Error | Warning | Info
+  message   String
+  source    String? // e.g. "reservations", "auth"
+  createdAt DateTime @default(now())
+
+  @@map("error_log")
 }

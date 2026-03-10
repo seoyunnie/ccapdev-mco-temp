@@ -54,7 +54,9 @@ function ReservationPage() {
     currentLetter = letter;
     currentRow.push(seat);
   }
-  if (currentRow.length > 0) {seatRows.push(currentRow);}
+  if (currentRow.length > 0) {
+    seatRows.push(currentRow);
+  }
 
   return (
     <Container size="lg" py="xl">
@@ -197,7 +199,9 @@ function ReservationPage() {
                 color="pink"
                 radius="xl"
                 onClick={async () => {
-                  if (selectedSeat == null || selectedStartTime == null || selectedEndTime == null) {return;}
+                  if (selectedSeat == null || selectedStartTime == null || selectedEndTime == null) {
+                    return;
+                  }
                   const baseDate = new Date();
                   baseDate.setDate(baseDate.getDate() + ((selectedDay - baseDate.getDay() + 7) % 7 || 7));
                   const dateStr = baseDate.toISOString().slice(0, 10);
@@ -229,7 +233,11 @@ function to24h(time: string): string {
   const [rawTime, period] = time.split(" ");
   const [h, m] = rawTime.split(":").map(Number);
   let hour = h;
-  if (period === "PM" && h !== 12) {hour += 12;}
-  if (period === "AM" && h === 12) {hour = 0;}
+  if (period === "PM" && h !== 12) {
+    hour += 12;
+  }
+  if (period === "AM" && h === 12) {
+    hour = 0;
+  }
   return `${String(hour).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }

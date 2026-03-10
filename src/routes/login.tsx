@@ -49,6 +49,7 @@ function LoginRegisterPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const loginForm = useForm({
     initialValues: { email: "", password: "" },
@@ -73,7 +74,11 @@ function LoginRegisterPage() {
   const handleLogin = async (values: typeof loginForm.values) => {
     setError("");
     setLoading(true);
-    const { error: authError } = await authClient.signIn.email({ email: values.email, password: values.password });
+    const { error: authError } = await authClient.signIn.email({
+      email: values.email,
+      password: values.password,
+      rememberMe,
+    });
     setLoading(false);
     if (authError) {
       setError(authError.message ?? "Login failed. Please try again.");
@@ -182,7 +187,14 @@ function LoginRegisterPage() {
 
               {!isRegister && (
                 <Group justify="space-between">
-                  <Checkbox label="Remember me" color="pink" />
+                  <Checkbox
+                    label="Remember me"
+                    color="pink"
+                    checked={rememberMe}
+                    onChange={(e) => {
+                      setRememberMe(e.currentTarget.checked);
+                    }}
+                  />
                 </Group>
               )}
 

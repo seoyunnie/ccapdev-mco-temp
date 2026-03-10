@@ -24,50 +24,50 @@ This branch implements the full backend layer for Adormable: database schema, us
 
 ### New files
 
-| File                             | Purpose                                                                                                                                                                             |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prisma/schema.prisma`           | 15 MongoDB models: 4 auth (User, Session, Account, Verification) + 11 domain (StudyZone, Seat, Reservation, Establishment, Review, Thread, Comment, Vote, Report, Ban, ActivityLog); `Establishment` has `address String?`; `Reservation` has `studentName String?` and `studentId String?` |
-| `prisma/seed.ts`                 | Seeds dev data: 4 users, 3 zones, 22 seats, 2 reservations, 2 establishments, 2 reviews, 2 threads, 2 comments                                                                      |
-| `prisma.config.ts`               | Prisma config pointing output to `generated/prisma/client`                                                                                                                          |
-| `src/db.ts`                      | PrismaClient singleton (HMR-safe global pattern)                                                                                                                                    |
-| `src/lib/auth.ts`                | Better Auth server instance — Prisma adapter, email/password, role field, cookie plugin                                                                                             |
-| `src/lib/auth-client.ts`         | Better Auth client instance (React hook-based)                                                                                                                                      |
-| `src/contexts/auth-context.tsx`  | React context: `useAuth()` → `{ isLoggedIn, role, name, isPending, signOut }`                                                                                                       |
-| `src/contexts/auth-provider.tsx` | Wraps app in `AuthContext` using `authClient.useSession()`                                                                                                                          |
-| `src/server/auth.ts`             | Core auth helpers: `getSession()` (dynamic import to avoid import-protection), `getSessionFn()` (SSR-safe), `requireSession()`, `requireRole(roles[])`                              |
-| `src/server/utils.ts`            | Shared utilities: `formatRelative(date)`, `categorizeAction(action)`                                                                                                                |
-| `src/server.ts`                  | Custom production server entry — intercepts `/api/auth/*` and routes to Better Auth before delegating to TanStack Start's default stream handler                                    |
-| `src/server/threads.ts`          | Forum: `getThreads`, `getThread`, `createThread`, `createComment`, `voteThread`, `voteComment`, `deleteThread`, `updateThread`, `deleteComment`                                     |
-| `src/server/zones.ts`            | Study nook: `getZones`, `getZone`                                                                                                                                                   |
-| `src/server/reservations.ts`     | Reservations: `getMyReservations`, `getAllReservations`, `createReservation`, `cancelReservation`, `purgeExpiredReservations`, `createWalkInReservation`                            |
-| `src/server/establishments.ts`   | Guide: `getEstablishments`, `getEstablishment`, `createEstablishment`, `createReview`, `createOwnerReply`, `deleteEstablishment`, `updateEstablishment`                             |
-| `src/server/profile.ts`          | Profile: `getUserProfile`, `updateProfile`, `deleteAccount`                                                                                                                         |
-| `src/server/moderation.ts`       | Moderation: `getReports`, `resolveReport`, `createBan`, `createReport`                                                                                                              |
-| `src/server/admin.ts`            | Admin: `getAdminStats`, `getUsers`, `updateUserRole`, `getActivityLogs`                                                                                                             |
+| File                             | Purpose                                                                                                                                                                                                                                                                                                                                                                                  |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prisma/schema.prisma`           | 17 MongoDB models: 4 auth (User, Session, Account, Verification) + 11 domain (StudyZone, Seat, Reservation, Establishment, Review, Thread, Comment, Vote, Report, Ban, ActivityLog) + 2 infrastructure (HelpfulVote, ErrorLog); `Establishment` has `address String?`; `Reservation` has `studentName String?` and `studentId String?`; `Review` has `helpful Int` and `images String[]` |
+| `prisma/seed.ts`                 | Seeds dev data: 4 users, 3 zones, 22 seats, 2 reservations, 2 establishments, 2 reviews, 2 threads, 2 comments                                                                                                                                                                                                                                                                           |
+| `prisma.config.ts`               | Prisma config pointing output to `generated/prisma/client`                                                                                                                                                                                                                                                                                                                               |
+| `src/db.ts`                      | PrismaClient singleton (HMR-safe global pattern)                                                                                                                                                                                                                                                                                                                                         |
+| `src/lib/auth.ts`                | Better Auth server instance — Prisma adapter, email/password, role field, cookie plugin                                                                                                                                                                                                                                                                                                  |
+| `src/lib/auth-client.ts`         | Better Auth client instance (React hook-based)                                                                                                                                                                                                                                                                                                                                           |
+| `src/contexts/auth-context.tsx`  | React context: `useAuth()` → `{ isLoggedIn, role, name, isPending, signOut }`                                                                                                                                                                                                                                                                                                            |
+| `src/contexts/auth-provider.tsx` | Wraps app in `AuthContext` using `authClient.useSession()`                                                                                                                                                                                                                                                                                                                               |
+| `src/server/auth.ts`             | Core auth helpers: `getSession()` (dynamic import to avoid import-protection), `getSessionFn()` (SSR-safe), `requireSession()`, `requireRole(roles[])`                                                                                                                                                                                                                                   |
+| `src/server/utils.ts`            | Shared utilities: `formatRelative(date)`, `categorizeAction(action)`, `logError(message, source?)` — writes to `ErrorLog` model                                                                                                                                                                                                                                                          |
+| `src/server.ts`                  | Custom production server entry — intercepts `/api/auth/*` and routes to Better Auth before delegating to TanStack Start's default stream handler                                                                                                                                                                                                                                         |
+| `src/server/threads.ts`          | Forum: `getThreads` (paginated), `getThread`, `createThread`, `createComment`, `voteThread`, `voteComment`, `deleteThread`, `updateThread`, `deleteComment`                                                                                                                                                                                                                              |
+| `src/server/zones.ts`            | Study nook: `getZones`, `getZone`                                                                                                                                                                                                                                                                                                                                                        |
+| `src/server/reservations.ts`     | Reservations: `getMyReservations`, `getAllReservations`, `createReservation`, `cancelReservation`, `purgeExpiredReservations`, `createWalkInReservation`                                                                                                                                                                                                                                 |
+| `src/server/establishments.ts`   | Guide: `getEstablishments` (paginated), `getEstablishment` (loads `isHelpful` per review), `createEstablishment`, `createReview` (images support), `createOwnerReply`, `deleteEstablishment`, `updateEstablishment`, `toggleHelpful`                                                                                                                                                     |
+| `src/server/profile.ts`          | Profile: `getUserProfile`, `updateProfile`, `deleteAccount`, `uploadProfilePhoto`                                                                                                                                                                                                                                                                                                        |
+| `src/server/moderation.ts`       | Moderation: `getReports`, `resolveReport`, `createBan`, `createReport`                                                                                                                                                                                                                                                                                                                   |
+| `src/server/admin.ts`            | Admin: `getAdminStats`, `getUsers`, `updateUserRole`, `getActivityLogs` (paginated), `getDiagnostics`, `getErrorLogs` (paginated)                                                                                                                                                                                                                                                        |
 
 ### Modified files
 
-| File                                       | What changed                                                                                                                                                 |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- |
-| `vite.config.ts`                           | Added `serverOnlyStubPlugin()` + `betterAuthVitePlugin()` -- see Bundling section below for details                                                          |
-| `src/routes/login.tsx`                     | Combined login/register page with toggle; uses `authClient.signIn.email()` + `authClient.signUp.email()`, `getSessionFn()` in `beforeLoad`; toggled via `?register=true` query param |
-| ~~`src/routes/signup.tsx`~~                | **Deleted** — redundant standalone signup page removed; header and sidebar links updated to `/login?register=true`                                           |
-| `src/routes/_app/route.tsx`                | Uses `getSessionFn()` in `beforeLoad` for SSR-safe auth + role gating                                                                                        |
-| `src/routes/_app/dashboard.tsx`            | Loads `getMyReservations`; Manage button links to `/profile`                                                                                                 |
-| `src/routes/_app/profile.tsx`              | Loads `getUserProfile`, calls `updateProfile`, `cancelReservation`, `deleteAccount`; Delete Account and Edit reservation wired                               |
-| `src/routes/_app/guide/$estId.tsx`         | Loads `getEstablishment`, calls `createReview`, `createOwnerReply`; Helpful thumbs-up toggle wired (client-side), owner reply inline form                    |
-| `src/routes/_app/lobby/index.tsx`          | Loads `getThreads`, calls `createThread`; New Post → modal, Sort Select wired; client-only category management modal removed (was non-persistent)            |
+| File                                       | What changed                                                                                                                                                                                                                                                       |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- |
+| `vite.config.ts`                           | Added `serverOnlyStubPlugin()` + `betterAuthVitePlugin()` -- see Bundling section below for details                                                                                                                                                                |
+| `src/routes/login.tsx`                     | Combined login/register page with toggle; uses `authClient.signIn.email()` + `authClient.signUp.email()`, `getSessionFn()` in `beforeLoad`; toggled via `?register=true` query param; `rememberMe` checkbox wired to `authClient.signIn.email({ rememberMe })`     |
+| ~~`src/routes/signup.tsx`~~                | **Deleted** — redundant standalone signup page removed; header and sidebar links updated to `/login?register=true`                                                                                                                                                 |
+| `src/routes/_app/route.tsx`                | Uses `getSessionFn()` in `beforeLoad` for SSR-safe auth + role gating                                                                                                                                                                                              |
+| `src/routes/_app/dashboard.tsx`            | Loads `getMyReservations`; Manage button links to `/profile`                                                                                                                                                                                                       |
+| `src/routes/_app/profile.tsx`              | Loads `getUserProfile`, calls `updateProfile`, `cancelReservation`, `deleteAccount`, `uploadProfilePhoto`; Photo upload modal with FileInput + base64 conversion                                                                                                   |
+| `src/routes/_app/guide/$estId.tsx`         | Loads `getEstablishment` (with `isHelpful` per review), calls `createReview` (with images), `createOwnerReply`, `toggleHelpful`; Review image thumbnails; persistent helpful votes; owner reply inline form                                                        |
+| `src/routes/_app/lobby/index.tsx`          | Loads `getThreads` (paginated), calls `createThread`; New Post → modal, Sort Select wired; Pagination component; client-only category management removed                                                                                                           |
 | `src/routes/_app/lobby/$threadId.tsx`      | Loads `getThread`, calls `createComment`, `voteThread`, `voteComment`, `updateThread`, `deleteThread`, `deleteComment`, `createReport`; Edit/Delete/Reply/upvote/Report/DeleteComment wired; `isAuthor` flag from server controls comment delete button visibility |
-| `src/routes/_app/study-nook/index.tsx`     | Loads `getZones`; availability filter Select wired                                                                                                           |
-| `src/routes/_app/study-nook/$zoneId.tsx`   | Loads `getZone`, calls `createReservation`                                                                                                                   |
-| `src/routes/_app/guide/index.tsx`          | Loads `getEstablishments`; search wired                                                                                                                      |
-| `src/routes/_app/guide/$estId.tsx`         | Loads `getEstablishment`, calls `createReview`, `createOwnerReply`; owner reply form gated to owner via `isOwner` flag                                       |     |
-| `src/routes/_app/concierge.tsx`            | Loads `getAllReservations`, calls `cancelReservation`, `purgeExpiredReservations`, `createWalkInReservation`; walk-in form fully wired with state            |
-| `src/routes/_app/moderation.tsx`           | Loads `getReports`, calls `resolveReport`, `createBan`                                                                                                       |
-| `src/routes/_app/admin/index.tsx`          | Loads `getAdminStats` + `getUsers`; `updateUserRole`, `createBan` wired; search/filter users wired; ban confirmation modal with editable reason and duration  |
-| `src/routes/_app/admin/establishments.tsx` | Loads `getEstablishments`, calls `createEstablishment`, `deleteEstablishment`, `updateEstablishment`; search, Edit/Delete/Assign/Cancel wired; `address` field wired through create/edit forms and server calls |
-| `src/routes/_app/admin/logs.tsx`           | Loads `getActivityLogs`; search + type filter wired with `useState` + `.filter()`                                                                            |
-| `package.json`                             | Added `better-auth`, `@better-auth/prisma-adapter`, `@prisma/client`, `prisma`, `dotenv`                                                                     |
+| `src/routes/_app/study-nook/index.tsx`     | Loads `getZones`; availability filter Select wired                                                                                                                                                                                                                 |
+| `src/routes/_app/study-nook/$zoneId.tsx`   | Loads `getZone`, calls `createReservation`                                                                                                                                                                                                                         |
+| `src/routes/_app/guide/index.tsx`          | Loads `getEstablishments` (paginated); search wired; Pagination component                                                                                                                                                                                          |
+| `src/routes/_app/guide/$estId.tsx`         | Loads `getEstablishment`, calls `createReview`, `createOwnerReply`; owner reply form gated to owner via `isOwner` flag                                                                                                                                             |     |
+| `src/routes/_app/concierge.tsx`            | Loads `getAllReservations`, calls `cancelReservation`, `purgeExpiredReservations`, `createWalkInReservation`; walk-in form fully wired with state                                                                                                                  |
+| `src/routes/_app/moderation.tsx`           | Loads `getReports`, calls `resolveReport`, `createBan`                                                                                                                                                                                                             |
+| `src/routes/_app/admin/index.tsx`          | Loads `getAdminStats` + `getUsers` + `getDiagnostics`; `updateUserRole`, `createBan` wired; search/filter users wired; ban confirmation modal; real diagnostics with DB ping                                                                                       |
+| `src/routes/_app/admin/establishments.tsx` | Loads `getEstablishments`, calls `createEstablishment`, `deleteEstablishment`, `updateEstablishment`; search, Edit/Delete/Assign/Cancel wired; `address` field wired through create/edit forms and server calls                                                    |
+| `src/routes/_app/admin/logs.tsx`           | Loads `getActivityLogs` (paginated) + `getErrorLogs` (paginated); search + type filter wired; real error logs from DB; Pagination on both tabs                                                                                                                     |
+| `package.json`                             | Added `better-auth`, `@better-auth/prisma-adapter`, `@prisma/client`, `prisma`, `dotenv`                                                                                                                                                                           |
 
 ---
 
@@ -95,12 +95,12 @@ Roles: `guest` (default on signup) → `resident` → `concierge` → `admin`. R
 
 ## Security measures
 
-- **All 22 mutation functions** check `requireSession()` or `requireRole()` — no anonymous writes.
-- **Role-based access**: admin-only functions (`getAdminStats`, `getActivityLogs`, `updateUserRole`, `createEstablishment`, `deleteEstablishment`, `updateEstablishment`), concierge/admin functions (`getUsers`, `getAllReservations`, `getReports`, `resolveReport`, `createBan`, `purgeExpiredReservations`, `createWalkInReservation`).
-- **Input validation**: role whitelist on `updateUserRole`, rating 1–5 on `createReview`, ban duration 1–365 days on `createBan`, content-not-empty checks on `createOwnerReply`, `createReport` requires at least one of `threadId`/`commentId`.
+- **All 27 mutation functions** check `requireSession()` or `requireRole()` — no anonymous writes.
+- **Role-based access**: admin-only functions (`getAdminStats`, `getActivityLogs`, `updateUserRole`, `createEstablishment`, `deleteEstablishment`, `updateEstablishment`, `getDiagnostics`, `getErrorLogs`), concierge/admin functions (`getUsers`, `getAllReservations`, `getReports`, `resolveReport`, `createBan`, `purgeExpiredReservations`, `createWalkInReservation`).
+- **Input validation**: role whitelist on `updateUserRole`, rating 1–5 on `createReview`, ban duration 1–365 days on `createBan`, content-not-empty checks on `createOwnerReply`, `createReport` requires at least one of `threadId`/`commentId`, image uploads validated (base64 data URL prefix, size limits, max count).
 - **Seat double-booking prevention**: `createReservation` uses `prisma.$transaction()` for atomic check + create + seat update (no race condition).
 - **Ownership checks**: `cancelReservation` verifies the user owns the reservation (or is concierge/admin). `deleteThread`/`deleteComment` verify authorship (or admin). `updateThread` verifies authorship. `createOwnerReply` verifies the user is the establishment owner.
-- **Activity logging**: All 22 mutation functions log to `ActivityLog` for full audit trail.
+- **Activity logging**: All 27 mutation functions log to `ActivityLog` for full audit trail.
 
 ---
 
@@ -130,14 +130,9 @@ TanStack Start's plugin (`resolveEntry`) scans `src/` for a file named `server.{
 
 ## Known limitations (future work)
 
-- Filtering/sorting on list pages is client-side only (no server-side pagination yet).
 - Seed users have no password hash — they exist only to populate relations. Real test accounts must be created via Sign Up.
-- No file/image upload yet (review images, user avatars). `FileInput` on the review form and profile photo modal render but do not upload.
 - No real-time updates (e.g. WebSocket for new comments).
-- `helpful` count on reviews is a client-side toggle only — no persistence model in the schema yet.
-- `admin/index.tsx` "Site Diagnostics" section shows hardcoded green badges. No real monitoring.
-- `admin/logs.tsx` "Error Logs" tab shows 4 hardcoded entries. Only the Activity Logs tab uses real data.
-- `login.tsx` "Remember me" checkbox renders but is non-functional.
+- Image storage uses base64 data URLs in MongoDB string fields. Acceptable for a school project; a production app would use an object store (S3, Cloudflare R2).
 
 ## Phase 1 fixes
 
@@ -150,3 +145,38 @@ Following issues resolved after initial integration:
 - **R12 — Remove category management**: Client-only Manage Categories modal removed from `lobby/index.tsx` (state was lost on reload). Tag filters now use `DEFAULT_TAGS` from `lobby.constants.ts` directly.
 - **R13 — Walk-in student info in DB**: Added `studentName String?` and `studentId String?` to the `Reservation` Prisma model; `createWalkInReservation` now stores them in the database row.
 - **R14 — Establishment address**: Added `address String?` to the `Establishment` Prisma model; `getEstablishments`, `createEstablishment`, and `updateEstablishment` all handle the field; admin UI edit and create forms load and submit `address`.
+
+## Phase 2 fixes
+
+Following cosmetic and infrastructure issues resolved:
+
+### Schema additions
+
+- **`HelpfulVote` model**: Join table with `userId` + `reviewId` (unique constraint). Relations to `User` and `Review`.
+- **`ErrorLog` model**: Fields `level`, `message`, `source`, `createdAt`. Used by `logError()` utility and queried by `getErrorLogs`.
+- **`Review.helpful`**: New `Int @default(0)` field for persisted helpful count. `Review.helpfulVotes` relation added.
+- **`User.helpfulVotes`**: Relation to `HelpfulVote[]`.
+
+### New server functions
+
+| Function             | File                | Purpose                                                                                                                     |
+| -------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `toggleHelpful`      | `establishments.ts` | Creates or deletes `HelpfulVote`, atomically increments/decrements `Review.helpful`. Logs errors via `logError()`.          |
+| `uploadProfilePhoto` | `profile.ts`        | Validates base64 data URL (<2 MB, starts with `data:image/`), updates `User.image`, logs activity.                          |
+| `getDiagnostics`     | `admin.ts`          | Pings MongoDB via `$runCommandRaw({ ping: 1 })`, counts records across 5 models, returns `{ api, database, totalRecords }`. |
+| `getErrorLogs`       | `admin.ts`          | Paginated query on `ErrorLog` model (admin-only). Returns `{ items, total, page, pageSize }`.                               |
+| `logError`           | `utils.ts`          | Async utility — dynamically imports Prisma, creates `ErrorLog` record. Silent catch (never crashes the app).                |
+
+### Server-side pagination
+
+`getThreads`, `getEstablishments`, `getActivityLogs`, and `getErrorLogs` now accept `{ page?, pageSize? }` input params and return `{ items, total, page, pageSize }`. Uses Prisma `skip`/`take` for offset-based pagination.
+
+### UI changes
+
+- **Login — Remember me**: `rememberMe` state wired to `Checkbox`, passed to `authClient.signIn.email({ rememberMe })`.
+- **Profile — Photo upload**: `FileInput` in photo modal converts file to base64 via `FileReader.readAsDataURL()`, calls `uploadProfilePhoto`. Loading state shown during upload.
+- **Guide — Review images**: `FileInput` (multiple) converts images to base64 array, passed to `createReview({ images })`. Review cards display image thumbnails.
+- **Guide — Helpful votes**: Button calls `toggleHelpful` server function. `isHelpful` flag per review loaded from `HelpfulVote` table via `getEstablishment`. Replaced client-only `useState` set.
+- **Admin — Diagnostics**: Real DB ping and record count from `getDiagnostics()`. Shows green/red status badges.
+- **Admin — Error logs**: Hardcoded entries removed. Error Logs tab reads from `ErrorLog` model with "Source" column. Empty state shown when no errors.
+- **Pagination**: Mantine `Pagination` component added to lobby (threads), guide (establishments), and admin logs (activity + error) pages. Shown conditionally when `total > pageSize`.

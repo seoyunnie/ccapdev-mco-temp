@@ -33,7 +33,9 @@ export const getUsers = createServerFn({ method: "GET" }).handler(async () => {
 export const updateUserRole = createServerFn({ method: "POST" })
   .inputValidator((d: { userId: string; role: string }) => {
     const validRoles = ["guest", "resident", "concierge", "admin"];
-    if (!validRoles.includes(d.role)) {throw new Error("Invalid role");}
+    if (!validRoles.includes(d.role)) {
+      throw new Error("Invalid role");
+    }
     return d;
   })
   .handler(async ({ data }) => {
@@ -52,19 +54,81 @@ export const updateUserRole = createServerFn({ method: "POST" })
     return updated;
   });
 
-export const getActivityLogs = createServerFn({ method: "GET" }).handler(async () => {
-  await requireRole(["admin"]);
-  const logs = await prisma.activityLog.findMany({
-    include: { user: { select: { name: true } } },
-    orderBy: { createdAt: "desc" },
-    take: 100,
+export const getActivityLogs = createServerFn({ method: "GET" })
+  .inputValidator((d: { page?: number; pageSize?: number }) => d)
+  .handler(async ({ data }) => {
+    await requireRole(["admin"]);
+    const page = data.page ?? 1;
+    const pageSize = data.pageSize ?? 50;
+    const [logs, total] = await Promise.all([
+      prisma.activityLog.findMany({
+        include: { user: { select: { name: true } } },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.activityLog.count(),
+    ]);
+    return {
+      items: logs.map((l) => ({
+        id: l.id,
+        user: l.user?.name ?? "System",
+        action: l.action,
+        detail: l.detail,
+        type: categorizeAction(l.action),
+        timestamp: l.createdAt.toISOString().replace("T", " ").slice(0, 19),
+      })),
+      total,
+      page,
+      pageSize,
+    };
   });
-  return logs.map((l) => ({
-    id: l.id,
-    user: l.user?.name ?? "System",
-    action: l.action,
-    detail: l.detail,
-    type: categorizeAction(l.action),
-    timestamp: l.createdAt.toISOString().replace("T", " ").slice(0, 19),
-  }));
+
+export const getDiagnostics = createServerFn({ method: "GET" }).handler(async () => {
+  await requireRole(["admin"]);
+
+  // Database check
+  let dbStatus: "Connected" | "Disconnected" = "Disconnected";
+  try {
+    await prisma.$runCommandRaw({ ping: 1 });
+    dbStatus = "Connected";
+  } catch {
+    dbStatus = "Disconnected";
+  }
+
+  // Counts as proxy for storage
+  const [users, threads, reviews, reservations, logs] = await Promise.all([
+    prisma.user.count(),
+    prisma.thread.count(),
+    prisma.review.count(),
+    prisma.reservation.count(),
+    prisma.activityLog.count(),
+  ]);
+  const totalRecords = users + threads + reviews + reservations + logs;
+
+  return { api: "Operational" as const, database: dbStatus, totalRecords };
 });
+
+export const getErrorLogs = createServerFn({ method: "GET" })
+  .inputValidator((d: { page?: number; pageSize?: number }) => d)
+  .handler(async ({ data }) => {
+    await requireRole(["admin"]);
+    const page = data.page ?? 1;
+    const pageSize = data.pageSize ?? 50;
+    const [logs, total] = await Promise.all([
+      prisma.errorLog.findMany({ orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),
+      prisma.errorLog.count(),
+    ]);
+    return {
+      items: logs.map((l) => ({
+        id: l.id,
+        level: l.level,
+        message: l.message,
+        source: l.source ?? "unknown",
+        timestamp: l.createdAt.toISOString().replace("T", " ").slice(0, 19),
+      })),
+      total,
+      page,
+      pageSize,
+    };
+  });

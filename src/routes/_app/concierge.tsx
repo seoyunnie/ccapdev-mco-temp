@@ -120,9 +120,19 @@ function ConciergeDashboardPage() {
               color="pink"
               radius="xl"
               onClick={async () => {
-                if (!studentName.trim() || !studentId.trim() || selectedZone == null || startTime == null || endTime == null) {return;}
+                if (
+                  !studentName.trim() ||
+                  !studentId.trim() ||
+                  selectedZone == null ||
+                  startTime == null ||
+                  endTime == null
+                ) {
+                  return;
+                }
                 const zone = zones.find((z) => z.name === selectedZone);
-                if (!zone) {return;}
+                if (!zone) {
+                  return;
+                }
                 const today = new Date().toISOString().slice(0, 10);
                 await createWalkInReservation({
                   data: {

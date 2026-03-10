@@ -189,7 +189,9 @@ function ForumModerationPage() {
             color="red"
             radius="xl"
             onClick={async () => {
-              if (banUser == null || banDuration == null) {return;}
+              if (banUser == null || banDuration == null) {
+                return;
+              }
               await createBan({
                 data: { userId: banUser, reason: "Manual ban", durationDays: durationMap[banDuration] },
               });

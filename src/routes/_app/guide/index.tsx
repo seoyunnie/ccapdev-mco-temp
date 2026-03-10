@@ -1,4 +1,16 @@
-import { Container, Text, Card, SimpleGrid, Group, Stack, Rating, Badge, Button, Chip } from "@mantine/core";
+import {
+  Container,
+  Text,
+  Card,
+  SimpleGrid,
+  Group,
+  Stack,
+  Rating,
+  Badge,
+  Button,
+  Chip,
+  Pagination,
+} from "@mantine/core";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -35,13 +47,14 @@ const CATEGORY_COLORS: Record<string, string> = {
 const ALL_CATEGORIES = ["All", "Coffee Shop", "Filipino Food", "Services", "Korean BBQ", "Convenience Store"] as const;
 
 export const Route = createFileRoute("/_app/guide/")({
-  loader: () => getEstablishments(),
+  loader: () => getEstablishments({ data: {} }),
   head: () => ({ meta: [{ title: "Survival Guide | Adormable" }] }),
   component: DirectoryListPage,
 });
 
 function DirectoryListPage() {
-  const establishments = Route.useLoaderData();
+  const result = Route.useLoaderData();
+  const establishments = result.items;
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("All");
 
@@ -117,6 +130,12 @@ function DirectoryListPage() {
           </Card>
         ))}
       </SimpleGrid>
+
+      {result.total > result.pageSize && (
+        <Group justify="center" mt="xl">
+          <Pagination total={Math.ceil(result.total / result.pageSize)} value={result.page} color="teal" />
+        </Group>
+      )}
     </Container>
   );
 }

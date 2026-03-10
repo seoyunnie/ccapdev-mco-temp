@@ -45,8 +45,12 @@ export const createReservation = createServerFn({ method: "POST" })
     const reservation = await prisma.$transaction(async (tx) => {
       if (data.seatId != null) {
         const seat = await tx.seat.findUnique({ where: { id: data.seatId } });
-        if (!seat) {throw new Error("Seat not found");}
-        if (seat.isTaken) {throw new Error("Seat is already taken");}
+        if (!seat) {
+          throw new Error("Seat not found");
+        }
+        if (seat.isTaken) {
+          throw new Error("Seat is already taken");
+        }
         await tx.seat.update({ where: { id: data.seatId }, data: { isTaken: true } });
       }
 
@@ -82,9 +86,12 @@ export const cancelReservation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const session = await requireSession();
     const reservation = await prisma.reservation.findUnique({ where: { id: data.reservationId } });
-    if (!reservation) {throw new Error("Not found");}
-    if (reservation.userId !== session.user.id && !["concierge", "admin"].includes(session.user.role as string))
-      {throw new Error("Forbidden");}
+    if (!reservation) {
+      throw new Error("Not found");
+    }
+    if (reservation.userId !== session.user.id && !["concierge", "admin"].includes(session.user.role as string)) {
+      throw new Error("Forbidden");
+    }
 
     await prisma.reservation.update({ where: { id: data.reservationId }, data: { status: "cancelled" } });
 

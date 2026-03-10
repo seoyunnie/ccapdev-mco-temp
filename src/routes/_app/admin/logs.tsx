@@ -1,10 +1,10 @@
-import { Container, Text, Paper, Group, Table, Badge, Select, TextInput, Tabs } from "@mantine/core";
+import { Container, Text, Paper, Group, Table, Badge, Select, TextInput, Tabs, Pagination, Stack } from "@mantine/core";
 import { IconSearch, IconUser, IconBug } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { SectionHeader } from "../../../components/section-header.tsx";
-import { getActivityLogs } from "../../../server/admin.ts";
+import { getActivityLogs, getErrorLogs } from "../../../server/admin.ts";
 
 import styles from "./index.module.css";
 
@@ -12,25 +12,29 @@ const typeColors: Record<string, string> = { Reservation: "pink", Forum: "grape"
 
 const levelColors: Record<string, string> = { Error: "red", Warning: "yellow", Info: "blue" };
 
-const errorLogs = [
-  { id: "e1", timestamp: "2026-02-08 14:32:01", level: "Error", message: "Database connection timeout on replica-2" },
-  { id: "e2", timestamp: "2026-02-08 13:15:44", level: "Warning", message: "High memory usage detected (89%)" },
-  { id: "e3", timestamp: "2026-02-07 22:01:12", level: "Info", message: "Scheduled backup completed successfully" },
-  { id: "e4", timestamp: "2026-02-07 18:45:33", level: "Error", message: "Failed to send email notification to user" },
-];
-
 export const Route = createFileRoute("/_app/admin/logs")({
-  loader: () => getActivityLogs(),
+  loader: async () => {
+    const [activityResult, errorResult] = await Promise.all([
+      getActivityLogs({ data: { page: 1, pageSize: 50 } }),
+      getErrorLogs({ data: { page: 1, pageSize: 50 } }),
+    ]);
+    return { activityResult, errorResult };
+  },
   head: () => ({ meta: [{ title: "Logs | Adormable" }] }),
   component: SystemLogsPage,
 });
 
 function SystemLogsPage() {
-  const activityLogs = Route.useLoaderData();
+  const { activityResult, errorResult } = Route.useLoaderData();
   const [activitySearch, setActivitySearch] = useState("");
   const [activityFilter, setActivityFilter] = useState<string | null>("All");
   const [errorSearch, setErrorSearch] = useState("");
   const [errorFilter, setErrorFilter] = useState<string | null>("All");
+  const [activityPage, setActivityPage] = useState(1);
+  const [errorPage, setErrorPage] = useState(1);
+
+  const activityLogs = activityResult.items;
+  const errorLogs = errorResult.items;
 
   const filteredActivityLogs = activityLogs.filter((log) => {
     const matchesSearch =
@@ -112,6 +116,16 @@ function SystemLogsPage() {
                 ))}
               </Table.Tbody>
             </Table>
+            {activityResult.total > activityResult.pageSize && (
+              <Group justify="center" p="md">
+                <Pagination
+                  total={Math.ceil(activityResult.total / activityResult.pageSize)}
+                  value={activityPage}
+                  onChange={setActivityPage}
+                  color="pink"
+                />
+              </Group>
+            )}
           </Paper>
         </Tabs.Panel>
 
@@ -135,34 +149,58 @@ function SystemLogsPage() {
                 size="sm"
               />
             </Group>
-            <Table>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Timestamp</Table.Th>
-                  <Table.Th>Level</Table.Th>
-                  <Table.Th>Message</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {filteredErrorLogs.map((log) => (
-                  <Table.Tr key={log.id} className={styles.tableRow}>
-                    <Table.Td>
-                      <Text size="sm" c="dimmed" ff="monospace">
-                        {log.timestamp}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Badge color={levelColors[log.level]} variant="light" size="sm">
-                        {log.level}
-                      </Badge>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm">{log.message}</Text>
-                    </Table.Td>
+            {filteredErrorLogs.length === 0 ? (
+              <Stack align="center" p="xl">
+                <Text c="dimmed" size="sm">
+                  No error logs recorded.
+                </Text>
+              </Stack>
+            ) : (
+              <Table>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Timestamp</Table.Th>
+                    <Table.Th>Level</Table.Th>
+                    <Table.Th>Source</Table.Th>
+                    <Table.Th>Message</Table.Th>
                   </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
+                </Table.Thead>
+                <Table.Tbody>
+                  {filteredErrorLogs.map((log) => (
+                    <Table.Tr key={log.id} className={styles.tableRow}>
+                      <Table.Td>
+                        <Text size="sm" c="dimmed" ff="monospace">
+                          {log.timestamp}
+                        </Text>
+                      </Table.Td>
+                      <Table.Td>
+                        <Badge color={levelColors[log.level]} variant="light" size="sm">
+                          {log.level}
+                        </Badge>
+                      </Table.Td>
+                      <Table.Td>
+                        <Text size="sm" c="dimmed">
+                          {log.source}
+                        </Text>
+                      </Table.Td>
+                      <Table.Td>
+                        <Text size="sm">{log.message}</Text>
+                      </Table.Td>
+                    </Table.Tr>
+                  ))}
+                </Table.Tbody>
+              </Table>
+            )}
+            {errorResult.total > errorResult.pageSize && (
+              <Group justify="center" p="md">
+                <Pagination
+                  total={Math.ceil(errorResult.total / errorResult.pageSize)}
+                  value={errorPage}
+                  onChange={setErrorPage}
+                  color="pink"
+                />
+              </Group>
+            )}
           </Paper>
         </Tabs.Panel>
       </Tabs>

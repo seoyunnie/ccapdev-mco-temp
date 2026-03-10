@@ -34,7 +34,7 @@ import defaultAdmin from "../../../assets/avatars/default-admin.svg";
 import { SectionHeader } from "../../../components/section-header.tsx";
 import { StatCard } from "../../../components/stat-card.tsx";
 import { ROLE_COLORS } from "../../../features/admin/admin.constants.ts";
-import { getAdminStats, getUsers, updateUserRole } from "../../../server/admin.ts";
+import { getAdminStats, getUsers, updateUserRole, getDiagnostics } from "../../../server/admin.ts";
 import { createBan } from "../../../server/moderation.ts";
 
 import styles from "./index.module.css";
@@ -48,15 +48,15 @@ const STAT_META = [
 
 export const Route = createFileRoute("/_app/admin/")({
   loader: async () => {
-    const [stats, users] = await Promise.all([getAdminStats(), getUsers()]);
-    return { stats, users };
+    const [stats, users, diagnostics] = await Promise.all([getAdminStats(), getUsers(), getDiagnostics()]);
+    return { stats, users, diagnostics };
   },
   head: () => ({ meta: [{ title: "Admin | Adormable" }] }),
   component: AdminControlPanelPage,
 });
 
 function AdminControlPanelPage() {
-  const { stats, users } = Route.useLoaderData();
+  const { stats, users, diagnostics } = Route.useLoaderData();
   const router = useRouter();
   const [userSearch, setUserSearch] = useState("");
   const [banTarget, setBanTarget] = useState<{ id: string; name: string } | null>(null);
@@ -139,7 +139,11 @@ function AdminControlPanelPage() {
                       color="pink"
                       aria-label="Cycle role"
                       onClick={async () => {
-                        const ROLE_ORDER: Record<string, string> = { resident: "concierge", concierge: "admin", admin: "resident" };
+                        const ROLE_ORDER: Record<string, string> = {
+                          resident: "concierge",
+                          concierge: "admin",
+                          admin: "resident",
+                        };
                         const nextRole = ROLE_ORDER[user.role] ?? "resident";
                         await updateUserRole({ data: { userId: user.id, role: nextRole } });
                         void router.invalidate();
@@ -226,7 +230,9 @@ function AdminControlPanelPage() {
             <Button
               color="red"
               onClick={async () => {
-                if (banTarget == null) {return;}
+                if (banTarget == null) {
+                  return;
+                }
                 await createBan({ data: { userId: banTarget.id, reason: banReason, durationDays: banDuration } });
                 setBanTarget(null);
                 void router.invalidate();
@@ -248,23 +254,28 @@ function AdminControlPanelPage() {
               API Status
             </Text>
             <Badge color="green" mt="xs">
-              Operational
+              {diagnostics.api}
             </Badge>
           </Paper>
-          <Paper bg="green.0" p="md" radius="md" className={styles.diagnosticCard}>
+          <Paper
+            bg={diagnostics.database === "Connected" ? "green.0" : "red.0"}
+            p="md"
+            radius="md"
+            className={styles.diagnosticCard}
+          >
             <Text size="sm" fw={600}>
               Database
             </Text>
-            <Badge color="green" mt="xs">
-              Connected
+            <Badge color={diagnostics.database === "Connected" ? "green" : "red"} mt="xs">
+              {diagnostics.database}
             </Badge>
           </Paper>
-          <Paper bg="yellow.0" p="md" radius="md" className={styles.diagnosticCard}>
+          <Paper bg="blue.0" p="md" radius="md" className={styles.diagnosticCard}>
             <Text size="sm" fw={600}>
-              Storage
+              Total Records
             </Text>
-            <Badge color="yellow" mt="xs">
-              72% Used
+            <Badge color="blue" mt="xs">
+              {diagnostics.totalRecords.toLocaleString()} records
             </Badge>
           </Paper>
         </SimpleGrid>

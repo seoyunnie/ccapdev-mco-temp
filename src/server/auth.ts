@@ -15,12 +15,16 @@ export const getSessionFn = createServerFn({ method: "GET" }).handler(() => getS
 
 export async function requireSession(): Promise<NonNullable<Awaited<ReturnType<typeof getSession>>>> {
   const session = await getSession();
-  if (!session) {throw new Error("Unauthorized");}
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
   return session;
 }
 
 export async function requireRole(roles: string[]): ReturnType<typeof requireSession> {
   const session = await requireSession();
-  if (!roles.includes(session.user.role as string)) {throw new Error("Forbidden");}
+  if (!roles.includes(session.user.role as string)) {
+    throw new Error("Forbidden");
+  }
   return session;
 }

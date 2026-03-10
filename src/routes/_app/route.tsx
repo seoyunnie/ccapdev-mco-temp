@@ -19,7 +19,9 @@ export const Route = createFileRoute("/_app")({
       path.startsWith("/study-nook/") ||
       path.startsWith("/lobby/") ||
       path.startsWith("/guide/");
-    if (isPublic) {return;}
+    if (isPublic) {
+      return;
+    }
 
     const session = await getSessionFn();
     if (!session?.user) {

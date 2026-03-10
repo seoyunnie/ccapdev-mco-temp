@@ -2,28 +2,45 @@ import { createServerFn } from "@tanstack/react-start";
 
 import { prisma } from "../db.ts";
 import { getSession, requireRole, requireSession } from "./auth.ts";
-import { formatRelative } from "./utils.ts";
+import { formatRelative, logError } from "./utils.ts";
 
-export const getEstablishments = createServerFn({ method: "GET" }).handler(async () => {
-  const rows = await prisma.establishment.findMany({
-    include: { reviews: { select: { rating: true } }, owner: { select: { name: true } } },
-    orderBy: { name: "asc" },
-  });
-  return rows.map((e) => {
-    const avg = e.reviews.length > 0 ? e.reviews.reduce((s, r) => s + r.rating, 0) / e.reviews.length : 0;
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_IMAGE_BYTES = 2_000_000;
+
+export const getEstablishments = createServerFn({ method: "GET" })
+  .inputValidator((d: { page?: number; pageSize?: number }) => d)
+  .handler(async ({ data }) => {
+    const page = data.page ?? 1;
+    const pageSize = data.pageSize ?? DEFAULT_PAGE_SIZE;
+    const [rows, total] = await Promise.all([
+      prisma.establishment.findMany({
+        include: { reviews: { select: { rating: true } }, owner: { select: { name: true } } },
+        orderBy: { name: "asc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.establishment.count(),
+    ]);
     return {
-      id: e.id,
-      name: e.name,
-      category: e.category,
-      description: e.description ?? "",
-      address: e.address ?? "",
-      rating: Math.round(avg * 10) / 10,
-      reviews: e.reviews.length,
-      owner: e.owner.name,
-      status: e.status.charAt(0).toUpperCase() + e.status.slice(1),
+      items: rows.map((e) => {
+        const avg = e.reviews.length > 0 ? e.reviews.reduce((s, r) => s + r.rating, 0) / e.reviews.length : 0;
+        return {
+          id: e.id,
+          name: e.name,
+          category: e.category,
+          description: e.description ?? "",
+          address: e.address ?? "",
+          rating: Math.round(avg * 10) / 10,
+          reviews: e.reviews.length,
+          owner: e.owner.name,
+          status: e.status.charAt(0).toUpperCase() + e.status.slice(1),
+        };
+      }),
+      total,
+      page,
+      pageSize,
     };
   });
-});
 
 export const getEstablishment = createServerFn({ method: "GET" })
   .inputValidator((d: { estId: string }) => d)
@@ -38,9 +55,19 @@ export const getEstablishment = createServerFn({ method: "GET" })
       }),
       getSession(),
     ]);
-    if (!est) {throw new Error("Establishment not found");}
+    if (!est) {
+      throw new Error("Establishment not found");
+    }
 
     const avg = est.reviews.length > 0 ? est.reviews.reduce((s, r) => s + r.rating, 0) / est.reviews.length : 0;
+
+    // Get user's helpful votes for reviews on this establishment
+    const helpfulVotes = session?.user?.id == null
+      ? []
+      : await prisma.helpfulVote.findMany({
+          where: { userId: session.user.id, reviewId: { in: est.reviews.map((r) => r.id) } },
+        });
+    const helpfulSet = new Set(helpfulVotes.map((v) => v.reviewId));
 
     return {
       name: est.name,
@@ -56,8 +83,10 @@ export const getEstablishment = createServerFn({ method: "GET" })
         rating: r.rating,
         time: formatRelative(r.createdAt),
         content: r.content,
-        helpful: 0,
+        helpful: r.helpful,
+        images: r.images,
         ownerReply: r.ownerReply,
+        isHelpful: helpfulSet.has(r.id),
       })),
     };
   });
@@ -91,9 +120,26 @@ export const createEstablishment = createServerFn({ method: "POST" })
   });
 
 export const createReview = createServerFn({ method: "POST" })
-  .inputValidator((d: { establishmentId: string; rating: number; content: string }) => {
-    if (d.rating < 1 || d.rating > 5) {throw new Error("Rating must be 1–5");}
-    if (!d.content.trim()) {throw new Error("Review content is required");}
+  .inputValidator((d: { establishmentId: string; rating: number; content: string; images?: string[] }) => {
+    if (d.rating < 1 || d.rating > 5) {
+      throw new Error("Rating must be 1–5");
+    }
+    if (!d.content.trim()) {
+      throw new Error("Review content is required");
+    }
+    if (d.images) {
+      for (const img of d.images) {
+        if (!img.startsWith("data:image/")) {
+          throw new Error("Invalid image data");
+        }
+        if (img.length > MAX_IMAGE_BYTES) {
+          throw new Error("Each image must be under 1.5 MB");
+        }
+      }
+      if (d.images.length > 5) {
+        throw new Error("Maximum 5 images per review");
+      }
+    }
     return d;
   })
   .handler(async ({ data }) => {
@@ -105,6 +151,7 @@ export const createReview = createServerFn({ method: "POST" })
         authorId: session.user.id,
         rating: data.rating,
         content: data.content,
+        images: data.images ?? [],
       },
     });
 
@@ -122,7 +169,9 @@ export const createReview = createServerFn({ method: "POST" })
 
 export const createOwnerReply = createServerFn({ method: "POST" })
   .inputValidator((d: { reviewId: string; reply: string }) => {
-    if (!d.reply.trim()) {throw new Error("Reply cannot be empty");}
+    if (!d.reply.trim()) {
+      throw new Error("Reply cannot be empty");
+    }
     return d;
   })
   .handler(async ({ data }) => {
@@ -131,8 +180,12 @@ export const createOwnerReply = createServerFn({ method: "POST" })
       where: { id: data.reviewId },
       include: { establishment: { select: { ownerId: true } } },
     });
-    if (!review) {throw new Error("Review not found");}
-    if (review.establishment.ownerId !== session.user.id) {throw new Error("Forbidden");}
+    if (!review) {
+      throw new Error("Review not found");
+    }
+    if (review.establishment.ownerId !== session.user.id) {
+      throw new Error("Forbidden");
+    }
 
     const updated = await prisma.review.update({ where: { id: data.reviewId }, data: { ownerReply: data.reply } });
 
@@ -153,7 +206,9 @@ export const deleteEstablishment = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const session = await requireRole(["admin"]);
     const est = await prisma.establishment.findUnique({ where: { id: data.establishmentId } });
-    if (!est) {throw new Error("Establishment not found");}
+    if (!est) {
+      throw new Error("Establishment not found");
+    }
 
     await prisma.establishment.delete({ where: { id: data.establishmentId } });
 
@@ -169,7 +224,14 @@ export const deleteEstablishment = createServerFn({ method: "POST" })
 
 export const updateEstablishment = createServerFn({ method: "POST" })
   .inputValidator(
-    (d: { establishmentId: string; name?: string; category?: string; description?: string; address?: string; ownerId?: string }) => d,
+    (d: {
+      establishmentId: string;
+      name?: string;
+      category?: string;
+      description?: string;
+      address?: string;
+      ownerId?: string;
+    }) => d,
   )
   .handler(async ({ data }) => {
     const session = await requireRole(["admin"]);
@@ -186,4 +248,30 @@ export const updateEstablishment = createServerFn({ method: "POST" })
     });
 
     return updated;
+  });
+
+export const toggleHelpful = createServerFn({ method: "POST" })
+  .inputValidator((d: { reviewId: string }) => d)
+  .handler(async ({ data }) => {
+    const session = await requireSession();
+    try {
+      const existing = await prisma.helpfulVote.findFirst({
+        where: { userId: session.user.id, reviewId: data.reviewId },
+      });
+
+      if (existing) {
+        await prisma.helpfulVote.delete({ where: { id: existing.id } });
+        await prisma.review.update({ where: { id: data.reviewId }, data: { helpful: { decrement: 1 } } });
+        return { helpful: false };
+      }
+
+      await prisma.helpfulVote.create({
+        data: { id: crypto.randomUUID(), userId: session.user.id, reviewId: data.reviewId },
+      });
+      await prisma.review.update({ where: { id: data.reviewId }, data: { helpful: { increment: 1 } } });
+      return { helpful: true };
+    } catch (error) {
+      await logError("Error toggling helpful vote", "establishments");
+      throw error;
+    }
   });
