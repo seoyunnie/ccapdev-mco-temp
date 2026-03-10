@@ -30,6 +30,16 @@ import { getZones } from "../../server/zones.ts";
 
 const FEEDBACK_TIMEOUT_MS = 2000;
 
+/** Convert "8:00 AM" → "08:00" (24-hour format for Date parsing). */
+function to24h(time12: string): string {
+  const [timePart, modifier] = time12.split(" ");
+  const [rawH, rawM] = timePart.split(":").map(Number);
+  let h = rawH;
+  if (modifier === "PM" && h !== 12) h += 12;
+  if (modifier === "AM" && h === 12) h = 0;
+  return `${String(h).padStart(2, "0")}:${String(rawM).padStart(2, "0")}`;
+}
+
 export const Route = createFileRoute("/_app/concierge")({
   loader: async () => {
     const [reservations, zones] = await Promise.all([getAllReservations(), getZones()]);
@@ -139,8 +149,8 @@ function ConciergeDashboardPage() {
                     studentName,
                     studentId,
                     zoneId: zone.id,
-                    startTime: new Date(`${today} ${startTime}`).toISOString(),
-                    endTime: new Date(`${today} ${endTime}`).toISOString(),
+                    startTime: new Date(`${today}T${to24h(startTime)}:00`).toISOString(),
+                    endTime: new Date(`${today}T${to24h(endTime)}:00`).toISOString(),
                   },
                 });
                 setStudentName("");

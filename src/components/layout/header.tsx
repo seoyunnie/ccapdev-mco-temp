@@ -18,15 +18,18 @@ export interface HeaderProps {
 }
 
 export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>) {
-  const { isLoggedIn, role, name, signOut } = useAuth();
+  const { isLoggedIn, role, name, image, signOut } = useAuth();
   const isStaff = role === UserRole.CONCIERGE || role === UserRole.ADMIN;
   const isAdmin = role === UserRole.ADMIN;
-  let avatarSrc = defaultAvatarFemale;
+
+  // Use uploaded profile photo if available, otherwise fall back to role-based defaults
+  let fallbackSrc = defaultAvatarFemale;
   if (role === UserRole.ADMIN) {
-    avatarSrc = defaultAdmin;
+    fallbackSrc = defaultAdmin;
   } else if (role === UserRole.CONCIERGE) {
-    avatarSrc = defaultConcierge;
+    fallbackSrc = defaultConcierge;
   }
+  const avatarSrc = image ?? fallbackSrc;
 
   const location = useLocation();
 

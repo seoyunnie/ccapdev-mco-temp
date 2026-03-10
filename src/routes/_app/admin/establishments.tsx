@@ -60,7 +60,7 @@ function EstablishmentManagerPage() {
 
   const filteredEstablishments = establishments.filter(
     (e) =>
-      e.name.toLowerCase().includes(search.toLowerCase()) ?? e.category.toLowerCase().includes(search.toLowerCase()),
+      e.name.toLowerCase().includes(search.toLowerCase()) || e.category.toLowerCase().includes(search.toLowerCase()),
   );
 
   const resetForm = () => {

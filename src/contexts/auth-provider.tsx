@@ -22,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // oxlint-disable-next-line no-unsafe-type-assertion -- Better Auth doesn't type custom user fields
       role: ((session?.user as Record<string, unknown>)?.role as UserRole) ?? "guest",
       name: session?.user?.name ?? "",
+      image: (session?.user?.image as string | null) ?? null,
       isPending,
       signOut,
     }),

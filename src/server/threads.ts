@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { prisma } from "../db.ts";
-import { getSession, requireSession } from "./auth.ts";
+import { getSessionFn, requireSession } from "./auth.ts";
 import { formatRelative } from "./utils.ts";
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -9,6 +9,7 @@ const DEFAULT_PAGE_SIZE = 20;
 export const getThreads = createServerFn({ method: "GET" })
   .inputValidator((d: { page?: number; pageSize?: number }) => d)
   .handler(async ({ data }) => {
+    const session = await getSessionFn();
     const page = data.page ?? 1;
     const pageSize = data.pageSize ?? DEFAULT_PAGE_SIZE;
     const [rows, total] = await Promise.all([
@@ -20,6 +21,15 @@ export const getThreads = createServerFn({ method: "GET" })
       }),
       prisma.thread.count(),
     ]);
+
+    // Fetch user's votes for these threads
+    const threadIds = rows.map((t) => t.id);
+    const votes =
+      session?.user?.id != null
+        ? await prisma.vote.findMany({ where: { userId: session.user.id, threadId: { in: threadIds } } })
+        : [];
+    const voteMap = new Map(votes.map((v) => [v.threadId, v.value]));
+
     return {
       items: rows.map((t) => ({
         id: t.id,
@@ -27,6 +37,7 @@ export const getThreads = createServerFn({ method: "GET" })
         author: t.author.name,
         snippet: t.content.length > 120 ? `${t.content.slice(0, 120)}…` : t.content,
         upvotes: t.upvotes,
+        userVote: voteMap.get(t.id) ?? 0,
         comments: t._count.comments,
         tag: t.tag ?? "General",
         time: formatRelative(t.createdAt),
@@ -40,7 +51,7 @@ export const getThreads = createServerFn({ method: "GET" })
 export const getThread = createServerFn({ method: "GET" })
   .inputValidator((d: { threadId: string }) => d)
   .handler(async ({ data }) => {
-    const session = await getSession();
+    const session = await getSessionFn();
     const thread = await prisma.thread.findUnique({
       where: { id: data.threadId },
       include: {
@@ -56,28 +67,50 @@ export const getThread = createServerFn({ method: "GET" })
       throw new Error("Thread not found");
     }
 
+    // Fetch user's votes for this thread and all visible comments
+    const allCommentIds = thread.comments.flatMap((c) => [c.id, ...c.replies.map((r) => r.id)]);
+    const votes =
+      session?.user?.id != null
+        ? await prisma.vote.findMany({
+            where: {
+              userId: session.user.id,
+              OR: [
+                { threadId: data.threadId },
+                ...(allCommentIds.length > 0 ? [{ commentId: { in: allCommentIds } }] : []),
+              ],
+            },
+          })
+        : [];
+    const voteMap = new Map(votes.map((v) => [v.threadId ?? v.commentId, v.value]));
+
     return {
       id: thread.id,
       title: thread.title,
       author: thread.author.name,
+      authorImage: thread.author.image,
       time: formatRelative(thread.createdAt),
       tag: thread.tag ?? "General",
       content: thread.content,
       upvotes: thread.upvotes,
+      userVote: voteMap.get(thread.id) ?? 0,
       isAuthor: session?.user.id === thread.authorId,
       comments: thread.comments.map((c) => ({
         id: c.id,
         author: c.author.name,
+        authorImage: c.author.image,
         time: formatRelative(c.createdAt),
         content: c.content,
         upvotes: c.upvotes,
+        userVote: voteMap.get(c.id) ?? 0,
         isAuthor: session?.user.id === c.authorId,
         replies: c.replies.map((r) => ({
           id: r.id,
           author: r.author.name,
+          authorImage: r.author.image,
           time: formatRelative(r.createdAt),
           content: r.content,
           upvotes: r.upvotes,
+          userVote: voteMap.get(r.id) ?? 0,
         })),
       })),
     };
@@ -117,7 +150,7 @@ export const createComment = createServerFn({ method: "POST" })
       data: {
         id: crypto.randomUUID(),
         threadId: data.threadId,
-        parentId: data.parentId,
+        parentId: data.parentId ?? null,
         authorId: session.user.id,
         content: data.content,
       },

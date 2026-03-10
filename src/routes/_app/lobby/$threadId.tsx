@@ -158,7 +158,7 @@ function ThreadViewPage() {
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
         <Group justify="space-between" mb="md">
           <Group>
-            <Avatar color="pink" radius="xl">
+            <Avatar color="pink" radius="xl" src={data.authorImage ?? undefined}>
               {data.author
                 .split(" ")
                 .map((n: string) => n[0])
@@ -210,8 +210,9 @@ function ThreadViewPage() {
         </Text>
         <Group>
           <ActionIcon
-            variant="light"
+            variant={data.userVote === 1 ? "filled" : "light"}
             color="pink"
+            disabled={!isLoggedIn}
             onClick={async () => {
               await voteThread({ data: { threadId: data.id, value: 1 } });
               void router.invalidate();
@@ -219,10 +220,13 @@ function ThreadViewPage() {
           >
             <IconArrowUp size={16} />
           </ActionIcon>
-          <Text fw={600}>{data.upvotes}</Text>
+          <Text fw={600} c={data.userVote === 1 ? "pink" : data.userVote === -1 ? "red" : undefined}>
+            {data.upvotes}
+          </Text>
           <ActionIcon
-            variant="light"
-            color="gray"
+            variant={data.userVote === -1 ? "filled" : "light"}
+            color="red"
+            disabled={!isLoggedIn}
             onClick={async () => {
               await voteThread({ data: { threadId: data.id, value: -1 } });
               void router.invalidate();
@@ -281,7 +285,7 @@ function ThreadViewPage() {
         {data.comments.map((comment: (typeof data.comments)[number]) => (
           <Paper key={comment.id} withBorder p="md" radius="md">
             <Group mb="xs">
-              <Avatar color="pink" radius="xl" size="sm">
+              <Avatar color="pink" radius="xl" size="sm" src={comment.authorImage ?? undefined}>
                 {comment.author
                   .split(" ")
                   .map((n: string) => n[0])
@@ -299,8 +303,10 @@ function ThreadViewPage() {
             </Text>
             <Group gap="xs">
               <ActionIcon
-                variant="subtle"
+                variant={comment.userVote === 1 ? "filled" : "subtle"}
+                color="pink"
                 size="xs"
+                disabled={!isLoggedIn}
                 onClick={async () => {
                   await voteComment({ data: { commentId: comment.id, value: 1 } });
                   void router.invalidate();
@@ -308,7 +314,21 @@ function ThreadViewPage() {
               >
                 <IconArrowUp size={12} />
               </ActionIcon>
-              <Text size="xs">{comment.upvotes}</Text>
+              <Text size="xs" c={comment.userVote === 1 ? "pink" : comment.userVote === -1 ? "red" : undefined}>
+                {comment.upvotes}
+              </Text>
+              <ActionIcon
+                variant={comment.userVote === -1 ? "filled" : "subtle"}
+                color="red"
+                size="xs"
+                disabled={!isLoggedIn}
+                onClick={async () => {
+                  await voteComment({ data: { commentId: comment.id, value: -1 } });
+                  void router.invalidate();
+                }}
+              >
+                <IconArrowDown size={12} />
+              </ActionIcon>
               <Button
                 variant="subtle"
                 size="xs"
@@ -397,7 +417,7 @@ function ThreadViewPage() {
                 {comment.replies.map((reply: (typeof comment.replies)[number]) => (
                   <Paper key={reply.id} bg="pink.0" p="sm" radius="sm" ml="xl">
                     <Group mb={4}>
-                      <Avatar color="pink" radius="xl" size="xs">
+                      <Avatar color="pink" radius="xl" size="xs" src={reply.authorImage ?? undefined}>
                         {reply.author
                           .split(" ")
                           .map((n: string) => n[0])

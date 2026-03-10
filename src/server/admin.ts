@@ -132,3 +132,19 @@ export const getErrorLogs = createServerFn({ method: "GET" })
       pageSize,
     };
   });
+
+export const unbanUser = createServerFn({ method: "POST" })
+  .inputValidator((d: { userId: string }) => d)
+  .handler(async ({ data }) => {
+    const session = await requireRole(["admin"]);
+    await prisma.ban.deleteMany({ where: { userId: data.userId } });
+
+    await prisma.activityLog.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        action: "unban_user",
+        detail: `Unbanned user ${data.userId}`,
+      },
+    });
+  });

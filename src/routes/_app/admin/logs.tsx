@@ -38,7 +38,7 @@ function SystemLogsPage() {
 
   const filteredActivityLogs = activityLogs.filter((log) => {
     const matchesSearch =
-      log.user.toLowerCase().includes(activitySearch.toLowerCase()) ??
+      log.user.toLowerCase().includes(activitySearch.toLowerCase()) ||
       log.action.toLowerCase().includes(activitySearch.toLowerCase());
     const matchesType =
       activityFilter == null || activityFilter === "" || activityFilter === "All" || log.type === activityFilter;

@@ -7,6 +7,7 @@ interface AuthState {
   isLoggedIn: boolean;
   role: UserRole;
   name: string;
+  image: string | null;
   isPending: boolean;
   signOut: () => Promise<void>;
 }
@@ -15,6 +16,7 @@ export const AuthContext = createContext<AuthState>({
   isLoggedIn: false,
   role: "guest",
   name: "",
+  image: null,
   isPending: true,
   signOut: async () => {},
 });

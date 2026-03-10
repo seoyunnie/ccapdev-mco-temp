@@ -34,7 +34,7 @@ import defaultAdmin from "../../../assets/avatars/default-admin.svg";
 import { SectionHeader } from "../../../components/section-header.tsx";
 import { StatCard } from "../../../components/stat-card.tsx";
 import { ROLE_COLORS } from "../../../features/admin/admin.constants.ts";
-import { getAdminStats, getUsers, updateUserRole, getDiagnostics } from "../../../server/admin.ts";
+import { getAdminStats, getUsers, updateUserRole, getDiagnostics, unbanUser } from "../../../server/admin.ts";
 import { createBan } from "../../../server/moderation.ts";
 
 import styles from "./index.module.css";
@@ -65,7 +65,7 @@ function AdminControlPanelPage() {
 
   const filteredUsers = users.filter(
     (u) =>
-      u.name.toLowerCase().includes(userSearch.toLowerCase()) ??
+      u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
       u.email.toLowerCase().includes(userSearch.toLowerCase()),
   );
 
@@ -156,10 +156,9 @@ function AdminControlPanelPage() {
                         variant="light"
                         size="sm"
                         color="green"
-                        aria-label="Restore user"
+                        aria-label="Unban user"
                         onClick={async () => {
-                          // Restore by cycling role (no unban endpoint yet)
-                          await updateUserRole({ data: { userId: user.id, role: user.role } });
+                          await unbanUser({ data: { userId: user.id } });
                           void router.invalidate();
                         }}
                       >

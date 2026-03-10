@@ -59,7 +59,7 @@ function ForumFeedPage() {
   const filtered = posts
     .filter((p) => {
       const matchSearch =
-        p.title.toLowerCase().includes(search.toLowerCase()) ?? p.snippet.toLowerCase().includes(search.toLowerCase());
+        p.title.toLowerCase().includes(search.toLowerCase()) || p.snippet.toLowerCase().includes(search.toLowerCase());
       const matchTag = activeTag === "All" || p.tag === activeTag;
       return matchSearch && matchTag;
     })
@@ -243,7 +243,11 @@ function ForumFeedPage() {
                 </Stack>
               </Group>
               <Group gap="xs">
-                <ActionIcon variant="light" color="pink" size="sm">
+                <ActionIcon
+                  variant="light"
+                  color={post.userVote === 1 ? "pink" : post.userVote === -1 ? "red" : "gray"}
+                  size="sm"
+                >
                   <IconArrowUp size={14} />
                 </ActionIcon>
                 <Text size="sm" fw={600}>

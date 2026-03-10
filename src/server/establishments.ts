@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { prisma } from "../db.ts";
-import { getSession, requireRole, requireSession } from "./auth.ts";
+import { getSessionFn, requireRole, requireSession } from "./auth.ts";
 import { formatRelative, logError } from "./utils.ts";
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -53,7 +53,7 @@ export const getEstablishment = createServerFn({ method: "GET" })
           owner: { select: { name: true } },
         },
       }),
-      getSession(),
+      getSessionFn(),
     ]);
     if (!est) {
       throw new Error("Establishment not found");
