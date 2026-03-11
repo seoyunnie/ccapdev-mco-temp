@@ -10,7 +10,6 @@
   "oxc.enable": true,
   "oxc.fmt.configPath": ".oxfmtrc.json",
   "oxc.tsConfigPath": "tsconfig.json",
-  "oxc.unusedDisableDirectives": "warn",
 
   "[css][html][json][jsonc][markdown][postcss][typescript][typescriptreact][yaml]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
