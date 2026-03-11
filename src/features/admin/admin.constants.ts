@@ -1,6 +1,6 @@
 import type { DefaultMantineColor } from "@mantine/core";
 
-import { UserRole } from "../../contexts/auth-context.tsx";
+import { UserRole } from "../../lib/auth-context.tsx";
 
 export const ROLE_COLORS: Record<UserRole, DefaultMantineColor> = {
   [UserRole.GUEST]: "gray",

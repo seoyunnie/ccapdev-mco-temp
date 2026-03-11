@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuspendedRouteImport } from './routes/suspended'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
@@ -24,9 +25,15 @@ import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppStudyNookZoneIdRouteImport } from './routes/_app/study-nook/$zoneId'
 import { Route as AppLobbyThreadIdRouteImport } from './routes/_app/lobby/$threadId'
 import { Route as AppGuideEstIdRouteImport } from './routes/_app/guide/$estId'
+import { Route as AppAdminZonesRouteImport } from './routes/_app/admin/zones'
 import { Route as AppAdminLogsRouteImport } from './routes/_app/admin/logs'
 import { Route as AppAdminEstablishmentsRouteImport } from './routes/_app/admin/establishments'
 
+const SuspendedRoute = SuspendedRouteImport.update({
+  id: '/suspended',
+  path: '/suspended',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -101,6 +108,11 @@ const AppGuideEstIdRoute = AppGuideEstIdRouteImport.update({
   path: '/guide/$estId',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppAdminZonesRoute = AppAdminZonesRouteImport.update({
+  id: '/admin/zones',
+  path: '/admin/zones',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppAdminLogsRoute = AppAdminLogsRouteImport.update({
   id: '/admin/logs',
   path: '/admin/logs',
@@ -115,6 +127,7 @@ const AppAdminEstablishmentsRoute = AppAdminEstablishmentsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
+  '/suspended': typeof SuspendedRoute
   '/concierge': typeof AppConciergeRoute
   '/dashboard': typeof AppDashboardRoute
   '/moderation': typeof AppModerationRoute
@@ -122,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof AppTermsRoute
   '/admin/establishments': typeof AppAdminEstablishmentsRoute
   '/admin/logs': typeof AppAdminLogsRoute
+  '/admin/zones': typeof AppAdminZonesRoute
   '/guide/$estId': typeof AppGuideEstIdRoute
   '/lobby/$threadId': typeof AppLobbyThreadIdRoute
   '/study-nook/$zoneId': typeof AppStudyNookZoneIdRoute
@@ -132,6 +146,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/suspended': typeof SuspendedRoute
   '/concierge': typeof AppConciergeRoute
   '/dashboard': typeof AppDashboardRoute
   '/moderation': typeof AppModerationRoute
@@ -140,6 +155,7 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/admin/establishments': typeof AppAdminEstablishmentsRoute
   '/admin/logs': typeof AppAdminLogsRoute
+  '/admin/zones': typeof AppAdminZonesRoute
   '/guide/$estId': typeof AppGuideEstIdRoute
   '/lobby/$threadId': typeof AppLobbyThreadIdRoute
   '/study-nook/$zoneId': typeof AppStudyNookZoneIdRoute
@@ -152,6 +168,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteRouteWithChildren
   '/login': typeof LoginRoute
+  '/suspended': typeof SuspendedRoute
   '/_app/concierge': typeof AppConciergeRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/moderation': typeof AppModerationRoute
@@ -160,6 +177,7 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/admin/establishments': typeof AppAdminEstablishmentsRoute
   '/_app/admin/logs': typeof AppAdminLogsRoute
+  '/_app/admin/zones': typeof AppAdminZonesRoute
   '/_app/guide/$estId': typeof AppGuideEstIdRoute
   '/_app/lobby/$threadId': typeof AppLobbyThreadIdRoute
   '/_app/study-nook/$zoneId': typeof AppStudyNookZoneIdRoute
@@ -173,6 +191,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/suspended'
     | '/concierge'
     | '/dashboard'
     | '/moderation'
@@ -180,6 +199,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/establishments'
     | '/admin/logs'
+    | '/admin/zones'
     | '/guide/$estId'
     | '/lobby/$threadId'
     | '/study-nook/$zoneId'
@@ -190,6 +210,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/suspended'
     | '/concierge'
     | '/dashboard'
     | '/moderation'
@@ -198,6 +219,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/establishments'
     | '/admin/logs'
+    | '/admin/zones'
     | '/guide/$estId'
     | '/lobby/$threadId'
     | '/study-nook/$zoneId'
@@ -209,6 +231,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_app'
     | '/login'
+    | '/suspended'
     | '/_app/concierge'
     | '/_app/dashboard'
     | '/_app/moderation'
@@ -217,6 +240,7 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/admin/establishments'
     | '/_app/admin/logs'
+    | '/_app/admin/zones'
     | '/_app/guide/$estId'
     | '/_app/lobby/$threadId'
     | '/_app/study-nook/$zoneId'
@@ -229,10 +253,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SuspendedRoute: typeof SuspendedRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/suspended': {
+      id: '/suspended'
+      path: '/suspended'
+      fullPath: '/suspended'
+      preLoaderRoute: typeof SuspendedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -338,6 +370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGuideEstIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/admin/zones': {
+      id: '/_app/admin/zones'
+      path: '/admin/zones'
+      fullPath: '/admin/zones'
+      preLoaderRoute: typeof AppAdminZonesRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/admin/logs': {
       id: '/_app/admin/logs'
       path: '/admin/logs'
@@ -364,6 +403,7 @@ interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppAdminEstablishmentsRoute: typeof AppAdminEstablishmentsRoute
   AppAdminLogsRoute: typeof AppAdminLogsRoute
+  AppAdminZonesRoute: typeof AppAdminZonesRoute
   AppGuideEstIdRoute: typeof AppGuideEstIdRoute
   AppLobbyThreadIdRoute: typeof AppLobbyThreadIdRoute
   AppStudyNookZoneIdRoute: typeof AppStudyNookZoneIdRoute
@@ -382,6 +422,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppAdminEstablishmentsRoute: AppAdminEstablishmentsRoute,
   AppAdminLogsRoute: AppAdminLogsRoute,
+  AppAdminZonesRoute: AppAdminZonesRoute,
   AppGuideEstIdRoute: AppGuideEstIdRoute,
   AppLobbyThreadIdRoute: AppLobbyThreadIdRoute,
   AppStudyNookZoneIdRoute: AppStudyNookZoneIdRoute,
@@ -398,6 +439,7 @@ const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
   LoginRoute: LoginRoute,
+  SuspendedRoute: SuspendedRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

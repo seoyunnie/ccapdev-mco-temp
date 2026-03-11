@@ -1,103 +1,58 @@
-import {
-  Container,
-  Title,
-  Text,
-  Paper,
-  Group,
-  Stack,
-  Badge,
-  Button,
-  Avatar,
-  ActionIcon,
-  Select,
-  Modal,
-} from "@mantine/core";
+import { Container, Title, Text, Paper, Group, Stack, Badge, Button, Select, Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconTrash, IconBan } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { RowActionMenu } from "../../components/row-action-menu.tsx";
 import { SectionHeader } from "../../components/section-header.tsx";
-
-const initialFlaggedPosts = [
-  {
-    id: "f1",
-    title: "Inappropriate content in thread",
-    author: "User123",
-    reason: "Harassment",
-    reports: 5,
-    date: "Feb 8, 2026",
-    content: "This thread contains language that violates community guidelines regarding harassment.",
-  },
-  {
-    id: "f2",
-    title: "Spam link posted repeatedly",
-    author: "SpamBot42",
-    reason: "Spam",
-    reports: 12,
-    date: "Feb 7, 2026",
-    content: "Repeated posting of external links that appear to be spam/phishing.",
-  },
-  {
-    id: "f3",
-    title: "Misleading review on Café Manila",
-    author: "FakeReviewer",
-    reason: "Misinformation",
-    reports: 3,
-    date: "Feb 6, 2026",
-    content: "Review contains fabricated claims about the establishment that are verifiably false.",
-  },
-];
+import { UserAvatar } from "../../components/user-avatar.tsx";
+import { IconTrash, IconBan } from "../../lib/icons.tsx";
+import { getUsers } from "../../server/admin.ts";
+import { getReports, resolveReport, createBan } from "../../server/moderation.ts";
 
 const reasonColors: Record<string, string> = { Harassment: "red", Spam: "orange", Misinformation: "yellow" };
 
 const FEEDBACK_TIMEOUT_MS = 2000;
 
 export const Route = createFileRoute("/_app/moderation")({
+  loader: async () => {
+    const [reports, users] = await Promise.all([getReports(), getUsers()]);
+    return { reports, users };
+  },
   head: () => ({ meta: [{ title: "Moderation | Adormable" }] }),
   component: ForumModerationPage,
 });
 
 function ForumModerationPage() {
-  const [flaggedPosts, setFlaggedPosts] = useState(initialFlaggedPosts);
-  const [reviewTarget, setReviewTarget] = useState<(typeof initialFlaggedPosts)[number] | null>(null);
+  const { reports: flaggedPosts, users } = Route.useLoaderData();
+  const router = useRouter();
+  type FlaggedPost = (typeof flaggedPosts)[number];
+  const [reviewTarget, setReviewTarget] = useState<FlaggedPost | null>(null);
   const [reviewOpened, { open: openReview, close: closeReview }] = useDisclosure(false);
   const [banUser, setBanUser] = useState<string | null>(null);
   const [banDuration, setBanDuration] = useState<string | null>(null);
   const [banIssued, setBanIssued] = useState(false);
 
-  const handleReview = (post: (typeof initialFlaggedPosts)[number]) => {
+  const durationMap: Record<string, number> = { "1 Day": 1, "3 Days": 3, "7 Days": 7, "14 Days": 14, "30 Days": 30 };
+
+  const handleReview = (post: FlaggedPost) => {
     setReviewTarget(post);
     openReview();
   };
 
-  const handleDelete = (id: string) => {
-    setFlaggedPosts((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  const handleIssueBan = () => {
-    if (banUser === null || banDuration === null) {
-      return;
-    }
-    setBanIssued(true);
-    setBanUser(null);
-    setBanDuration(null);
-    setTimeout(() => {
-      setBanIssued(false);
-    }, FEEDBACK_TIMEOUT_MS);
-  };
-
   return (
-    <Container size="lg" py="xl">
+    <Container size="lg" py="xl" className="pageEnter">
       <SectionHeader title="Forum Moderation" description="Review flagged content and manage user behavior." />
 
       <Modal opened={reviewOpened} onClose={closeReview} title="Review Flagged Content" centered size="lg">
         {reviewTarget && (
           <Stack>
             <Group>
-              <Badge color={reasonColors[reviewTarget.reason]} variant="light">
-                {reviewTarget.reason}
-              </Badge>
+              {reviewTarget.reasons.map((reason) => (
+                <Badge key={reason} color={reasonColors[reason] ?? "gray"} variant="light">
+                  {reason}
+                </Badge>
+              ))}
               <Text size="sm" c="dimmed">
                 {reviewTarget.reports} reports · {reviewTarget.date}
               </Text>
@@ -106,19 +61,26 @@ function ForumModerationPage() {
             <Text size="sm" c="dimmed">
               Posted by {reviewTarget.author}
             </Text>
-            <Paper bg="gray.0" p="md" radius="md">
-              <Text size="sm">{reviewTarget.content}</Text>
-            </Paper>
+            <Text size="sm">{reviewTarget.excerpt}</Text>
             <Group justify="flex-end">
-              <Button variant="light" color="gray" onClick={closeReview}>
+              <Button
+                variant="light"
+                color="gray"
+                onClick={async () => {
+                  await resolveReport({ data: { reportId: reviewTarget.id, action: "dismiss" } });
+                  closeReview();
+                  void router.invalidate();
+                }}
+              >
                 Dismiss
               </Button>
               <Button
                 color="red"
                 radius="xl"
-                onClick={() => {
-                  handleDelete(reviewTarget.id);
+                onClick={async () => {
+                  await resolveReport({ data: { reportId: reviewTarget.id, action: "delete" } });
                   closeReview();
+                  void router.invalidate();
                 }}
               >
                 Remove Content
@@ -138,10 +100,7 @@ function ForumModerationPage() {
             <Paper key={post.id} withBorder p="md" radius="md">
               <Group justify="space-between" wrap="wrap">
                 <Group>
-                  <Avatar color="red" radius="xl" size="sm">
-                    {/* oxlint-disable-next-line no-magic-numbers */}
-                    {post.author.slice(0, 2).toUpperCase()}
-                  </Avatar>
+                  <UserAvatar name={post.author} image={post.authorImage} color="red" radius="xl" size="sm" />
                   <Stack gap={2}>
                     <Text fw={600}>{post.title}</Text>
                     <Text size="xs" c="dimmed">
@@ -150,29 +109,30 @@ function ForumModerationPage() {
                   </Stack>
                 </Group>
                 <Group gap="xs">
-                  <Badge color={reasonColors[post.reason]} variant="light">
-                    {post.reason}
+                  <Badge color={reasonColors[post.primaryReason] ?? "gray"} variant="light">
+                    {post.primaryReason}
                   </Badge>
-                  <Button
-                    size="xs"
-                    variant="light"
-                    color="pink"
-                    onClick={() => {
-                      handleReview(post);
-                    }}
-                  >
-                    Review
-                  </Button>
-                  <ActionIcon
-                    variant="light"
-                    color="red"
-                    size="sm"
-                    onClick={() => {
-                      handleDelete(post.id);
-                    }}
-                  >
-                    <IconTrash size={14} />
-                  </ActionIcon>
+                  <RowActionMenu
+                    label="Review"
+                    items={[
+                      {
+                        label: "Open review modal",
+                        leftSection: <IconBan size={14} />,
+                        onClick: () => {
+                          handleReview(post);
+                        },
+                      },
+                      {
+                        label: "Remove flagged content",
+                        color: "red",
+                        leftSection: <IconTrash size={14} />,
+                        onClick: async () => {
+                          await resolveReport({ data: { reportId: post.id, action: "delete" } });
+                          void router.invalidate();
+                        },
+                      },
+                    ]}
+                  />
                 </Group>
               </Group>
             </Paper>
@@ -196,7 +156,17 @@ function ForumModerationPage() {
           <Select
             label="Select User"
             placeholder="Search user..."
-            data={["User123", "SpamBot42", "FakeReviewer"]}
+            data={users.map((u) => ({
+              value: u.id,
+              label:
+                u.status === "Banned" && u.activeBanExpiresAt != null
+                  ? `${u.name} (banned until ${new Date(u.activeBanExpiresAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })})`
+                  : u.name,
+              disabled: u.status === "Banned",
+            }))}
             searchable
             value={banUser}
             onChange={setBanUser}
@@ -209,13 +179,34 @@ function ForumModerationPage() {
             onChange={setBanDuration}
           />
         </Group>
+        <Text size="xs" c="dimmed" mt="xs">
+          Active bans are enforced automatically and already-banned users are disabled in this picker.
+        </Text>
         <Group justify="flex-end" mt="md" gap="sm">
           {banIssued && (
             <Text size="sm" c="green.6" fw={600}>
               Ban issued!
             </Text>
           )}
-          <Button color="red" radius="xl" onClick={handleIssueBan}>
+          <Button
+            color="red"
+            radius="xl"
+            onClick={async () => {
+              if (banUser == null || banDuration == null) {
+                return;
+              }
+              await createBan({
+                data: { userId: banUser, reason: "Manual ban", durationDays: durationMap[banDuration] },
+              });
+              setBanUser(null);
+              setBanDuration(null);
+              setBanIssued(true);
+              setTimeout(() => {
+                setBanIssued(false);
+              }, FEEDBACK_TIMEOUT_MS);
+              void router.invalidate();
+            }}
+          >
             Issue Ban
           </Button>
         </Group>

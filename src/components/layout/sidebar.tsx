@@ -1,10 +1,10 @@
 import { Button, Divider, Drawer, NavLink, Stack } from "@mantine/core";
-import { IconSettings, IconShield } from "@tabler/icons-react";
 import { Link, useLocation } from "@tanstack/react-router";
 
 import adormableLogo from "../../assets/logos/adormable-logo.png";
-import { useAuth, UserRole } from "../../contexts/auth-context.tsx";
-import { NAV_ITEMS } from "../../data/nav-items.ts";
+import { NAV_ITEMS } from "../../features/navigation/nav-items.ts";
+import { useAuth, UserRole } from "../../lib/auth-context.tsx";
+import { IconSettings, IconShield } from "../../lib/icons.tsx";
 import { LinkButton } from "../link-button.tsx";
 
 export interface SidebarProps {
@@ -13,7 +13,7 @@ export interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
-  const { isLoggedIn, role, logout } = useAuth();
+  const { isLoggedIn, role, signOut } = useAuth();
   const isStaff = role === UserRole.CONCIERGE || role === UserRole.ADMIN;
   const isAdmin = role === UserRole.ADMIN;
 
@@ -76,6 +76,13 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
               onClick={onToggle}
             />
             <NavLink
+              label="Study Zones"
+              leftSection={<IconSettings size={18} />}
+              component={Link}
+              to="/admin/zones"
+              onClick={onToggle}
+            />
+            <NavLink
               label="System Logs"
               leftSection={<IconSettings size={18} />}
               component={Link}
@@ -93,7 +100,7 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
             fullWidth
             radius="xl"
             onClick={() => {
-              logout();
+              void signOut();
               onToggle();
             }}
           >
@@ -106,7 +113,7 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
             </Button>
             <LinkButton
               to="/login"
-              search={{ register: "true" }}
+              search={{ register: true }}
               color="pink"
               fullWidth
               mt="xs"

@@ -18,7 +18,7 @@ import { ColorSchemeScript, mantineHtmlProps, MantineProvider } from "@mantine/c
 import { Notifications } from "@mantine/notifications";
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 
-import { AuthProvider } from "../contexts/auth-provider.tsx";
+import { AuthProvider } from "../lib/auth-provider.tsx";
 import { theme } from "../theme.ts";
 
 export const Route = createRootRoute({

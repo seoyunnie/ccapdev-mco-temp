@@ -5,320 +5,505 @@ import {
   Paper,
   Group,
   Stack,
-  Avatar,
   Badge,
   Button,
   ActionIcon,
   Textarea,
   Divider,
+  Modal,
+  TextInput,
+  Select,
+  FileInput,
 } from "@mantine/core";
-import { IconArrowUp, IconArrowDown, IconEdit, IconTrash } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { notifications } from "@mantine/notifications";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
 import emptyState from "../../../assets/features/empty-state.svg";
 import threadPlaceholder from "../../../assets/lobby/thread-placeholder.svg";
 import { BackButton } from "../../../components/back-button.tsx";
 import { EmptyState } from "../../../components/empty-state.tsx";
+import { DetailSkeleton } from "../../../components/page-skeleton.tsx";
+import { UserAvatar } from "../../../components/user-avatar.tsx";
+import { TAG_COLORS } from "../../../features/lobby/lobby.constants.ts";
+import { useAuth } from "../../../lib/auth-context.tsx";
+import { IconArrowDown, IconArrowUp, IconEdit, IconFlag, IconPhoto, IconTrash } from "../../../lib/icons.tsx";
+import { createReport } from "../../../server/moderation.ts";
+import {
+  getThread,
+  createComment,
+  voteThread,
+  voteComment,
+  deleteThread,
+  deleteComment,
+  updateThread,
+} from "../../../server/threads.ts";
 
-import imgStyles from "../../../components/shared-images.module.css";
+export const Route = createFileRoute("/_app/lobby/$threadId")({
+  loader: ({ params }) => getThread({ data: { threadId: params.threadId } }),
+  head: () => ({ meta: [{ title: "Thread | Adormable" }] }),
+  pendingComponent: DetailSkeleton,
+  errorComponent: () => <EmptyState image={emptyState} message="Thread not found." />,
+  component: ThreadViewPage,
+});
 
-const posts = [
-  {
-    id: "1",
-    title: "Best study spots in the dorm?",
-    author: "Maria Santos",
-    time: "2 hours ago",
-    tag: "Discussion",
-    content: `I've been looking for quiet places to study after 9 PM. The main hall
-gets really crowded around that time and I can't focus with all the noise.
-
-Does anyone know of any hidden gems in the building? I tried the reading room
-on the 4th floor but it closes at 8 PM.
-
-Any suggestions would be greatly appreciated!`,
-    upvotes: 24,
-    isAuthor: true,
-  },
-  {
-    id: "2",
-    title: "Wi-Fi Issues on Floor 3",
-    author: "Juan Reyes",
-    time: "5 hours ago",
-    tag: "Issue",
-    content: `Anyone else experiencing slow internet on the 3rd floor? It's been like this for a week now.
-
-I've tried resetting my router and switching between 2.4GHz and 5GHz but nothing works. Even basic web browsing is painfully slow.
-
-If you're also affected, please report it to the admin office so they take action.`,
-    upvotes: 42,
-    isAuthor: false,
-  },
-  {
-    id: "3",
-    title: "Movie night this Saturday!",
-    author: "Ava Cruz",
-    time: "1 day ago",
-    tag: "Event",
-    content: `We're organizing a movie night in the common area this Saturday at 7 PM!
-
-Bring your own snacks and blankets. We'll vote for the movie below — options include Marvel, Studio Ghibli, or a horror flick.
-
-Everyone's welcome!`,
-    upvotes: 67,
-    isAuthor: false,
-  },
-  {
-    id: "4",
-    title: "Lost AirPods in laundry room",
-    author: "Carlos Lim",
-    time: "1 day ago",
-    tag: "Lost & Found",
-    content: `Left my AirPods Pro in the 2nd floor laundry room yesterday around 3 PM. White case with a blue sticker on the back.
-
-If anyone found them, please DM me or drop them off at the concierge desk. Much appreciated!`,
-    upvotes: 11,
-    isAuthor: false,
-  },
-];
-
-interface ThreadComment {
-  id: string;
-  author: string;
-  time: string;
-  content: string;
-  upvotes: number;
-  replies: { id: string; author: string; time: string; content: string; upvotes: number }[];
-}
-
-const commentsMap: Record<string, ThreadComment[]> = {
-  "1": [
-    {
-      id: "c1",
-      author: "Juan Reyes",
-      time: "1 hour ago",
-      content: "Try the rooftop area! It's usually empty after 8 PM and has decent lighting.",
-      upvotes: 8,
-      replies: [
-        {
-          id: "c1r1",
-          author: "Maria Santos",
-          time: "45 min ago",
-          content: "Oh I didn't know we could go there! Thanks, I'll check it out!",
-          upvotes: 2,
-        },
-      ],
-    },
-    {
-      id: "c2",
-      author: "Ava Cruz",
-      time: "30 min ago",
-      content: "The lobby lounge on the 2nd floor is pretty quiet at night. Plus it has power outlets everywhere.",
-      upvotes: 5,
-      replies: [],
-    },
-  ],
-};
-
-export const Route = createFileRoute("/_app/lobby/$threadId")({ component: ThreadViewPage });
-
-function getVoteOffset(vote: "up" | "down" | null): number {
-  if (vote === "up") {
-    return 1;
+function getVoteColor(vote: number) {
+  if (vote === 1) {
+    return "pink";
   }
-  if (vote === "down") {
-    return -1;
-  }
-  return 0;
-}
 
-function getVoteColor(vote: "up" | "down" | null): string | undefined {
-  if (vote === "up") {
-    return "grape";
-  }
-  if (vote === "down") {
+  if (vote === -1) {
     return "red";
   }
-  return undefined;
+
+  return null;
 }
 
 function ThreadViewPage() {
-  const { threadId } = Route.useParams();
-  const post = posts.find((p) => p.id === threadId);
-  const comments = commentsMap[threadId] ?? [];
-
-  const [postVote, setPostVote] = useState<"up" | "down" | null>(null);
-  const [commentVotes, setCommentVotes] = useState<Record<string, "up" | "down" | null>>({});
-
-  if (!post) {
-    return (
-      <Container size="md" py="xl">
-        <BackButton to="/lobby" label="Back to Lobby" color="grape" />
-        <EmptyState image={emptyState} message="Post not found." />
-      </Container>
-    );
-  }
-
-  const toggleCommentVote = (commentId: string, direction: "up" | "down") => {
-    setCommentVotes((prev) => ({ ...prev, [commentId]: prev[commentId] === direction ? null : direction }));
-  };
+  const data = Route.useLoaderData();
+  const router = useRouter();
+  const { isLoggedIn } = useAuth();
+  const [replyContent, setReplyContent] = useState("");
+  const [commentReplyId, setCommentReplyId] = useState<string | null>(null);
+  const [commentReplyContent, setCommentReplyContent] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState(data.title);
+  const [editContent, setEditContent] = useState(data.content);
+  const [editTag, setEditTag] = useState<string | null>(data.tag);
+  const [editImage, setEditImage] = useState<string | null>(data.image ?? null);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportTarget, setReportTarget] = useState<{ threadId?: string; commentId?: string }>({});
+  const [submittingReport, setSubmittingReport] = useState(false);
 
   return (
-    <Container size="md" py="xl">
+    <Container size="md" py="xl" className="pageEnter">
+      {/* Edit Thread Modal */}
+      <Modal
+        opened={editOpen}
+        onClose={() => {
+          setEditOpen(false);
+        }}
+        title="Edit Thread"
+        centered
+      >
+        <Stack>
+          <TextInput
+            label="Title"
+            value={editTitle}
+            onChange={(e) => {
+              setEditTitle(e.currentTarget.value);
+            }}
+          />
+          <Select label="Tag" data={Object.keys(TAG_COLORS)} value={editTag} onChange={setEditTag} />
+          <FileInput
+            label="Thread image"
+            placeholder="Replace thread image"
+            leftSection={<IconPhoto size={16} />}
+            accept="image/*"
+            onChange={(file) => {
+              if (file == null) {
+                setEditImage(null);
+                return;
+              }
+              const reader = new FileReader();
+              reader.addEventListener("load", () => {
+                if (typeof reader.result === "string") {
+                  setEditImage(reader.result);
+                }
+              });
+              reader.readAsDataURL(file);
+            }}
+          />
+          <Textarea
+            label="Content"
+            minRows={4}
+            value={editContent}
+            onChange={(e) => {
+              setEditContent(e.currentTarget.value);
+            }}
+          />
+          <Group justify="flex-end">
+            <Button
+              color="pink"
+              radius="xl"
+              onClick={async () => {
+                await updateThread({
+                  data: {
+                    threadId: data.id,
+                    title: editTitle,
+                    content: editContent,
+                    tag: editTag ?? undefined,
+                    image: editImage,
+                  },
+                });
+                setEditOpen(false);
+                void router.invalidate();
+              }}
+            >
+              Save Changes
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* Report Modal */}
+      <Modal
+        opened={reportOpen}
+        onClose={() => {
+          setReportOpen(false);
+          setReportReason("");
+          setReportTarget({});
+        }}
+        title="Report Content"
+        centered
+      >
+        <Stack>
+          <Textarea
+            label="Reason"
+            placeholder="Why are you reporting this?"
+            minRows={3}
+            value={reportReason}
+            onChange={(e) => {
+              setReportReason(e.currentTarget.value);
+            }}
+          />
+          <Group justify="flex-end">
+            <Button
+              variant="light"
+              color="gray"
+              onClick={() => {
+                setReportOpen(false);
+                setReportReason("");
+                setReportTarget({});
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="red"
+              radius="xl"
+              loading={submittingReport}
+              onClick={async () => {
+                if (!reportReason.trim()) {
+                  notifications.show({
+                    title: "Reason required",
+                    message: "Add a short explanation before submitting a report.",
+                    color: "red",
+                  });
+                  return;
+                }
+                setSubmittingReport(true);
+                try {
+                  await createReport({ data: { ...reportTarget, reason: reportReason.trim() } });
+                  setReportOpen(false);
+                  setReportReason("");
+                  setReportTarget({});
+                  notifications.show({
+                    title: "Report submitted",
+                    message: "Thanks. A moderator can review this content now.",
+                    color: "green",
+                  });
+                } catch (error) {
+                  const message = error instanceof Error ? error.message : "Could not submit the report.";
+                  notifications.show({ title: "Report failed", message, color: "red" });
+                } finally {
+                  setSubmittingReport(false);
+                }
+              }}
+            >
+              Submit Report
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
       <BackButton to="/lobby" label="Back to Lobby" color="grape" />
 
+      {/* Thread Content */}
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
-        <img src={threadPlaceholder} alt="Thread" className={imgStyles.cardImage} />
         <Group justify="space-between" mb="md">
           <Group>
-            <Avatar color="grape" radius="xl">
-              {post.author
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
-            </Avatar>
+            <UserAvatar name={data.author} image={data.authorImage} color="pink" radius="xl" />
             <Stack gap={2}>
               <Group gap="xs">
-                <Text fw={700}>{post.title}</Text>
-                <Badge color="pink" size="sm" variant="light">
-                  {post.tag}
+                <Text fw={700}>{data.title}</Text>
+                <Badge color={TAG_COLORS[data.tag] ?? "gray"} size="sm" variant="light">
+                  {data.tag}
                 </Badge>
               </Group>
               <Text size="xs" c="dimmed">
-                {post.author} · {post.time}
+                {data.author} · {data.time}
               </Text>
             </Stack>
           </Group>
-          {post.isAuthor && (
+          {data.isAuthor && (
             <Group gap="xs">
-              <ActionIcon variant="light" color="pink" size="sm">
+              <ActionIcon
+                variant="light"
+                color="pink"
+                size="sm"
+                aria-label="Edit thread"
+                onClick={() => {
+                  setEditOpen(true);
+                }}
+              >
                 <IconEdit size={14} />
               </ActionIcon>
-              <ActionIcon variant="light" color="red" size="sm">
+              <ActionIcon
+                variant="light"
+                color="red"
+                size="sm"
+                aria-label="Delete thread"
+                onClick={async () => {
+                  if (!confirm("Delete this thread?")) {
+                    return;
+                  }
+                  await deleteThread({ data: { threadId: data.id } });
+                  void router.navigate({ to: "/lobby" });
+                }}
+              >
                 <IconTrash size={14} />
               </ActionIcon>
             </Group>
           )}
         </Group>
+        <img
+          src={data.image ?? threadPlaceholder}
+          alt={data.title}
+          style={{ width: "100%", borderRadius: 16, marginBottom: 16, objectFit: "cover", maxHeight: 280 }}
+        />
         <Text style={{ whiteSpace: "pre-line" }} mb="md">
-          {post.content}
+          {data.content}
         </Text>
-        <Group gap="xs">
+        <Group>
           <ActionIcon
-            variant={postVote === "up" ? "filled" : "light"}
-            color="grape"
-            onClick={() => {
-              setPostVote((v) => (v === "up" ? null : "up"));
+            variant={data.userVote === 1 ? "filled" : "light"}
+            color="pink"
+            disabled={!isLoggedIn}
+            aria-label="Upvote thread"
+            onClick={async () => {
+              await voteThread({ data: { threadId: data.id, value: 1 } });
+              void router.invalidate();
             }}
-            aria-label="Upvote post"
           >
             <IconArrowUp size={16} />
           </ActionIcon>
-          <Text fw={600} size="sm" c={getVoteColor(postVote)}>
-            {post.upvotes + getVoteOffset(postVote)}
+          <Text fw={600} c={getVoteColor(data.userVote) ?? undefined}>
+            {data.upvotes}
           </Text>
           <ActionIcon
-            variant={postVote === "down" ? "filled" : "light"}
+            variant={data.userVote === -1 ? "filled" : "light"}
             color="red"
-            onClick={() => {
-              setPostVote((v) => (v === "down" ? null : "down"));
+            disabled={!isLoggedIn}
+            aria-label="Downvote thread"
+            onClick={async () => {
+              await voteThread({ data: { threadId: data.id, value: -1 } });
+              void router.invalidate();
             }}
-            aria-label="Downvote post"
           >
             <IconArrowDown size={16} />
           </ActionIcon>
+          {isLoggedIn && !data.isAuthor && (
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              aria-label="Report thread"
+              onClick={() => {
+                setReportTarget({ threadId: data.id });
+                setReportOpen(true);
+              }}
+            >
+              <IconFlag size={16} />
+            </ActionIcon>
+          )}
         </Group>
       </Paper>
 
+      {/* Reply Box */}
       <Paper shadow="sm" p="md" radius="md" className="content-card" mb="lg">
-        <Textarea placeholder="Write a reply..." minRows={3} mb="sm" />
-        <Button size="sm" color="pink" radius="xl">
-          Post Reply
+        <Textarea
+          placeholder="Write a reply..."
+          minRows={3}
+          mb="sm"
+          disabled={!isLoggedIn}
+          value={replyContent}
+          onChange={(e) => {
+            setReplyContent(e.currentTarget.value);
+          }}
+        />
+        <Button
+          size="sm"
+          color="pink"
+          radius="xl"
+          disabled={!isLoggedIn}
+          onClick={async () => {
+            if (!replyContent.trim()) {
+              return;
+            }
+            await createComment({ data: { threadId: data.id, content: replyContent } });
+            setReplyContent("");
+            void router.invalidate();
+          }}
+        >
+          {isLoggedIn ? "Post Reply" : "Sign in to Reply"}
         </Button>
       </Paper>
 
+      {/* Comments */}
       <Title order={4} mb="md">
-        Comments ({comments.length})
+        Comments ({data.comments.length})
       </Title>
       <Stack>
-        {comments.map((comment) => {
-          const vote = commentVotes[comment.id] ?? null;
-          return (
-            <Paper key={comment.id} withBorder p="md" radius="md">
-              <Group mb="xs">
-                <Avatar color="grape" radius="xl" size="sm">
-                  {comment.author
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </Avatar>
-                <Text size="sm" fw={600}>
-                  {comment.author}
-                </Text>
-                <Text size="xs" c="dimmed">
-                  {comment.time}
-                </Text>
-              </Group>
-              <Text size="sm" mb="xs">
-                {comment.content}
+        {data.comments.map((comment: (typeof data.comments)[number]) => (
+          <Paper key={comment.id} withBorder p="md" radius="md">
+            <Group mb="xs">
+              <UserAvatar name={comment.author} image={comment.authorImage} color="pink" radius="xl" size="sm" />
+              <Text size="sm" fw={600}>
+                {comment.author}
               </Text>
-              <Group gap="xs">
+              <Text size="xs" c="dimmed">
+                {comment.time}
+              </Text>
+            </Group>
+            <Text size="sm" mb="xs">
+              {comment.content}
+            </Text>
+            <Group gap="xs">
+              <ActionIcon
+                variant={comment.userVote === 1 ? "filled" : "subtle"}
+                color="pink"
+                size="xs"
+                disabled={!isLoggedIn}
+                aria-label="Upvote comment"
+                onClick={async () => {
+                  await voteComment({ data: { commentId: comment.id, value: 1 } });
+                  void router.invalidate();
+                }}
+              >
+                <IconArrowUp size={12} />
+              </ActionIcon>
+              <Text size="xs" c={getVoteColor(comment.userVote) ?? undefined}>
+                {comment.upvotes}
+              </Text>
+              <ActionIcon
+                variant={comment.userVote === -1 ? "filled" : "subtle"}
+                color="red"
+                size="xs"
+                disabled={!isLoggedIn}
+                aria-label="Downvote comment"
+                onClick={async () => {
+                  await voteComment({ data: { commentId: comment.id, value: -1 } });
+                  void router.invalidate();
+                }}
+              >
+                <IconArrowDown size={12} />
+              </ActionIcon>
+              <Button
+                variant="subtle"
+                size="xs"
+                onClick={() => {
+                  setCommentReplyId(commentReplyId === comment.id ? null : comment.id);
+                }}
+              >
+                Reply
+              </Button>
+              {isLoggedIn && (
                 <ActionIcon
-                  variant={vote === "up" ? "filled" : "subtle"}
-                  size="xs"
-                  color="grape"
-                  onClick={() => {
-                    toggleCommentVote(comment.id, "up");
-                  }}
-                  aria-label="Upvote comment"
-                >
-                  <IconArrowUp size={12} />
-                </ActionIcon>
-                <Text size="xs" fw={500} c={getVoteColor(vote)}>
-                  {comment.upvotes + getVoteOffset(vote)}
-                </Text>
-                <ActionIcon
-                  variant={vote === "down" ? "filled" : "subtle"}
+                  variant="subtle"
                   size="xs"
                   color="red"
+                  aria-label="Report comment"
                   onClick={() => {
-                    toggleCommentVote(comment.id, "down");
+                    setReportTarget({ commentId: comment.id });
+                    setReportOpen(true);
                   }}
-                  aria-label="Downvote comment"
                 >
-                  <IconArrowDown size={12} />
+                  <IconFlag size={12} />
                 </ActionIcon>
-                <Button variant="subtle" size="xs">
-                  Reply
-                </Button>
-              </Group>
-              {comment.replies.length > 0 && (
-                <>
-                  <Divider my="sm" />
-                  {comment.replies.map((reply) => (
-                    <Paper key={reply.id} bg="pink.0" p="sm" radius="sm" ml="xl">
-                      <Group mb={4}>
-                        <Avatar color="grape" radius="xl" size="xs">
-                          {reply.author
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </Avatar>
-                        <Text size="xs" fw={600}>
-                          {reply.author}
-                        </Text>
-                        <Text size="xs" c="dimmed">
-                          {reply.time}
-                        </Text>
-                      </Group>
-                      <Text size="sm">{reply.content}</Text>
-                    </Paper>
-                  ))}
-                </>
               )}
-            </Paper>
-          );
-        })}
+              {comment.isAuthor && (
+                <ActionIcon
+                  variant="subtle"
+                  size="xs"
+                  color="red"
+                  aria-label="Delete comment"
+                  onClick={async () => {
+                    if (!confirm("Delete this comment?")) {
+                      return;
+                    }
+                    await deleteComment({ data: { commentId: comment.id } });
+                    void router.invalidate();
+                  }}
+                >
+                  <IconTrash size={12} />
+                </ActionIcon>
+              )}
+            </Group>
+            {commentReplyId === comment.id && (
+              <Stack mt="xs" gap="xs">
+                <Textarea
+                  placeholder="Write a reply..."
+                  minRows={2}
+                  size="sm"
+                  value={commentReplyContent}
+                  onChange={(e) => {
+                    setCommentReplyContent(e.currentTarget.value);
+                  }}
+                />
+                <Group>
+                  <Button
+                    size="xs"
+                    color="pink"
+                    radius="xl"
+                    onClick={async () => {
+                      if (!commentReplyContent.trim()) {
+                        return;
+                      }
+                      await createComment({
+                        data: { threadId: data.id, content: commentReplyContent, parentId: comment.id },
+                      });
+                      setCommentReplyContent("");
+                      setCommentReplyId(null);
+                      void router.invalidate();
+                    }}
+                  >
+                    Post Reply
+                  </Button>
+                  <Button
+                    size="xs"
+                    variant="subtle"
+                    color="gray"
+                    onClick={() => {
+                      setCommentReplyId(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </Group>
+              </Stack>
+            )}
+            {comment.replies.length > 0 && (
+              <>
+                <Divider my="sm" />
+                {comment.replies.map((reply: (typeof comment.replies)[number]) => (
+                  <Paper key={reply.id} bg="pink.0" p="sm" radius="sm" ml="xl">
+                    <Group mb={4}>
+                      <UserAvatar name={reply.author} image={reply.authorImage} color="pink" radius="xl" size="xs" />
+                      <Text size="xs" fw={600}>
+                        {reply.author}
+                      </Text>
+                      <Text size="xs" c="dimmed">
+                        {reply.time}
+                      </Text>
+                    </Group>
+                    <Text size="sm">{reply.content}</Text>
+                  </Paper>
+                ))}
+              </>
+            )}
+          </Paper>
+        ))}
       </Stack>
     </Container>
   );

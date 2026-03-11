@@ -1,0 +1,317 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL") // Ignore error message, we're not using 7.x
+}
+
+model User {
+  id             String          @id @map("_id")
+  name           String
+  email          String
+  emailVerified  Boolean         @default(false)
+  image          String?
+  role           String          @default("guest")
+  bio            String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  sessions       Session[]
+  accounts       Account[]
+  reservations   Reservation[]
+  reviews        Review[]
+  threads        Thread[]
+  comments       Comment[]
+  establishments Establishment[] @relation("EstablishmentOwner")
+  votes          Vote[]
+  reports        Report[]
+  bans           Ban[]
+  appeals        BanAppeal[]     @relation("AppealAuthor")
+  reviewedAppeals BanAppeal[]    @relation("AppealReviewer")
+  activityLogs   ActivityLog[]
+  helpfulVotes   HelpfulVote[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @map("_id")
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @map("_id")
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @map("_id")
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// Domain models
+
+model StudyZone {
+  id           String        @id @map("_id")
+  name         String
+  capacity     Int
+  image        String?
+  seats        Seat[]
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("study_zone")
+}
+
+model Seat {
+  id           String        @id @map("_id")
+  zoneId       String
+  zone         StudyZone     @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  label        String // e.g. "A1"
+  isTaken      Boolean       @default(false)
+  reservations Reservation[]
+
+  @@index([zoneId])
+  @@map("seat")
+}
+
+model Reservation {
+  id          String    @id @map("_id")
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  zoneId      String
+  zone        StudyZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  seatId      String?
+  seat        Seat?     @relation(fields: [seatId], references: [id])
+  date        DateTime
+  startTime   DateTime
+  endTime     DateTime
+  status      String    @default("pending") // pending | confirmed | cancelled
+  isAnonymous Boolean   @default(false)
+  studentName String?
+  studentId   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([zoneId])
+  @@map("reservation")
+}
+
+model Establishment {
+  id          String   @id @map("_id")
+  name        String
+  category    String
+  description String?
+  address     String?
+  image       String?
+  ownerId     String
+  owner       User     @relation("EstablishmentOwner", fields: [ownerId], references: [id])
+  status      String   @default("active") // active | pending | closed
+  reviews     Review[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
+  @@map("establishment")
+}
+
+model Review {
+  id              String        @id @map("_id")
+  establishmentId String
+  establishment   Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
+  authorId        String
+  author          User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  rating          Int // 1–5
+  content         String
+  ownerReply      String?
+  images          String[]
+  helpful         Int           @default(0)
+  helpfulVotes    HelpfulVote[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([establishmentId])
+  @@index([authorId])
+  @@map("review")
+}
+
+model Thread {
+  id        String    @id @map("_id")
+  title     String
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  image     String?
+  tag       String?
+  upvotes   Int       @default(0)
+  comments  Comment[]
+  votes     Vote[]
+  reports   Report[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([authorId])
+  @@map("thread")
+}
+
+model Comment {
+  id        String    @id @map("_id")
+  threadId  String
+  thread    Thread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Comment[] @relation("CommentReplies")
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  upvotes   Int       @default(0)
+  votes     Vote[]
+  reports   Report[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([threadId])
+  @@index([authorId])
+  @@map("comment")
+}
+
+model Vote {
+  id        String  @id @map("_id")
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  threadId  String?
+  thread    Thread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  value     Int // 1 = upvote, -1 = downvote
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([threadId])
+  @@index([commentId])
+  @@map("vote")
+}
+
+model Report {
+  id         String  @id @map("_id")
+  reporterId String
+  reporter   User    @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  threadId   String?
+  thread     Thread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  commentId  String?
+  comment    Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  reason     String
+  status     String   @default("pending") // pending | resolved | dismissed
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([reporterId])
+  @@map("report")
+}
+
+model Ban {
+  id        String    @id @map("_id")
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason    String
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  appeals   BanAppeal[]
+
+  @@index([userId])
+  @@map("ban")
+}
+
+model BanAppeal {
+  id         String   @id @map("_id")
+  userId     String
+  user       User     @relation("AppealAuthor", fields: [userId], references: [id], onDelete: Cascade)
+  banId      String?
+  ban        Ban?     @relation(fields: [banId], references: [id], onDelete: SetNull)
+  reviewerId String?
+  reviewer   User?    @relation("AppealReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  message    String
+  status     String   @default("pending") // pending | approved | rejected
+  staffNote  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  reviewedAt DateTime?
+
+  @@index([userId])
+  @@index([banId])
+  @@index([reviewerId])
+  @@map("ban_appeal")
+}
+
+model ActivityLog {
+  id        String   @id @map("_id")
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String // e.g. "login", "create_thread", "ban_user"
+  detail    String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("activity_log")
+}
+
+model HelpfulVote {
+  id       String @id @map("_id")
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewId String
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reviewId])
+  @@index([userId])
+  @@index([reviewId])
+  @@map("helpful_vote")
+}
+
+model ErrorLog {
+  id        String   @id @map("_id")
+  level     String // Error | Warning | Info
+  message   String
+  source    String? // e.g. "reservations", "auth"
+  createdAt DateTime @default(now())
+
+  @@map("error_log")
+}

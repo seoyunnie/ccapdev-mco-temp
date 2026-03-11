@@ -1,7 +1,6 @@
-import type { IconProps } from "@tabler/icons-react";
-import type { ForwardRefExoticComponent, RefAttributes } from "react";
-
 import { Paper, RingProgress, Stack, Text, type DefaultMantineColor } from "@mantine/core";
+
+import type { IconComponent } from "../lib/icons.tsx";
 
 import styles from "./stat-card.module.css";
 
@@ -9,7 +8,7 @@ interface StatCardProps {
   readonly label: string;
   readonly value: string | number;
   readonly color?: DefaultMantineColor;
-  readonly iconComponent?: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
+  readonly iconComponent?: IconComponent;
   readonly progress?: number;
 }
 

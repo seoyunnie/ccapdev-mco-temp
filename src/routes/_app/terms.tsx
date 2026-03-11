@@ -88,7 +88,7 @@ function TermsOfServicePage() {
 
           <Divider />
 
-          <section>
+          <section id="privacy">
             <Title order={4} mb="xs">
               6. Privacy
             </Title>
@@ -108,6 +108,29 @@ function TermsOfServicePage() {
               Adormable reserves the right to modify these terms at any time. Users will be notified of significant
               changes. Continued use of the platform after modifications constitutes acceptance of the updated terms.
             </Text>
+          </section>
+
+          <Divider />
+
+          <section id="support">
+            <Title order={4} mb="xs">
+              8. Support Channels
+            </Title>
+            <Text size="sm" c="dimmed" mb="xs">
+              For account issues, moderation concerns, or booking questions, residents should use the in-app flows first
+              and escalate through the dorm support channels when needed.
+            </Text>
+            <List size="sm" c="dimmed">
+              <List.Item>
+                Reservation issues: contact the concierge desk or use the concierge dashboard for staff support.
+              </List.Item>
+              <List.Item>
+                Community reports: use the report actions in the Virtual Lobby so moderation receives the full context.
+              </List.Item>
+              <List.Item>
+                Policy questions: review this page and the Survival Guide before requesting manual assistance.
+              </List.Item>
+            </List>
           </section>
 
           <Divider />

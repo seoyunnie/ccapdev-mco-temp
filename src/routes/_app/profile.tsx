@@ -1,159 +1,78 @@
 import {
   Container,
   Title,
+  Text,
   Tabs,
   Paper,
   Group,
   Stack,
-  Avatar,
   TextInput,
   Textarea,
   Button,
   Badge,
   Table,
   ActionIcon,
-  Text,
   Modal,
   FileInput,
+  Select,
+  Switch,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconUser, IconCalendar, IconHistory, IconEdit, IconTrash, IconCamera, IconPhoto } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
-import defaultAvatarFemale from "../../assets/avatars/default-avatar-female.svg";
 import { SectionHeader } from "../../components/section-header.tsx";
-
-const initialReservations = [
-  { id: "r1", zone: "Quiet Room A", date: "Feb 10, 2026", time: "2:00 PM – 4:00 PM", status: "Confirmed" },
-  { id: "r2", zone: "Main Hall – Seat 12", date: "Feb 12, 2026", time: "10:00 AM – 12:00 PM", status: "Pending" },
-];
-
-const activityHistory = [
-  { action: "Booked Quiet Room A", date: "Feb 8, 2026", type: "Reservation" },
-  { action: "Posted in Virtual Lobby", date: "Feb 7, 2026", type: "Forum" },
-  { action: "Reviewed Café Manila (5★)", date: "Feb 5, 2026", type: "Review" },
-  { action: "Upvoted 'Wi-Fi Issues'", date: "Feb 4, 2026", type: "Forum" },
-];
+import { UserAvatar } from "../../components/user-avatar.tsx";
+import { TIME_SLOTS } from "../../features/study-nook/study-nook.constants.ts";
+import { IconUser, IconCalendar, IconHistory, IconEdit, IconTrash, IconCamera, IconPhoto } from "../../lib/icons.tsx";
+import { getUserProfile, updateProfile, deleteAccount, uploadProfilePhoto } from "../../server/profile.ts";
+import { cancelReservation, updateReservation } from "../../server/reservations.ts";
 
 const typeColors: Record<string, string> = { Reservation: "pink", Forum: "grape", Review: "teal" };
 
-const FEEDBACK_TIMEOUT_MS = 2000;
-
-export const Route = createFileRoute("/_app/profile")({ component: UserProfilePage });
+export const Route = createFileRoute("/_app/profile")({
+  loader: () => getUserProfile(),
+  head: () => ({ meta: [{ title: "Profile | Adormable" }] }),
+  component: UserProfilePage,
+});
 
 function UserProfilePage() {
-  const [displayName, setDisplayName] = useState("Maria Santos");
-  const [bio, setBio] = useState("3rd year CS student. Coffee addict.");
-  const [saved, setSaved] = useState(false);
-  const [reservations, setReservations] = useState(initialReservations);
+  const profile = Route.useLoaderData();
+  const router = useRouter();
+  const [displayName, setDisplayName] = useState(profile.name);
+  const [bio, setBio] = useState(profile.bio);
+
   const [photoOpened, { open: openPhoto, close: closePhoto }] = useDisclosure(false);
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [editTarget, setEditTarget] = useState<string | null>(null);
+  const [deleteResOpened, { open: openDeleteRes, close: closeDeleteRes }] = useDisclosure(false);
+  const [editResOpened, { open: openEditRes, close: closeEditRes }] = useDisclosure(false);
+  const [deleteResId, setDeleteResId] = useState<string | null>(null);
+  const [editReservationId, setEditReservationId] = useState<string | null>(null);
+  const [editReservationDate, setEditReservationDate] = useState("");
+  const [editReservationStart, setEditReservationStart] = useState<string | null>(null);
+  const [editReservationEnd, setEditReservationEnd] = useState<string | null>(null);
+  const [editReservationAnonymous, setEditReservationAnonymous] = useState(false);
+  const [editReservationSeat, setEditReservationSeat] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => {
-      setSaved(false);
-    }, FEEDBACK_TIMEOUT_MS);
-  };
-
-  const handleDeleteReservation = () => {
-    if (deleteTarget !== null) {
-      setReservations((prev) => prev.filter((r) => r.id !== deleteTarget));
-      setDeleteTarget(null);
-    }
+  const openReservationEditor = (reservation: (typeof profile.reservations)[number]) => {
+    setEditReservationId(reservation.id);
+    setEditReservationDate(reservation.dateValue);
+    setEditReservationStart(to12hSlot(reservation.startTimeValue));
+    setEditReservationEnd(to12hSlot(reservation.endTimeValue));
+    setEditReservationAnonymous(reservation.isAnonymous);
+    setEditReservationSeat(reservation.seatLabel ?? "Unassigned");
+    openEditRes();
   };
 
   return (
-    <Container size="md" py="xl">
-      <SectionHeader title="My Profile" />
-
-      <Modal opened={photoOpened} onClose={closePhoto} title="Change Profile Photo" centered>
-        <Stack>
-          <FileInput
-            label="Upload a new photo"
-            placeholder="Choose file"
-            leftSection={<IconPhoto size={16} />}
-            accept="image/*"
-          />
-          <Group justify="flex-end">
-            <Button variant="light" color="gray" onClick={closePhoto}>
-              Cancel
-            </Button>
-            <Button color="pink" radius="xl" onClick={closePhoto}>
-              Upload
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
-
-      <Modal
-        opened={deleteTarget !== null}
-        onClose={() => {
-          setDeleteTarget(null);
-        }}
-        title="Delete Reservation"
-        centered
-      >
-        <Text mb="md">Are you sure you want to cancel this reservation? This action cannot be undone.</Text>
-        <Group justify="flex-end">
-          <Button
-            variant="light"
-            color="gray"
-            onClick={() => {
-              setDeleteTarget(null);
-            }}
-          >
-            Keep
-          </Button>
-          <Button color="red" radius="xl" onClick={handleDeleteReservation}>
-            Delete
-          </Button>
-        </Group>
-      </Modal>
-
-      <Modal
-        opened={editTarget !== null}
-        onClose={() => {
-          setEditTarget(null);
-        }}
-        title="Edit Reservation"
-        centered
-      >
-        <Stack>
-          <Text size="sm" c="dimmed">
-            Editing: {reservations.find((r) => r.id === editTarget)?.zone}
-          </Text>
-          <TextInput label="Date" defaultValue={reservations.find((r) => r.id === editTarget)?.date} />
-          <TextInput label="Time" defaultValue={reservations.find((r) => r.id === editTarget)?.time} />
-          <Group justify="flex-end">
-            <Button
-              variant="light"
-              color="gray"
-              onClick={() => {
-                setEditTarget(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              color="pink"
-              radius="xl"
-              onClick={() => {
-                setEditTarget(null);
-              }}
-            >
-              Save
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
+    <Container size="md" py="xl" className="pageEnter">
+      <SectionHeader title="My Profile" description="Manage your account, reservations, and activity." />
 
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Group wrap="wrap">
           <Stack align="center">
-            <Avatar size={100} radius="xl" src={defaultAvatarFemale} alt="Maria Santos" />
+            <UserAvatar name={profile.name} image={profile.image} size={100} radius="xl" color="pink" />
             <Button variant="light" color="pink" size="xs" leftSection={<IconCamera size={14} />} onClick={openPhoto}>
               Change Photo
             </Button>
@@ -174,20 +93,165 @@ function UserProfilePage() {
               }}
               minRows={2}
             />
-            <TextInput label="Email" defaultValue="maria@adormable.com" disabled />
+            <TextInput label="Email" value={profile.email} disabled />
             <Group justify="flex-end">
-              {saved && (
-                <Text size="sm" c="green.6" fw={600}>
-                  Changes saved!
-                </Text>
-              )}
-              <Button color="pink" radius="xl" onClick={handleSave}>
+              <Button
+                color="pink"
+                radius="xl"
+                onClick={async () => {
+                  await updateProfile({ data: { name: displayName, bio } });
+                  void router.invalidate();
+                }}
+              >
                 Save Changes
               </Button>
             </Group>
           </Stack>
         </Group>
       </Paper>
+
+      {/* Photo Upload Modal */}
+      <Modal opened={photoOpened} onClose={closePhoto} title="Upload Profile Photo">
+        <Stack>
+          <FileInput
+            placeholder="Choose an image"
+            leftSection={<IconPhoto size={16} />}
+            accept="image/*"
+            value={photoFile}
+            onChange={setPhotoFile}
+          />
+          <Group justify="flex-end">
+            <Button variant="light" color="gray" onClick={closePhoto}>
+              Cancel
+            </Button>
+            <Button
+              color="pink"
+              loading={photoUploading}
+              disabled={!photoFile}
+              onClick={async () => {
+                if (!photoFile) {
+                  return;
+                }
+                setPhotoUploading(true);
+                try {
+                  const reader = new FileReader();
+                  // oxlint-disable-next-line promise/avoid-new
+                  const dataUrl = await new Promise<string>((resolve, reject) => {
+                    reader.addEventListener("load", () => {
+                      const { result } = reader;
+                      if (typeof result !== "string") {
+                        reject(new Error("Unexpected FileReader result type"));
+                        return;
+                      }
+                      resolve(result);
+                    });
+                    reader.addEventListener("error", () => reject(reader.error ?? new Error("FileReader error")));
+                    reader.readAsDataURL(photoFile);
+                  });
+                  await uploadProfilePhoto({ data: { image: dataUrl } });
+                  void router.invalidate();
+                  closePhoto();
+                  setPhotoFile(null);
+                } finally {
+                  setPhotoUploading(false);
+                }
+              }}
+            >
+              Upload
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* Delete Reservation Confirmation */}
+      <Modal opened={deleteResOpened} onClose={closeDeleteRes} title="Cancel Reservation">
+        <Text mb="lg">Are you sure you want to cancel this reservation?</Text>
+        <Group justify="flex-end">
+          <Button variant="light" color="gray" onClick={closeDeleteRes}>
+            Keep
+          </Button>
+          <Button
+            color="red"
+            onClick={async () => {
+              if (deleteResId != null) {
+                await cancelReservation({ data: { reservationId: deleteResId } });
+                void router.invalidate();
+              }
+              closeDeleteRes();
+            }}
+          >
+            Cancel Reservation
+          </Button>
+        </Group>
+      </Modal>
+
+      <Modal opened={editResOpened} onClose={closeEditRes} title="Edit Reservation" centered>
+        <Stack>
+          <Text size="sm" c="dimmed">
+            Seat stays assigned to {editReservationSeat}. This editor updates the reservation schedule and anonymity.
+          </Text>
+          <TextInput
+            label="Reservation Date"
+            type="date"
+            value={editReservationDate}
+            onChange={(e) => {
+              setEditReservationDate(e.currentTarget.value);
+            }}
+          />
+          <Group grow>
+            <Select
+              label="Start Time"
+              data={[...TIME_SLOTS]}
+              value={editReservationStart}
+              onChange={setEditReservationStart}
+            />
+            <Select
+              label="End Time"
+              data={[...TIME_SLOTS]}
+              value={editReservationEnd}
+              onChange={setEditReservationEnd}
+            />
+          </Group>
+          <Switch
+            label="Anonymous Reservation"
+            checked={editReservationAnonymous}
+            onChange={(event) => {
+              setEditReservationAnonymous(event.currentTarget.checked);
+            }}
+          />
+          <Group justify="flex-end">
+            <Button variant="light" color="gray" onClick={closeEditRes}>
+              Cancel
+            </Button>
+            <Button
+              color="pink"
+              onClick={async () => {
+                if (
+                  editReservationId == null ||
+                  !editReservationDate ||
+                  editReservationStart == null ||
+                  editReservationEnd == null
+                ) {
+                  return;
+                }
+                await updateReservation({
+                  data: {
+                    reservationId: editReservationId,
+                    date: `${editReservationDate}T00:00:00.000Z`,
+                    startTime: `${editReservationDate}T${to24h(editReservationStart)}:00.000Z`,
+                    endTime: `${editReservationDate}T${to24h(editReservationEnd)}:00.000Z`,
+                    isAnonymous: editReservationAnonymous,
+                  },
+                });
+                closeEditRes();
+                void router.invalidate();
+              }}
+            >
+              Save Reservation
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
 
       <Tabs defaultValue="reservations">
         <Tabs.List>
@@ -204,7 +268,7 @@ function UserProfilePage() {
 
         <Tabs.Panel value="reservations" pt="md">
           <Stack>
-            {reservations.map((res) => (
+            {profile.reservations.map((res) => (
               <Paper key={res.id} withBorder p="md" radius="md">
                 <Group justify="space-between" wrap="wrap">
                   <Stack gap={2}>
@@ -221,8 +285,9 @@ function UserProfilePage() {
                       variant="light"
                       color="pink"
                       size="sm"
+                      aria-label="Edit reservation"
                       onClick={() => {
-                        setEditTarget(res.id);
+                        openReservationEditor(res);
                       }}
                     >
                       <IconEdit size={14} />
@@ -231,8 +296,10 @@ function UserProfilePage() {
                       variant="light"
                       color="red"
                       size="sm"
+                      aria-label="Cancel reservation"
                       onClick={() => {
-                        setDeleteTarget(res.id);
+                        setDeleteResId(res.id);
+                        openDeleteRes();
                       }}
                     >
                       <IconTrash size={14} />
@@ -249,13 +316,13 @@ function UserProfilePage() {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Action</Table.Th>
-                <Table.Th>Type</Table.Th>
+                <Table.Th>Category</Table.Th>
                 <Table.Th>Date</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {activityHistory.map((item) => (
-                <Table.Tr key={item.action}>
+              {profile.activityHistory.map((item) => (
+                <Table.Tr key={item.id}>
                   <Table.Td>{item.action}</Table.Td>
                   <Table.Td>
                     <Badge color={typeColors[item.type]} variant="light" size="sm">
@@ -282,7 +349,19 @@ function UserProfilePage() {
               <Text size="sm" c="dimmed">
                 Permanently delete your account and all associated data. This action cannot be undone.
               </Text>
-              <Button color="red" variant="outline" w="fit-content" radius="xl">
+              <Button
+                color="red"
+                variant="outline"
+                w="fit-content"
+                radius="xl"
+                onClick={async () => {
+                  if (!confirm("Are you sure? This will permanently delete your account and all data.")) {
+                    return;
+                  }
+                  await deleteAccount();
+                  void router.navigate({ to: "/login" });
+                }}
+              >
                 Delete Account
               </Button>
             </Stack>
@@ -291,4 +370,21 @@ function UserProfilePage() {
       </Tabs>
     </Container>
   );
+}
+
+function to12hSlot(isoValue: string): string {
+  return new Date(isoValue).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
+function to24h(time12: string): string {
+  const [timePart, modifier] = time12.split(" ");
+  const [rawHour, rawMinute] = timePart.split(":").map(Number);
+  let hour = rawHour;
+  if (modifier === "PM" && hour !== 12) {
+    hour += 12;
+  }
+  if (modifier === "AM" && hour === 12) {
+    hour = 0;
+  }
+  return `${String(hour).padStart(2, "0")}:${String(rawMinute).padStart(2, "0")}`;
 }

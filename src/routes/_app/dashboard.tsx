@@ -1,5 +1,5 @@
 import {
-  Avatar,
+  Box,
   Container,
   Title,
   Text,
@@ -13,26 +13,23 @@ import {
   Paper,
   rem,
 } from "@mantine/core";
-import { IconCalendar, IconSun, IconMoon, IconSunrise } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-import defaultAvatarFemale from "../../assets/avatars/default-avatar-female.svg";
-import { useAuth } from "../../contexts/auth-context.tsx";
+import { LinkButton } from "../../components/link-button.tsx";
+import { UserAvatar } from "../../components/user-avatar.tsx";
 import { QUICK_ACTIONS } from "../../features/dashboard/data/quick-actions.ts";
+import { useAuth } from "../../lib/auth-context.tsx";
+import { IconArrowRight, IconCalendar, IconMoon, IconSparkles, IconSun, IconSunrise } from "../../lib/icons.tsx";
+import { getMyReservations } from "../../server/reservations.ts";
 
 import styles from "./dashboard.module.css";
 
-// oxlint-disable-next-line no-magic-numbers
 const QUICK_ACTION_ICON_BOX = rem(50);
-// oxlint-disable-next-line no-magic-numbers
+// oxlint-disable-next-line no-magic-numbers -- UI icon size constant
 const QUICK_ACTION_ICON_SIZE = rem(26);
 
-const upcomingReservations = [
-  { zone: "Quiet Room A", date: "Feb 10, 2026", time: "2:00 PM - 4:00 PM", status: "Confirmed" },
-  { zone: "Main Hall - Seat 12", date: "Feb 12, 2026", time: "10:00 AM - 12:00 PM", status: "Pending" },
-];
-
 export const Route = createFileRoute("/_app/dashboard")({
+  loader: () => getMyReservations(),
   head: () => ({ meta: [{ title: "Dashboard | Adormable" }] }),
   component: DashboardPage,
 });
@@ -53,25 +50,118 @@ function getGreeting() {
 }
 
 function DashboardPage() {
-  const { name } = useAuth();
+  const { name, image } = useAuth();
+  const upcomingReservations = Route.useLoaderData();
   const greeting = getGreeting();
+  const nextReservation = upcomingReservations[0] ?? null;
 
   return (
-    <Container size="lg" py="xl">
-      <Paper shadow="sm" p="lg" radius="md" className={styles.welcomeBanner} mb="xl">
-        <Group gap="md" wrap="nowrap">
-          <Avatar src={defaultAvatarFemale} alt={name} size="lg" radius="xl" />
-          <Stack gap={2}>
-            <Group gap="xs">
-              <greeting.Icon size={20} color="var(--mantine-color-pink-5)" />
-              <Title order={2}>
-                {greeting.text}, {name}!
-              </Title>
+    <Container size="lg" py="xl" className="pageEnter">
+      <Box className={styles.heroPanel} mb="xl">
+        <div className={styles.heroGlow} aria-hidden="true" />
+        <div className={styles.heroGrid}>
+          <Stack gap="md" className={styles.heroCopy}>
+            <Group gap="sm" wrap="wrap">
+              <Badge color="pink" variant="light" radius="xl" size="lg">
+                Resident dashboard
+              </Badge>
+              <Badge color="grape" variant="light" radius="xl" leftSection={<IconSparkles size={14} />}>
+                Daily overview
+              </Badge>
             </Group>
-            <Text c="dimmed">Here&apos;s a quick overview of your Adormable activity.</Text>
+            <Group gap="md" wrap="nowrap" align="center">
+              <UserAvatar name={name} image={image} size={64} radius="xl" className={styles.heroAvatar} />
+              <div>
+                <Group gap="xs" mb={4}>
+                  <greeting.Icon size={20} color="var(--mantine-color-pink-5)" />
+                  <Text fw={700} className={styles.heroEyebrow}>
+                    {greeting.text}
+                  </Text>
+                </Group>
+                <Title order={1} className={styles.heroTitle}>
+                  Welcome back, {name}.
+                </Title>
+              </div>
+            </Group>
+            <Text className={styles.heroDescription}>
+              Your next booking, community shortcuts, and dorm essentials are all surfaced here so you can move from
+              planning to action without hunting through the app.
+            </Text>
+            <Group gap="sm" wrap="wrap">
+              <LinkButton color="pink" radius="xl" to="/study-nook" rightSection={<IconArrowRight size={16} />}>
+                Reserve a study slot
+              </LinkButton>
+              <LinkButton variant="default" radius="xl" to="/lobby">
+                Check the lobby
+              </LinkButton>
+            </Group>
+            <Group gap="sm" wrap="wrap">
+              <Paper radius="xl" px="md" py="xs" className={styles.heroMetricChip}>
+                <Text size="xs" tt="uppercase" fw={700}>
+                  Upcoming
+                </Text>
+                <Text size="sm" c="dimmed">
+                  {upcomingReservations.length} active reservation{upcomingReservations.length === 1 ? "" : "s"}
+                </Text>
+              </Paper>
+              <Paper radius="xl" px="md" py="xs" className={styles.heroMetricChip}>
+                <Text size="xs" tt="uppercase" fw={700}>
+                  Quick access
+                </Text>
+                <Text size="sm" c="dimmed">
+                  Study nook, lobby, and guide in one tap
+                </Text>
+              </Paper>
+            </Group>
           </Stack>
-        </Group>
-      </Paper>
+
+          <div className={styles.heroVisual}>
+            <Paper radius="xl" p="lg" className={`${styles.heroCard} ${styles.heroCardPrimary}`}>
+              <Text size="xs" tt="uppercase" fw={700} className={styles.cardLabel}>
+                Next reservation
+              </Text>
+              {nextReservation == null ? (
+                <>
+                  <Title order={3}>No upcoming bookings yet</Title>
+                  <Text size="sm" c="dimmed">
+                    Open the study nook to find a quieter corner before the busy hours hit.
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Title order={3}>{nextReservation.zone}</Title>
+                  <Text size="sm" c="dimmed">
+                    {nextReservation.date} · {nextReservation.time}
+                  </Text>
+                  <Badge color={nextReservation.status === "Confirmed" ? "green" : "yellow"} variant="light" mt="sm">
+                    {nextReservation.status}
+                  </Badge>
+                </>
+              )}
+            </Paper>
+
+            <Paper radius="xl" p="md" className={`${styles.heroCard} ${styles.heroCardSecondary}`}>
+              <Text size="xs" tt="uppercase" fw={700} className={styles.cardLabel}>
+                Today&apos;s rhythm
+              </Text>
+              <Text fw={700}>Best flow: book, discuss, then review.</Text>
+              <Text size="sm" c="dimmed">
+                Keep the dashboard as the launch point for reservation changes, lobby activity, and local spots.
+              </Text>
+            </Paper>
+
+            <Paper radius="xl" p="md" className={`${styles.heroCard} ${styles.heroCardAccent}`}>
+              <Text size="xs" tt="uppercase" fw={700} className={styles.cardLabel}>
+                Fast lane
+              </Text>
+              <Text fw={700}>Manage your schedule</Text>
+              <Text size="sm" c="dimmed">
+                Use the profile page for edits and cancellations without leaving the resident flow.
+              </Text>
+            </Paper>
+          </div>
+        </div>
+      </Box>
 
       <Text className={styles.sectionTitle} mb="md">
         Quick Actions
@@ -106,7 +196,7 @@ function DashboardPage() {
       </Group>
       <Stack gap="sm">
         {upcomingReservations.map((res) => (
-          <Paper key={res.zone + res.date} withBorder p="md" radius="md" className={styles.reservationContainer}>
+          <Paper key={res.id} withBorder p="md" radius="md" className={styles.reservationContainer}>
             <Group justify="space-between" wrap="wrap">
               <Stack gap={2}>
                 <Text fw={600}>{res.zone}</Text>
@@ -118,7 +208,7 @@ function DashboardPage() {
                 <Badge color={res.status === "Confirmed" ? "green" : "yellow"} variant="light">
                   {res.status}
                 </Badge>
-                <Button size="xs" variant="light" color="pink" radius="xl">
+                <Button size="xs" variant="light" color="pink" radius="xl" component={Link} to="/profile">
                   Manage
                 </Button>
               </Group>

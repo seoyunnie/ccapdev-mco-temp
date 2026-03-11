@@ -1,0 +1,88 @@
+.carouselShell {
+  position: relative;
+}
+
+.carouselViewport {
+  position: relative;
+}
+
+.carousel {
+  overflow: hidden;
+  padding: 6px 4px 12px;
+}
+
+.carouselContainer {
+  display: flex;
+  gap: var(--mantine-spacing-md);
+}
+
+.carouselSlide {
+  flex: 0 0 300px;
+  min-width: 0;
+
+  @mixin smaller-than $mantine-breakpoint-sm {
+    flex: 0 0 min(82vw, 280px);
+  }
+}
+
+.carouselEdge {
+  background: linear-gradient(90deg, rgba(255, 249, 252, 0.96), rgba(255, 249, 252, 0));
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 32px;
+  z-index: 1;
+}
+
+.carouselEdgeRight {
+  background: linear-gradient(270deg, rgba(255, 249, 252, 0.96), rgba(255, 249, 252, 0));
+  left: auto;
+  right: 0;
+}
+
+.carouselControls {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+}
+
+.carouselLabel {
+  color: #702449;
+  letter-spacing: 0.08em;
+}
+
+.carouselHint {
+  max-width: 360px;
+}
+
+.carouselStatus {
+  color: #7a5d69;
+  font-weight: 700;
+  min-width: 52px;
+  text-align: right;
+}
+
+.carouselDots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.carouselDot {
+  background-color: rgba(122, 93, 105, 0.28);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  height: 8px;
+  padding: 0;
+  transition: background-color 0.2s ease;
+  width: 8px;
+}
+
+.carouselDotActive {
+  background: linear-gradient(90deg, rgba(230, 73, 128, 1), rgba(190, 75, 219, 0.92));
+  width: 20px;
+  border-radius: 4px;
+}

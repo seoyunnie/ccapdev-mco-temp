@@ -12,85 +12,100 @@ import {
   Badge,
   ActionIcon,
   Modal,
+  FileInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconEdit, IconTrash, IconPlus, IconSearch } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useRef, useState } from "react";
 
 import placeholder from "../../../assets/establishments/placeholder.svg";
 import { SectionHeader } from "../../../components/section-header.tsx";
+import { IconEdit, IconPlus, IconSearch, IconTrash, IconUpload } from "../../../lib/icons.tsx";
+import { getUsers } from "../../../server/admin.ts";
+import {
+  getEstablishments,
+  createEstablishment,
+  deleteEstablishment,
+  updateEstablishment,
+} from "../../../server/establishments.ts";
 
 import imgStyles from "../../../components/shared-images.module.css";
 import styles from "./index.module.css";
 
-const initialEstablishments = [
-  { id: "1", name: "Café Manila", category: "Coffee Shop", owner: "cafe_manila_owner", status: "Active" },
-  { id: "2", name: "Kuya's Carinderia", category: "Filipino Food", owner: "—", status: "Active" },
-  { id: "3", name: "Quick Prints", category: "Services", owner: "quickprints_admin", status: "Active" },
-  { id: "4", name: "Samgyup Corner", category: "Korean BBQ", owner: "—", status: "Inactive" },
-];
-
 const FEEDBACK_TIMEOUT_MS = 2000;
+const MAX_IMAGE_BYTES = 2_000_000;
 
 export const Route = createFileRoute("/_app/admin/establishments")({
+  loader: async () => {
+    const [estResult, users] = await Promise.all([getEstablishments({ data: {} }), getUsers()]);
+    return { establishments: estResult.items, users };
+  },
   head: () => ({ meta: [{ title: "Establishments | Adormable" }] }),
   component: EstablishmentManagerPage,
 });
 
 function EstablishmentManagerPage() {
+  const { establishments, users } = Route.useLoaderData();
+  const router = useRouter();
+  const formRef = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState("");
-  const [establishments, setEstablishments] = useState(initialEstablishments);
-  const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
-  const [deleteOpened, { open: openDelete, close: closeDelete }] = useDisclosure(false);
-  const [assignOpened, { open: openAssign, close: closeAssign }] = useDisclosure(false);
-  const [selectedEst, setSelectedEst] = useState<(typeof initialEstablishments)[0] | null>(null);
-
-  const [newName, setNewName] = useState("");
-  const [newCategory, setNewCategory] = useState<string | null>(null);
-  const [newDesc, setNewDesc] = useState("");
-  const [newAddress, setNewAddress] = useState("");
-  const [newOwner, setNewOwner] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
+  const [address, setAddress] = useState("");
+  const [ownerId, setOwnerId] = useState<string | null>(null);
+  const [imageData, setImageData] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState("");
+
+  const [deleteOpened, { open: openDelete, close: closeDelete }] = useDisclosure(false);
+  const [selectedEst, setSelectedEst] = useState<(typeof establishments)[0] | null>(null);
 
   const filteredEstablishments = establishments.filter(
     (e) =>
       e.name.toLowerCase().includes(search.toLowerCase()) || e.category.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const handleDelete = () => {
-    if (selectedEst) {
-      setEstablishments((prev) => prev.filter((e) => e.id !== selectedEst.id));
-      setSelectedEst(null);
-      closeDelete();
-    }
+  const resetForm = () => {
+    setEditId(null);
+    setName("");
+    setCategory(null);
+    setDescription("");
+    setAddress("");
+    setOwnerId(null);
+    setImageData(null);
   };
 
-  const handleSaveNew = () => {
-    if (!newName || newCategory == null || newCategory === "") {
+  const handleImageChange = (file: File | null) => {
+    if (!file) {
+      setImageData(null);
       return;
     }
-    const newEst = {
-      id: String(Date.now()),
-      name: newName,
-      category: newCategory,
-      owner: newOwner ?? "—",
-      status: "Active" as const,
-    };
-    setEstablishments((prev) => [...prev, newEst]);
-    setNewName("");
-    setNewCategory(null);
-    setNewDesc("");
-    setNewAddress("");
-    setNewOwner(null);
-    setSuccessMsg("Establishment added!");
-    setTimeout(() => {
-      setSuccessMsg("");
-    }, FEEDBACK_TIMEOUT_MS);
+    if (file.size > MAX_IMAGE_BYTES) {
+      setSuccessMsg("Image must be under 2 MB");
+      setTimeout(() => setSuccessMsg(""), FEEDBACK_TIMEOUT_MS);
+      return;
+    }
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      if (typeof reader.result === "string") {
+        setImageData(reader.result);
+      }
+    });
+    reader.readAsDataURL(file);
+  };
+
+  const handleDelete = async () => {
+    if (selectedEst) {
+      await deleteEstablishment({ data: { establishmentId: selectedEst.id } });
+      setSelectedEst(null);
+      closeDelete();
+      void router.invalidate();
+    }
   };
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="lg" py="xl" className="pageEnter">
       <Group justify="space-between" mb="xs">
         <SectionHeader
           title="Establishment Manager"
@@ -102,7 +117,8 @@ function EstablishmentManagerPage() {
           color="pink"
           radius="xl"
           onClick={() => {
-            document.querySelector("#add-establishment-section")?.scrollIntoView({ behavior: "smooth" });
+            resetForm();
+            formRef.current?.scrollIntoView({ behavior: "smooth" });
           }}
         >
           Add Establishment
@@ -145,8 +161,13 @@ function EstablishmentManagerPage() {
                       size="xs"
                       variant="subtle"
                       onClick={() => {
-                        setSelectedEst(est);
-                        openAssign();
+                        setEditId(est.id);
+                        setName(est.name);
+                        setCategory(est.category);
+                        setDescription(est.description);
+                        setAddress(est.address);
+                        setOwnerId(null);
+                        formRef.current?.scrollIntoView({ behavior: "smooth" });
                       }}
                     >
                       Assign Owner
@@ -166,11 +187,16 @@ function EstablishmentManagerPage() {
                       variant="light"
                       size="sm"
                       color="pink"
-                      onClick={() => {
-                        setSelectedEst(est);
-                        openEdit();
-                      }}
                       aria-label="Edit establishment"
+                      onClick={() => {
+                        setEditId(est.id);
+                        setName(est.name);
+                        setCategory(est.category);
+                        setDescription(est.description);
+                        setAddress(est.address);
+                        setOwnerId(null);
+                        formRef.current?.scrollIntoView({ behavior: "smooth" });
+                      }}
                     >
                       <IconEdit size={14} />
                     </ActionIcon>
@@ -178,11 +204,11 @@ function EstablishmentManagerPage() {
                       variant="light"
                       size="sm"
                       color="red"
+                      aria-label="Delete establishment"
                       onClick={() => {
                         setSelectedEst(est);
                         openDelete();
                       }}
-                      aria-label="Delete establishment"
                     >
                       <IconTrash size={14} />
                     </ActionIcon>
@@ -193,28 +219,6 @@ function EstablishmentManagerPage() {
           </Table.Tbody>
         </Table>
       </Paper>
-
-      {/* Edit Modal */}
-      <Modal opened={editOpened} onClose={closeEdit} title="Edit Establishment">
-        {selectedEst && (
-          <Stack>
-            <TextInput label="Name" defaultValue={selectedEst.name} />
-            <Select
-              label="Category"
-              defaultValue={selectedEst.category}
-              data={["Coffee Shop", "Filipino Food", "Korean BBQ", "Services", "Convenience Store"]}
-            />
-            <Group justify="flex-end">
-              <Button variant="light" color="gray" onClick={closeEdit}>
-                Cancel
-              </Button>
-              <Button color="pink" onClick={closeEdit}>
-                Save
-              </Button>
-            </Group>
-          </Stack>
-        )}
-      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal opened={deleteOpened} onClose={closeDelete} title="Delete Establishment">
@@ -231,35 +235,9 @@ function EstablishmentManagerPage() {
         </Group>
       </Modal>
 
-      {/* Assign Owner Modal */}
-      <Modal opened={assignOpened} onClose={closeAssign} title="Assign Owner">
-        {selectedEst && (
-          <Stack>
-            <Text size="sm">
-              Assign an owner account to <strong>{selectedEst.name}</strong>.
-            </Text>
-            <Select
-              label="Owner Account"
-              placeholder="Search users..."
-              data={["cafe_manila_owner", "quickprints_admin", "maria@adormable.com", "mike@adormable.com"]}
-              searchable
-              clearable
-            />
-            <Group justify="flex-end">
-              <Button variant="light" color="gray" onClick={closeAssign}>
-                Cancel
-              </Button>
-              <Button color="pink" onClick={closeAssign}>
-                Assign
-              </Button>
-            </Group>
-          </Stack>
-        )}
-      </Modal>
-
-      <Paper shadow="md" p="lg" radius="md" className="content-card" mt="xl" id="add-establishment-section">
+      <Paper shadow="md" p="lg" radius="md" className="content-card" mt="xl" ref={formRef}>
         <Title order={4} mb="md">
-          Add New Establishment
+          {editId == null ? "Add New Establishment" : "Edit Establishment"}
         </Title>
         <img src={placeholder} alt="Preview" className={imgStyles.previewImage} />
         <Stack>
@@ -267,62 +245,90 @@ function EstablishmentManagerPage() {
             <TextInput
               label="Name"
               placeholder="Establishment name"
-              value={newName}
+              value={name}
               onChange={(e) => {
-                setNewName(e.currentTarget.value);
+                setName(e.currentTarget.value);
               }}
             />
             <Select
               label="Category"
               placeholder="Select category"
               data={["Coffee Shop", "Filipino Food", "Korean BBQ", "Services", "Convenience Store"]}
-              value={newCategory}
-              onChange={setNewCategory}
+              value={category}
+              onChange={setCategory}
             />
           </Group>
           <TextInput
             label="Description"
             placeholder="Brief description"
-            value={newDesc}
+            value={description}
             onChange={(e) => {
-              setNewDesc(e.currentTarget.value);
+              setDescription(e.currentTarget.value);
             }}
           />
           <Group grow>
             <TextInput
               label="Address"
               placeholder="Street address"
-              value={newAddress}
+              value={address}
               onChange={(e) => {
-                setNewAddress(e.currentTarget.value);
+                setAddress(e.currentTarget.value);
               }}
             />
             <Select
               label="Assign Owner"
               placeholder="Search users..."
-              data={["cafe_manila_owner", "quickprints_admin"]}
+              data={users.map((u) => ({ value: u.id, label: u.name }))}
               searchable
               clearable
-              value={newOwner}
-              onChange={setNewOwner}
+              value={ownerId}
+              onChange={setOwnerId}
             />
           </Group>
+          <FileInput
+            label="Establishment Image"
+            placeholder="Upload image (max 2 MB)"
+            leftSection={<IconUpload size={16} />}
+            accept="image/*"
+            onChange={handleImageChange}
+          />
           <Group justify="flex-end">
-            <Button
-              variant="light"
-              color="gray"
-              onClick={() => {
-                setNewName("");
-                setNewCategory(null);
-                setNewDesc("");
-                setNewAddress("");
-                setNewOwner(null);
-              }}
-            >
+            <Button variant="light" color="gray" onClick={resetForm}>
               Cancel
             </Button>
-            <Button color="pink" radius="xl" onClick={handleSaveNew}>
-              Save Establishment
+            <Button
+              color="pink"
+              radius="xl"
+              onClick={async () => {
+                if (editId == null) {
+                  if (!name || category == null || ownerId == null) {
+                    return;
+                  }
+                  await createEstablishment({
+                    data: { name, category, description, address, image: imageData ?? undefined, ownerId },
+                  });
+                } else {
+                  await updateEstablishment({
+                    data: {
+                      establishmentId: editId,
+                      name: name || undefined,
+                      category: category ?? undefined,
+                      description: description || undefined,
+                      address: address || undefined,
+                      image: imageData ?? undefined,
+                      ownerId: ownerId ?? undefined,
+                    },
+                  });
+                }
+                resetForm();
+                setSuccessMsg(editId == null ? "Establishment added!" : "Establishment updated!");
+                setTimeout(() => {
+                  setSuccessMsg("");
+                }, FEEDBACK_TIMEOUT_MS);
+                void router.invalidate();
+              }}
+            >
+              {editId == null ? "Save Establishment" : "Save Changes"}
             </Button>
           </Group>
           {successMsg && (
