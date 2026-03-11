@@ -84,9 +84,7 @@ function LoginRegisterPage() {
       setError(authError.message ?? "Login failed. Please try again.");
       return;
     }
-    await router.invalidate();
-    const sessionState = await getSessionStateFn();
-    void router.navigate({ to: sessionState.activeBan == null ? "/dashboard" : "/suspended" });
+    window.location.assign("/dashboard");
   };
 
   const handleRegister = async (values: typeof registerForm.values) => {
@@ -102,9 +100,7 @@ function LoginRegisterPage() {
       setError(authError.message ?? "Registration failed. Please try again.");
       return;
     }
-    await router.invalidate();
-    const sessionState = await getSessionStateFn();
-    void router.navigate({ to: sessionState.activeBan == null ? "/dashboard" : "/suspended" });
+    window.location.assign("/dashboard");
   };
 
   return (

@@ -15,6 +15,7 @@ import {
   Select,
   FileInput,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -73,6 +74,7 @@ function ThreadViewPage() {
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportTarget, setReportTarget] = useState<{ threadId?: string; commentId?: string }>({});
+  const [submittingReport, setSubmittingReport] = useState(false);
 
   return (
     <Container size="md" py="xl" className="pageEnter">
@@ -151,6 +153,7 @@ function ThreadViewPage() {
         onClose={() => {
           setReportOpen(false);
           setReportReason("");
+          setReportTarget({});
         }}
         title="Report Content"
         centered
@@ -172,6 +175,7 @@ function ThreadViewPage() {
               onClick={() => {
                 setReportOpen(false);
                 setReportReason("");
+                setReportTarget({});
               }}
             >
               Cancel
@@ -179,13 +183,33 @@ function ThreadViewPage() {
             <Button
               color="red"
               radius="xl"
+              loading={submittingReport}
               onClick={async () => {
                 if (!reportReason.trim()) {
+                  notifications.show({
+                    title: "Reason required",
+                    message: "Add a short explanation before submitting a report.",
+                    color: "red",
+                  });
                   return;
                 }
-                await createReport({ data: { ...reportTarget, reason: reportReason } });
-                setReportOpen(false);
-                setReportReason("");
+                setSubmittingReport(true);
+                try {
+                  await createReport({ data: { ...reportTarget, reason: reportReason.trim() } });
+                  setReportOpen(false);
+                  setReportReason("");
+                  setReportTarget({});
+                  notifications.show({
+                    title: "Report submitted",
+                    message: "Thanks. A moderator can review this content now.",
+                    color: "green",
+                  });
+                } catch (error) {
+                  const message = error instanceof Error ? error.message : "Could not submit the report.";
+                  notifications.show({ title: "Report failed", message, color: "red" });
+                } finally {
+                  setSubmittingReport(false);
+                }
               }}
             >
               Submit Report

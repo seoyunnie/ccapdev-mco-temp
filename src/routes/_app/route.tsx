@@ -8,7 +8,7 @@ import { Sidebar } from "../../components/layout/sidebar.tsx";
 import { getSessionStateFn } from "../../server/auth.ts";
 
 // Routes under /_app that don't require authentication
-const PUBLIC_PATHS = new Set(["/", "/study-nook", "/lobby", "/guide"]);
+const PUBLIC_PATHS = new Set(["/", "/study-nook", "/lobby", "/guide", "/terms"]);
 
 export const Route = createFileRoute("/_app")({
   beforeLoad: async ({ location }) => {
