@@ -14,29 +14,29 @@ import {
   Alert,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { IconAlertCircle } from "@tabler/icons-react";
 import { Link, createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
 import loginBg from "../assets/backgrounds/login-bg.svg";
 import adormableLogo from "../assets/logos/adormable-logo.png";
 import { authClient } from "../lib/auth-client.ts";
-import { getSessionFn } from "../server/auth.ts";
+import { IconAlertCircle } from "../lib/icons.tsx";
+import { getSessionStateFn } from "../server/auth.ts";
 
 import styles from "./login.module.css";
 
 interface LoginSearch {
-  register?: string | undefined;
+  register?: boolean | undefined;
 }
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search): LoginSearch => ({
-    register: typeof search.register === "string" ? search.register : undefined,
+    register: typeof search.register === "boolean" ? search.register : undefined,
   }),
   beforeLoad: async () => {
-    const session = await getSessionFn();
-    if (session?.user) {
-      throw redirect({ to: "/dashboard" });
+    const sessionState = await getSessionStateFn();
+    if (sessionState.session?.user) {
+      throw redirect({ to: sessionState.activeBan == null ? "/dashboard" : "/suspended" });
     }
   },
   head: () => ({ meta: [{ title: "Login | Adormable" }] }),
@@ -45,7 +45,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginRegisterPage() {
   const { register } = Route.useSearch();
-  const [isRegister, setIsRegister] = useState(register === "true");
+  const [isRegister, setIsRegister] = useState(register === true);
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -84,7 +84,9 @@ function LoginRegisterPage() {
       setError(authError.message ?? "Login failed. Please try again.");
       return;
     }
-    void router.navigate({ to: "/dashboard" });
+    await router.invalidate();
+    const sessionState = await getSessionStateFn();
+    void router.navigate({ to: sessionState.activeBan == null ? "/dashboard" : "/suspended" });
   };
 
   const handleRegister = async (values: typeof registerForm.values) => {
@@ -100,14 +102,16 @@ function LoginRegisterPage() {
       setError(authError.message ?? "Registration failed. Please try again.");
       return;
     }
-    void router.navigate({ to: "/dashboard" });
+    await router.invalidate();
+    const sessionState = await getSessionStateFn();
+    void router.navigate({ to: sessionState.activeBan == null ? "/dashboard" : "/suspended" });
   };
 
   return (
     <div
       className={styles.page}
       style={{
-        backgroundImage: `linear-gradient(160deg, rgba(255,240,246,0.85) 0%, rgba(250,250,250,0.85) 50%, rgba(243,229,245,0.85) 100%), url(${loginBg})`,
+        backgroundImage: `linear-gradient(155deg, rgba(255,246,250,0.92) 0%, rgba(255,251,253,0.84) 42%, rgba(247,237,248,0.9) 100%), url(${loginBg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

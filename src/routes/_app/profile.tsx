@@ -6,7 +6,6 @@ import {
   Paper,
   Group,
   Stack,
-  Avatar,
   TextInput,
   Textarea,
   Button,
@@ -15,15 +14,19 @@ import {
   ActionIcon,
   Modal,
   FileInput,
+  Select,
+  Switch,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconUser, IconCalendar, IconHistory, IconEdit, IconTrash, IconCamera, IconPhoto } from "@tabler/icons-react";
-import { createFileRoute, useRouter, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { SectionHeader } from "../../components/section-header.tsx";
+import { UserAvatar } from "../../components/user-avatar.tsx";
+import { TIME_SLOTS } from "../../features/study-nook/study-nook.constants.ts";
+import { IconUser, IconCalendar, IconHistory, IconEdit, IconTrash, IconCamera, IconPhoto } from "../../lib/icons.tsx";
 import { getUserProfile, updateProfile, deleteAccount, uploadProfilePhoto } from "../../server/profile.ts";
-import { cancelReservation } from "../../server/reservations.ts";
+import { cancelReservation, updateReservation } from "../../server/reservations.ts";
 
 const typeColors: Record<string, string> = { Reservation: "pink", Forum: "grape", Review: "teal" };
 
@@ -36,15 +39,31 @@ export const Route = createFileRoute("/_app/profile")({
 function UserProfilePage() {
   const profile = Route.useLoaderData();
   const router = useRouter();
-  const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(profile.name);
   const [bio, setBio] = useState(profile.bio);
 
   const [photoOpened, { open: openPhoto, close: closePhoto }] = useDisclosure(false);
   const [deleteResOpened, { open: openDeleteRes, close: closeDeleteRes }] = useDisclosure(false);
+  const [editResOpened, { open: openEditRes, close: closeEditRes }] = useDisclosure(false);
   const [deleteResId, setDeleteResId] = useState<string | null>(null);
+  const [editReservationId, setEditReservationId] = useState<string | null>(null);
+  const [editReservationDate, setEditReservationDate] = useState("");
+  const [editReservationStart, setEditReservationStart] = useState<string | null>(null);
+  const [editReservationEnd, setEditReservationEnd] = useState<string | null>(null);
+  const [editReservationAnonymous, setEditReservationAnonymous] = useState(false);
+  const [editReservationSeat, setEditReservationSeat] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoUploading, setPhotoUploading] = useState(false);
+
+  const openReservationEditor = (reservation: (typeof profile.reservations)[number]) => {
+    setEditReservationId(reservation.id);
+    setEditReservationDate(reservation.dateValue);
+    setEditReservationStart(to12hSlot(reservation.startTimeValue));
+    setEditReservationEnd(to12hSlot(reservation.endTimeValue));
+    setEditReservationAnonymous(reservation.isAnonymous);
+    setEditReservationSeat(reservation.seatLabel ?? "Unassigned");
+    openEditRes();
+  };
 
   return (
     <Container size="md" py="xl" className="pageEnter">
@@ -53,12 +72,7 @@ function UserProfilePage() {
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
         <Group wrap="wrap">
           <Stack align="center">
-            <Avatar size={100} radius="xl" color="pink" src={profile.image ?? undefined}>
-              {profile.name
-                .split(" ")
-                .map((n: string) => n[0])
-                .join("")}
-            </Avatar>
+            <UserAvatar name={profile.name} image={profile.image} size={100} radius="xl" color="pink" />
             <Button variant="light" color="pink" size="xs" leftSection={<IconCamera size={14} />} onClick={openPhoto}>
               Change Photo
             </Button>
@@ -115,7 +129,9 @@ function UserProfilePage() {
               loading={photoUploading}
               disabled={!photoFile}
               onClick={async () => {
-                if (!photoFile) {return;}
+                if (!photoFile) {
+                  return;
+                }
                 setPhotoUploading(true);
                 try {
                   const reader = new FileReader();
@@ -169,6 +185,74 @@ function UserProfilePage() {
         </Group>
       </Modal>
 
+      <Modal opened={editResOpened} onClose={closeEditRes} title="Edit Reservation" centered>
+        <Stack>
+          <Text size="sm" c="dimmed">
+            Seat stays assigned to {editReservationSeat}. This editor updates the reservation schedule and anonymity.
+          </Text>
+          <TextInput
+            label="Reservation Date"
+            type="date"
+            value={editReservationDate}
+            onChange={(e) => {
+              setEditReservationDate(e.currentTarget.value);
+            }}
+          />
+          <Group grow>
+            <Select
+              label="Start Time"
+              data={[...TIME_SLOTS]}
+              value={editReservationStart}
+              onChange={setEditReservationStart}
+            />
+            <Select
+              label="End Time"
+              data={[...TIME_SLOTS]}
+              value={editReservationEnd}
+              onChange={setEditReservationEnd}
+            />
+          </Group>
+          <Switch
+            label="Anonymous Reservation"
+            checked={editReservationAnonymous}
+            onChange={(event) => {
+              setEditReservationAnonymous(event.currentTarget.checked);
+            }}
+          />
+          <Group justify="flex-end">
+            <Button variant="light" color="gray" onClick={closeEditRes}>
+              Cancel
+            </Button>
+            <Button
+              color="pink"
+              onClick={async () => {
+                if (
+                  editReservationId == null ||
+                  !editReservationDate ||
+                  editReservationStart == null ||
+                  editReservationEnd == null
+                ) {
+                  return;
+                }
+                await updateReservation({
+                  data: {
+                    reservationId: editReservationId,
+                    date: `${editReservationDate}T00:00:00.000Z`,
+                    startTime: `${editReservationDate}T${to24h(editReservationStart)}:00.000Z`,
+                    endTime: `${editReservationDate}T${to24h(editReservationEnd)}:00.000Z`,
+                    isAnonymous: editReservationAnonymous,
+                  },
+                });
+                closeEditRes();
+                void router.invalidate();
+              }}
+            >
+              Save Reservation
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
       <Tabs defaultValue="reservations">
         <Tabs.List>
           <Tabs.Tab value="reservations" leftSection={<IconCalendar size={16} />}>
@@ -201,8 +285,9 @@ function UserProfilePage() {
                       variant="light"
                       color="pink"
                       size="sm"
+                      aria-label="Edit reservation"
                       onClick={() => {
-                        void navigate({ to: "/study-nook" });
+                        openReservationEditor(res);
                       }}
                     >
                       <IconEdit size={14} />
@@ -211,6 +296,7 @@ function UserProfilePage() {
                       variant="light"
                       color="red"
                       size="sm"
+                      aria-label="Cancel reservation"
                       onClick={() => {
                         setDeleteResId(res.id);
                         openDeleteRes();
@@ -230,7 +316,7 @@ function UserProfilePage() {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Action</Table.Th>
-                <Table.Th>Type</Table.Th>
+                <Table.Th>Category</Table.Th>
                 <Table.Th>Date</Table.Th>
               </Table.Tr>
             </Table.Thead>
@@ -284,4 +370,21 @@ function UserProfilePage() {
       </Tabs>
     </Container>
   );
+}
+
+function to12hSlot(isoValue: string): string {
+  return new Date(isoValue).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
+function to24h(time12: string): string {
+  const [timePart, modifier] = time12.split(" ");
+  const [rawHour, rawMinute] = timePart.split(":").map(Number);
+  let hour = rawHour;
+  if (modifier === "PM" && hour !== 12) {
+    hour += 12;
+  }
+  if (modifier === "AM" && hour === 12) {
+    hour = 0;
+  }
+  return `${String(hour).padStart(2, "0")}:${String(rawMinute).padStart(2, "0")}`;
 }

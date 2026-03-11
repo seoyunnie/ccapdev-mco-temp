@@ -5,7 +5,6 @@ import {
   Paper,
   Group,
   Stack,
-  Avatar,
   Badge,
   Button,
   ActionIcon,
@@ -14,17 +13,20 @@ import {
   Modal,
   TextInput,
   Select,
+  FileInput,
 } from "@mantine/core";
-import { IconArrowUp, IconArrowDown, IconEdit, IconTrash, IconFlag } from "@tabler/icons-react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
 import emptyState from "../../../assets/features/empty-state.svg";
+import threadPlaceholder from "../../../assets/lobby/thread-placeholder.svg";
 import { BackButton } from "../../../components/back-button.tsx";
 import { EmptyState } from "../../../components/empty-state.tsx";
 import { DetailSkeleton } from "../../../components/page-skeleton.tsx";
-import { useAuth } from "../../../contexts/auth-context.tsx";
+import { UserAvatar } from "../../../components/user-avatar.tsx";
 import { TAG_COLORS } from "../../../features/lobby/lobby.constants.ts";
+import { useAuth } from "../../../lib/auth-context.tsx";
+import { IconArrowDown, IconArrowUp, IconEdit, IconFlag, IconPhoto, IconTrash } from "../../../lib/icons.tsx";
 import { createReport } from "../../../server/moderation.ts";
 import {
   getThread,
@@ -44,6 +46,18 @@ export const Route = createFileRoute("/_app/lobby/$threadId")({
   component: ThreadViewPage,
 });
 
+function getVoteColor(vote: number) {
+  if (vote === 1) {
+    return "pink";
+  }
+
+  if (vote === -1) {
+    return "red";
+  }
+
+  return null;
+}
+
 function ThreadViewPage() {
   const data = Route.useLoaderData();
   const router = useRouter();
@@ -55,6 +69,7 @@ function ThreadViewPage() {
   const [editTitle, setEditTitle] = useState(data.title);
   const [editContent, setEditContent] = useState(data.content);
   const [editTag, setEditTag] = useState<string | null>(data.tag);
+  const [editImage, setEditImage] = useState<string | null>(data.image ?? null);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportTarget, setReportTarget] = useState<{ threadId?: string; commentId?: string }>({});
@@ -79,6 +94,25 @@ function ThreadViewPage() {
             }}
           />
           <Select label="Tag" data={Object.keys(TAG_COLORS)} value={editTag} onChange={setEditTag} />
+          <FileInput
+            label="Thread image"
+            placeholder="Replace thread image"
+            leftSection={<IconPhoto size={16} />}
+            accept="image/*"
+            onChange={(file) => {
+              if (file == null) {
+                setEditImage(null);
+                return;
+              }
+              const reader = new FileReader();
+              reader.addEventListener("load", () => {
+                if (typeof reader.result === "string") {
+                  setEditImage(reader.result);
+                }
+              });
+              reader.readAsDataURL(file);
+            }}
+          />
           <Textarea
             label="Content"
             minRows={4}
@@ -93,7 +127,13 @@ function ThreadViewPage() {
               radius="xl"
               onClick={async () => {
                 await updateThread({
-                  data: { threadId: data.id, title: editTitle, content: editContent, tag: editTag ?? undefined },
+                  data: {
+                    threadId: data.id,
+                    title: editTitle,
+                    content: editContent,
+                    tag: editTag ?? undefined,
+                    image: editImage,
+                  },
                 });
                 setEditOpen(false);
                 void router.invalidate();
@@ -160,12 +200,7 @@ function ThreadViewPage() {
       <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
         <Group justify="space-between" mb="md">
           <Group>
-            <Avatar color="pink" radius="xl" src={data.authorImage ?? undefined}>
-              {data.author
-                .split(" ")
-                .map((n: string) => n[0])
-                .join("")}
-            </Avatar>
+            <UserAvatar name={data.author} image={data.authorImage} color="pink" radius="xl" />
             <Stack gap={2}>
               <Group gap="xs">
                 <Text fw={700}>{data.title}</Text>
@@ -184,6 +219,7 @@ function ThreadViewPage() {
                 variant="light"
                 color="pink"
                 size="sm"
+                aria-label="Edit thread"
                 onClick={() => {
                   setEditOpen(true);
                 }}
@@ -194,6 +230,7 @@ function ThreadViewPage() {
                 variant="light"
                 color="red"
                 size="sm"
+                aria-label="Delete thread"
                 onClick={async () => {
                   if (!confirm("Delete this thread?")) {
                     return;
@@ -207,6 +244,11 @@ function ThreadViewPage() {
             </Group>
           )}
         </Group>
+        <img
+          src={data.image ?? threadPlaceholder}
+          alt={data.title}
+          style={{ width: "100%", borderRadius: 16, marginBottom: 16, objectFit: "cover", maxHeight: 280 }}
+        />
         <Text style={{ whiteSpace: "pre-line" }} mb="md">
           {data.content}
         </Text>
@@ -215,6 +257,7 @@ function ThreadViewPage() {
             variant={data.userVote === 1 ? "filled" : "light"}
             color="pink"
             disabled={!isLoggedIn}
+            aria-label="Upvote thread"
             onClick={async () => {
               await voteThread({ data: { threadId: data.id, value: 1 } });
               void router.invalidate();
@@ -222,13 +265,14 @@ function ThreadViewPage() {
           >
             <IconArrowUp size={16} />
           </ActionIcon>
-          <Text fw={600} c={data.userVote === 1 ? "pink" : data.userVote === -1 ? "red" : undefined}>
+          <Text fw={600} c={getVoteColor(data.userVote) ?? undefined}>
             {data.upvotes}
           </Text>
           <ActionIcon
             variant={data.userVote === -1 ? "filled" : "light"}
             color="red"
             disabled={!isLoggedIn}
+            aria-label="Downvote thread"
             onClick={async () => {
               await voteThread({ data: { threadId: data.id, value: -1 } });
               void router.invalidate();
@@ -240,6 +284,7 @@ function ThreadViewPage() {
             <ActionIcon
               variant="subtle"
               color="red"
+              aria-label="Report thread"
               onClick={() => {
                 setReportTarget({ threadId: data.id });
                 setReportOpen(true);
@@ -257,6 +302,7 @@ function ThreadViewPage() {
           placeholder="Write a reply..."
           minRows={3}
           mb="sm"
+          disabled={!isLoggedIn}
           value={replyContent}
           onChange={(e) => {
             setReplyContent(e.currentTarget.value);
@@ -266,6 +312,7 @@ function ThreadViewPage() {
           size="sm"
           color="pink"
           radius="xl"
+          disabled={!isLoggedIn}
           onClick={async () => {
             if (!replyContent.trim()) {
               return;
@@ -275,7 +322,7 @@ function ThreadViewPage() {
             void router.invalidate();
           }}
         >
-          Post Reply
+          {isLoggedIn ? "Post Reply" : "Sign in to Reply"}
         </Button>
       </Paper>
 
@@ -287,12 +334,7 @@ function ThreadViewPage() {
         {data.comments.map((comment: (typeof data.comments)[number]) => (
           <Paper key={comment.id} withBorder p="md" radius="md">
             <Group mb="xs">
-              <Avatar color="pink" radius="xl" size="sm" src={comment.authorImage ?? undefined}>
-                {comment.author
-                  .split(" ")
-                  .map((n: string) => n[0])
-                  .join("")}
-              </Avatar>
+              <UserAvatar name={comment.author} image={comment.authorImage} color="pink" radius="xl" size="sm" />
               <Text size="sm" fw={600}>
                 {comment.author}
               </Text>
@@ -309,6 +351,7 @@ function ThreadViewPage() {
                 color="pink"
                 size="xs"
                 disabled={!isLoggedIn}
+                aria-label="Upvote comment"
                 onClick={async () => {
                   await voteComment({ data: { commentId: comment.id, value: 1 } });
                   void router.invalidate();
@@ -316,7 +359,7 @@ function ThreadViewPage() {
               >
                 <IconArrowUp size={12} />
               </ActionIcon>
-              <Text size="xs" c={comment.userVote === 1 ? "pink" : comment.userVote === -1 ? "red" : undefined}>
+              <Text size="xs" c={getVoteColor(comment.userVote) ?? undefined}>
                 {comment.upvotes}
               </Text>
               <ActionIcon
@@ -324,6 +367,7 @@ function ThreadViewPage() {
                 color="red"
                 size="xs"
                 disabled={!isLoggedIn}
+                aria-label="Downvote comment"
                 onClick={async () => {
                   await voteComment({ data: { commentId: comment.id, value: -1 } });
                   void router.invalidate();
@@ -345,6 +389,7 @@ function ThreadViewPage() {
                   variant="subtle"
                   size="xs"
                   color="red"
+                  aria-label="Report comment"
                   onClick={() => {
                     setReportTarget({ commentId: comment.id });
                     setReportOpen(true);
@@ -358,6 +403,7 @@ function ThreadViewPage() {
                   variant="subtle"
                   size="xs"
                   color="red"
+                  aria-label="Delete comment"
                   onClick={async () => {
                     if (!confirm("Delete this comment?")) {
                       return;
@@ -419,12 +465,7 @@ function ThreadViewPage() {
                 {comment.replies.map((reply: (typeof comment.replies)[number]) => (
                   <Paper key={reply.id} bg="pink.0" p="sm" radius="sm" ml="xl">
                     <Group mb={4}>
-                      <Avatar color="pink" radius="xl" size="xs" src={reply.authorImage ?? undefined}>
-                        {reply.author
-                          .split(" ")
-                          .map((n: string) => n[0])
-                          .join("")}
-                      </Avatar>
+                      <UserAvatar name={reply.author} image={reply.authorImage} color="pink" radius="xl" size="xs" />
                       <Text size="xs" fw={600}>
                         {reply.author}
                       </Text>

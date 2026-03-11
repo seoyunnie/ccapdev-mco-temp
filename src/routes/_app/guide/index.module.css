@@ -1,4 +1,6 @@
 .estCard {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 248, 251, 0.9));
+  border: 1px solid rgba(230, 73, 128, 0.12);
   color: inherit;
   text-decoration: none;
   transition:
@@ -6,7 +8,23 @@
     box-shadow 0.15s ease;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--mantine-shadow-lg);
+    transform: translateY(-4px);
+    box-shadow: 0 24px 36px -30px rgba(112, 36, 73, 0.45);
   }
+}
+
+.estMedia {
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.estBadge {
+  border: 1px solid rgba(255, 255, 255, 0.72);
+}
+
+.estMetaText {
+  max-width: 150px;
+}
+
+.estFooter {
+  margin-top: auto;
 }

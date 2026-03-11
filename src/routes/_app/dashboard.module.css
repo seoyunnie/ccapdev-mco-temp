@@ -1,13 +1,139 @@
-.welcomeBanner {
-  border: 1px solid light-dark(var(--mantine-color-pink-1), var(--mantine-color-dark-5));
-  background: light-dark(
-    linear-gradient(135deg, var(--mantine-color-pink-0) 0%, var(--mantine-color-white) 100%),
-    var(--mantine-color-dark-6)
-  );
+.heroPanel {
+  overflow: hidden;
+  position: relative;
+}
+
+.heroGlow {
+  background:
+    radial-gradient(circle at 20% 18%, rgba(230, 73, 128, 0.18), transparent 0 34%),
+    radial-gradient(circle at 85% 16%, rgba(190, 75, 219, 0.14), transparent 0 28%);
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.heroGrid {
+  -webkit-backdrop-filter: blur(16px) saturate(1.08);
+  backdrop-filter: blur(16px) saturate(1.08);
+  background: linear-gradient(160deg, rgba(255, 252, 254, 0.92), rgba(255, 246, 250, 0.84));
+  border: 1px solid rgba(230, 73, 128, 0.14);
+  border-radius: calc(var(--mantine-radius-xl) * 1.2);
+  box-shadow: 0 30px 56px -38px rgba(112, 36, 73, 0.42);
+  display: grid;
+  gap: calc(var(--mantine-spacing-xl) * 1.2);
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.9fr);
+  padding: calc(var(--mantine-spacing-xl) * 1.2);
+  position: relative;
+
+  @mixin smaller-than $mantine-breakpoint-md {
+    grid-template-columns: 1fr;
+  }
+}
+
+.heroCopy {
+  position: relative;
+  z-index: 1;
+}
+
+.heroAvatar {
+  box-shadow: 0 20px 34px -26px rgba(112, 36, 73, 0.45);
+}
+
+.heroEyebrow {
+  color: #8d365d;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  color: #4d2436;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  line-height: 1.02;
+}
+
+.heroDescription {
+  color: #6e5560;
+  font-size: var(--mantine-font-size-md);
+  max-width: 640px;
+}
+
+.heroMetricChip {
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(230, 73, 128, 0.12);
+}
+
+.heroVisual {
+  min-height: 330px;
+  position: relative;
+
+  @mixin smaller-than $mantine-breakpoint-md {
+    min-height: 280px;
+  }
+}
+
+.heroCard {
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 248, 251, 0.84));
+  border: 1px solid rgba(230, 73, 128, 0.12);
+  box-shadow: 0 28px 46px -34px rgba(112, 36, 73, 0.34);
+  position: absolute;
+}
+
+.heroCardPrimary {
+  inset: 16px 28px auto auto;
+  max-width: 290px;
+  z-index: 3;
+  animation: floatPrimary 6s ease-in-out infinite;
+
+  @mixin smaller-than $mantine-breakpoint-md {
+    inset: 0 auto auto 0;
+    max-width: none;
+    position: relative;
+  }
+}
+
+.heroCardSecondary {
+  bottom: 24px;
+  left: 8px;
+  max-width: 260px;
+  z-index: 2;
+  animation: floatSecondary 7s ease-in-out infinite;
+
+  @mixin smaller-than $mantine-breakpoint-md {
+    bottom: auto;
+    left: auto;
+    margin-top: var(--mantine-spacing-md);
+    max-width: none;
+    position: relative;
+  }
+}
+
+.heroCardAccent {
+  right: 8px;
+  top: 160px;
+  max-width: 220px;
+  z-index: 1;
+  animation: floatAccent 5.5s ease-in-out infinite;
+
+  @mixin smaller-than $mantine-breakpoint-md {
+    margin-top: var(--mantine-spacing-md);
+    max-width: none;
+    position: relative;
+    right: auto;
+    top: auto;
+  }
+}
+
+.cardLabel {
+  color: #8d365d;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
 }
 
 .quickActionCard {
-  border: 1px solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 248, 251, 0.88));
+  border: 1px solid rgba(230, 73, 128, 0.12);
   color: inherit;
   text-decoration: none;
   transition:
@@ -16,15 +142,22 @@
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 22px 36px -30px rgba(112, 36, 73, 0.4);
   }
 }
 
 .reservationContainer {
-  transition: border-color 0.2s ease;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 249, 252, 0.9));
+  border: 1px solid rgba(230, 73, 128, 0.1);
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
     border-color: var(--mantine-color-pink-3);
+    box-shadow: 0 22px 34px -32px rgba(112, 36, 73, 0.35);
+    transform: translateY(-2px);
   }
 }
 
@@ -39,5 +172,38 @@
     height: 2px;
     margin-top: var(--mantine-spacing-xs);
     width: 45px;
+  }
+}
+
+@keyframes floatPrimary {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-8px) rotate(-1deg);
+  }
+}
+
+@keyframes floatSecondary {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(6px) rotate(1deg);
+  }
+}
+
+@keyframes floatAccent {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-5px);
   }
 }

@@ -2,13 +2,26 @@
   background: linear-gradient(160deg, #fff0f6 0%, #fafafa 50%, #f3e5f5 100%);
   padding-bottom: calc(var(--mantine-spacing-xl) * 4);
   padding-top: calc(var(--mantine-spacing-xl) * 4);
+  position: relative;
   overflow: hidden;
+}
+
+.heroSection::before {
+  background:
+    radial-gradient(circle at top left, rgba(230, 73, 128, 0.16), transparent 0 32%),
+    radial-gradient(circle at 88% 14%, rgba(190, 75, 219, 0.12), transparent 0 24%);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
 }
 
 .heroContainer {
   align-items: center;
   display: flex;
   justify-content: space-between;
+  position: relative;
+  z-index: 1;
 
   @mixin smaller-than $mantine-breakpoint-md {
     flex-direction: column;
@@ -40,8 +53,9 @@
 }
 
 .heroHighlight {
-  background-color: var(--mantine-color-pink-light);
+  background: linear-gradient(180deg, rgba(255, 214, 229, 0.95), rgba(255, 194, 217, 0.92));
   border-radius: var(--mantine-radius-sm);
+  box-shadow: 0 16px 32px -26px rgba(230, 73, 128, 0.72);
   padding: 4px 12px;
   position: relative;
 }
@@ -74,6 +88,10 @@
 }
 
 .quickActionCard {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 249, 252, 0.88));
+  border: 1px solid rgba(230, 73, 128, 0.12);
   color: inherit;
   text-decoration: none;
   transition:
@@ -81,7 +99,7 @@
     box-shadow 0.2s ease;
 
   &:hover {
-    box-shadow: var(--mantine-shadow-md);
+    box-shadow: 0 22px 34px -28px rgba(112, 36, 73, 0.45);
     transform: translateY(-2px);
   }
 }
@@ -111,7 +129,10 @@
 }
 
 .featureCard {
-  border: 1px solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 248, 251, 0.88));
+  border: 1px solid rgba(230, 73, 128, 0.12);
   color: inherit;
   text-decoration: none;
   transition:
@@ -119,7 +140,7 @@
     box-shadow 0.25s ease;
 
   &:hover {
-    box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 24px 38px -28px rgba(112, 36, 73, 0.45);
     transform: translateY(-6px);
   }
 }
@@ -136,8 +157,11 @@
 }
 
 .statisticsBar {
-  background-image: linear-gradient(-60deg, var(--mantine-color-pink-4) 0%, var(--mantine-color-pink-7) 100%);
-  border-radius: var(--mantine-radius-md);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--mantine-radius-lg);
+  box-shadow: 0 26px 48px -34px rgba(112, 36, 73, 0.5);
   display: flex;
   padding: calc(var(--mantine-spacing-xl) * 1.5);
 
@@ -166,7 +190,7 @@
 }
 
 .statisticCount {
-  color: var(--mantine-color-black);
+  color: #4d2436;
   font-size: 32px;
   font-weight: 700;
   line-height: 1;
@@ -174,20 +198,22 @@
 }
 
 .statisticTitle {
-  color: var(--mantine-color-black);
+  color: #5f3446;
   font-size: var(--mantine-font-size-sm);
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .statisticDescription {
-  color: var(--mantine-color-black);
+  color: #6e5560;
   font-size: var(--mantine-font-size-sm);
   margin-top: 5px;
 }
 
 .stepCard {
-  border: 1px solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 248, 251, 0.9));
+  border: 1px solid rgba(230, 73, 128, 0.12);
+  box-shadow: 0 22px 36px -30px rgba(112, 36, 73, 0.35);
   text-align: center;
 }
 
@@ -219,7 +245,9 @@
 .aboutImagePlaceholder {
   align-items: center;
   background: linear-gradient(135deg, #fcc2d7 0%, #e8d5f5 50%, #d0ebff 100%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: var(--mantine-radius-lg);
+  box-shadow: 0 28px 44px -34px rgba(112, 36, 73, 0.42);
   display: flex;
   flex: 1;
   height: 400px;
@@ -235,8 +263,11 @@
 }
 
 .callToActionBanner {
-  background: linear-gradient(135deg, #e64980, #be4bdb);
+  background:
+    linear-gradient(135deg, rgba(230, 73, 128, 0.96), rgba(190, 75, 219, 0.9)),
+    url("../../assets/backgrounds/cta-pattern.svg");
   border-radius: 20px;
+  box-shadow: 0 28px 48px -34px rgba(112, 36, 73, 0.55);
   padding: 60px;
   text-align: center;
 

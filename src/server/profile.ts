@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 
 import { prisma } from "../db.ts";
 import { requireSession } from "./auth.ts";
-import { categorizeAction, sanitize } from "./utils.ts";
+import { buildSeatLabelMap, categorizeAction, sanitize } from "./utils.ts";
 
 export const getUserProfile = createServerFn({ method: "GET" }).handler(async () => {
   const session = await requireSession();
@@ -13,7 +13,7 @@ export const getUserProfile = createServerFn({ method: "GET" }).handler(async ()
 
   const reservations = await prisma.reservation.findMany({
     where: { userId: user.id, status: { not: "cancelled" } },
-    include: { zone: true, seat: true },
+    include: { zone: { include: { seats: { select: { id: true, label: true } } } }, seat: true },
     orderBy: { date: "desc" },
     take: 10,
   });
@@ -29,13 +29,24 @@ export const getUserProfile = createServerFn({ method: "GET" }).handler(async ()
     email: user.email,
     bio: user.bio ?? "",
     image: user.image,
-    reservations: reservations.map((r) => ({
-      id: r.id,
-      zone: r.seat ? `${r.zone.name} – Seat ${r.seat.label}` : r.zone.name,
-      date: r.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      time: `${r.startTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} – ${r.endTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`,
-      status: r.status.charAt(0).toUpperCase() + r.status.slice(1),
-    })),
+    reservations: reservations.map((r) => {
+      const seatLabelMap = buildSeatLabelMap(r.zone.seats);
+      const displaySeatLabel = r.seat ? (seatLabelMap.get(r.seat.id) ?? r.seat.label) : null;
+      return {
+        id: r.id,
+        zone: displaySeatLabel == null ? r.zone.name : `${r.zone.name} – Seat ${displaySeatLabel}`,
+        date: r.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        time: `${r.startTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} – ${r.endTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`,
+        status: r.status.charAt(0).toUpperCase() + r.status.slice(1),
+        dateValue: r.date.toISOString().slice(0, 10),
+        startTimeValue: r.startTime.toISOString(),
+        endTimeValue: r.endTime.toISOString(),
+        isAnonymous: r.isAnonymous,
+        zoneId: r.zoneId,
+        seatId: r.seatId,
+        seatLabel: displaySeatLabel,
+      };
+    }),
     activityHistory: logs.map((l) => ({
       id: l.id,
       action: l.detail ?? l.action,
@@ -73,7 +84,9 @@ export const uploadProfilePhoto = createServerFn({ method: "POST" })
 
 export const updateProfile = createServerFn({ method: "POST" })
   .inputValidator((d: { name: string; bio: string }) => {
-    if (!d.name.trim()) throw new Error("Name is required");
+    if (!d.name.trim()) {
+      throw new Error("Name is required");
+    }
     return { name: sanitize(d.name), bio: sanitize(d.bio) };
   })
   .handler(async ({ data }) => {

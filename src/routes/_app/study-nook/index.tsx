@@ -10,10 +10,10 @@ import quietRoomA from "../../../assets/study-nook/quiet-room-a.svg";
 import quietRoomB from "../../../assets/study-nook/quiet-room-b.svg";
 import readingRoom from "../../../assets/study-nook/reading-room.svg";
 import { EmptyState } from "../../../components/empty-state.tsx";
+import { FadeInSection } from "../../../components/fade-in-section.tsx";
 import { PageSkeleton } from "../../../components/page-skeleton.tsx";
 import { SearchBar } from "../../../components/search-bar.tsx";
 import { SectionHeader } from "../../../components/section-header.tsx";
-import { FadeInSection } from "../../../hooks/use-fade-in.tsx";
 import { getZones } from "../../../server/zones.ts";
 
 import imgStyles from "../../../components/shared-images.module.css";
@@ -65,37 +65,41 @@ function ZoneSelectionPage() {
       <FadeInSection>
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
           {filtered.map((zone) => {
-          const pct = ((zone.capacity - zone.available) / zone.capacity) * TO_PERCENT;
-          return (
-            <Card key={zone.id} shadow="md" padding="lg" radius="md" className="content-card">
-              <img src={ZONE_IMAGES[zone.name] ?? mainHall} alt={zone.name} className={imgStyles.cardImage} />
-              <Stack gap="sm">
-                <Group justify="space-between">
-                  <Text fw={600} size="lg">
-                    {zone.name}
+            const pct = ((zone.capacity - zone.available) / zone.capacity) * TO_PERCENT;
+            return (
+              <Card key={zone.id} shadow="md" padding="lg" radius="md" className="content-card">
+                <img
+                  src={zone.image ?? ZONE_IMAGES[zone.name] ?? mainHall}
+                  alt={zone.name}
+                  className={imgStyles.cardImage}
+                />
+                <Stack gap="sm">
+                  <Group justify="space-between">
+                    <Text fw={600} size="lg">
+                      {zone.name}
+                    </Text>
+                    <Badge color={zone.status === "Open" ? "green" : "red"} variant="light">
+                      {zone.status}
+                    </Badge>
+                  </Group>
+                  <Text size="sm" c="dimmed">
+                    {zone.available} / {zone.capacity} seats available
                   </Text>
-                  <Badge color={zone.status === "Open" ? "green" : "red"} variant="light">
-                    {zone.status}
-                  </Badge>
-                </Group>
-                <Text size="sm" c="dimmed">
-                  {zone.available} / {zone.capacity} seats available
-                </Text>
-                <Progress value={pct} color={getOccupancyColor(pct)} size="sm" />
-                <Button
-                  fullWidth
-                  color="pink"
-                  radius="xl"
-                  component={Link}
-                  to={`/study-nook/${zone.id}`}
-                  disabled={zone.status === "Full"}
-                >
-                  {zone.status === "Full" ? "No Spots Available" : "View & Reserve"}
-                </Button>
-              </Stack>
-            </Card>
-          );
-        })}
+                  <Progress value={pct} color={getOccupancyColor(pct)} size="sm" />
+                  <Button
+                    fullWidth
+                    color="pink"
+                    radius="xl"
+                    component={Link}
+                    to={`/study-nook/${zone.id}`}
+                    disabled={zone.status === "Full"}
+                  >
+                    {zone.status === "Full" ? "No Spots Available" : "View & Reserve"}
+                  </Button>
+                </Stack>
+              </Card>
+            );
+          })}
         </SimpleGrid>
       </FadeInSection>
     </Container>

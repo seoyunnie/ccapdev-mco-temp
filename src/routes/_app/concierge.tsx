@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Container,
   Title,
   Text,
@@ -12,31 +11,38 @@ import {
   Table,
   Badge,
   ActionIcon,
+  Tooltip,
 } from "@mantine/core";
-import { IconTrash, IconPlus } from "@tabler/icons-react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import defaultConcierge from "../../assets/avatars/default-concierge.svg";
 import { SectionHeader } from "../../components/section-header.tsx";
+import { UserAvatar } from "../../components/user-avatar.tsx";
 import { TIME_SLOTS } from "../../features/study-nook/study-nook.constants.ts";
+import { useAuth } from "../../lib/auth-context.tsx";
+import { IconTrash, IconPlus } from "../../lib/icons.tsx";
 import {
   getAllReservations,
   purgeExpiredReservations,
   cancelReservation,
   createWalkInReservation,
 } from "../../server/reservations.ts";
-import { getZones } from "../../server/zones.ts";
+import { getZone, getZones } from "../../server/zones.ts";
 
 const FEEDBACK_TIMEOUT_MS = 2000;
+type ZoneAvailability = Awaited<ReturnType<typeof getZone>>;
 
 /** Convert "8:00 AM" → "08:00" (24-hour format for Date parsing). */
 function to24h(time12: string): string {
   const [timePart, modifier] = time12.split(" ");
   const [rawH, rawM] = timePart.split(":").map(Number);
   let h = rawH;
-  if (modifier === "PM" && h !== 12) h += 12;
-  if (modifier === "AM" && h === 12) h = 0;
+  if (modifier === "PM" && h !== 12) {
+    h += 12;
+  }
+  if (modifier === "AM" && h === 12) {
+    h = 0;
+  }
   return `${String(h).padStart(2, "0")}:${String(rawM).padStart(2, "0")}`;
 }
 
@@ -51,19 +57,79 @@ export const Route = createFileRoute("/_app/concierge")({
 
 function ConciergeDashboardPage() {
   const { reservations, zones } = Route.useLoaderData();
+  const { image, name } = useAuth();
   const router = useRouter();
   const zoneNames = zones.map((z) => z.name);
   const [studentName, setStudentName] = useState("");
   const [studentId, setStudentId] = useState("");
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
+  const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<string | null>(null);
   const [endTime, setEndTime] = useState<string | null>(null);
   const [bookingCreated, setBookingCreated] = useState(false);
+  const [availableZoneData, setAvailableZoneData] = useState<ZoneAvailability | null>(null);
+
+  useEffect(() => {
+    if (selectedZone == null || startTime == null || endTime == null) {
+      return;
+    }
+
+    const zone = zones.find((entry) => entry.name === selectedZone);
+    if (!zone) {
+      return;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    let isCancelled = false;
+
+    void (async () => {
+      const zoneData = await getZone({
+        data: {
+          zoneId: zone.id,
+          date: `${today}T00:00:00.000Z`,
+          startTime: new Date(`${today}T${to24h(startTime)}:00`).toISOString(),
+          endTime: new Date(`${today}T${to24h(endTime)}:00`).toISOString(),
+        },
+      });
+
+      if (isCancelled) {
+        return;
+      }
+
+      const options = zoneData.seats.map((seat) => ({
+        value: seat.id,
+        label: `${seat.label}${seat.taken ? " - unavailable" : ""}`,
+        disabled: seat.taken,
+      }));
+      setAvailableZoneData(zoneData);
+      setSelectedSeat((currentSeat) =>
+        options.some((seat) => seat.value === currentSeat && !seat.disabled) ? currentSeat : null,
+      );
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [endTime, selectedZone, startTime, zones]);
+
+  const seatOptions =
+    availableZoneData?.seats.map((seat) => ({
+      value: seat.id,
+      label: `${seat.label}${seat.taken ? " - unavailable" : ""}`,
+      disabled: seat.taken,
+    })) ?? [];
+
+  let seatHelpText = "Checking available seats for the selected walk-in slot...";
+  if (selectedZone == null || startTime == null || endTime == null) {
+    seatHelpText = "Select a zone and times to load open seats.";
+  } else if (availableZoneData != null) {
+    seatHelpText = `${availableZoneData.available} of ${availableZoneData.capacity} seats are open right now.`;
+  }
 
   return (
     <Container size="lg" py="xl" className="pageEnter">
       <Group gap="md" mb="xs">
-        <Avatar src={defaultConcierge} alt="Concierge" size={48} radius="xl" />
+        <UserAvatar name={name} image={image} alt="Concierge" size={48} radius="xl" />
         <SectionHeader
           title="Concierge Dashboard"
           description="Manage walk-in bookings and handle no-show reservations."
@@ -103,23 +169,44 @@ function ConciergeDashboardPage() {
               placeholder="Select zone"
               data={zoneNames}
               value={selectedZone}
-              onChange={setSelectedZone}
+              onChange={(value) => {
+                setSelectedZone(value);
+                setSelectedSeat(null);
+                setAvailableZoneData(null);
+              }}
             />
             <Select
               label="Start Time"
               placeholder="Select"
               data={[...TIME_SLOTS]}
               value={startTime}
-              onChange={setStartTime}
+              onChange={(value) => {
+                setStartTime(value);
+                setSelectedSeat(null);
+                setAvailableZoneData(null);
+              }}
             />
             <Select
               label="End Time"
               placeholder="Select"
               data={[...TIME_SLOTS]}
               value={endTime}
-              onChange={setEndTime}
+              onChange={(value) => {
+                setEndTime(value);
+                setSelectedSeat(null);
+                setAvailableZoneData(null);
+              }}
             />
           </Group>
+          <Select
+            label="Seat"
+            placeholder="Select an available seat"
+            data={seatOptions}
+            value={selectedSeat}
+            disabled={seatOptions.length === 0}
+            onChange={setSelectedSeat}
+            description={seatHelpText}
+          />
           <Group justify="flex-end" gap="sm">
             {bookingCreated && (
               <Text size="sm" c="green.6" fw={600}>
@@ -134,6 +221,7 @@ function ConciergeDashboardPage() {
                   !studentName.trim() ||
                   !studentId.trim() ||
                   selectedZone == null ||
+                  selectedSeat == null ||
                   startTime == null ||
                   endTime == null
                 ) {
@@ -149,6 +237,8 @@ function ConciergeDashboardPage() {
                     studentName,
                     studentId,
                     zoneId: zone.id,
+                    seatId: selectedSeat,
+                    date: `${today}T00:00:00.000Z`,
                     startTime: new Date(`${today}T${to24h(startTime)}:00`).toISOString(),
                     endTime: new Date(`${today}T${to24h(endTime)}:00`).toISOString(),
                   },
@@ -156,6 +246,7 @@ function ConciergeDashboardPage() {
                 setStudentName("");
                 setStudentId("");
                 setSelectedZone(null);
+                setSelectedSeat(null);
                 setStartTime(null);
                 setEndTime(null);
                 setBookingCreated(true);
@@ -201,17 +292,20 @@ function ConciergeDashboardPage() {
                   </Badge>
                 </Table.Td>
                 <Table.Td>
-                  <ActionIcon
-                    variant="light"
-                    color="red"
-                    size="sm"
-                    onClick={async () => {
-                      await cancelReservation({ data: { reservationId: booking.id } });
-                      void router.invalidate();
-                    }}
-                  >
-                    <IconTrash size={14} />
-                  </ActionIcon>
+                  <Tooltip label="Cancel booking">
+                    <ActionIcon
+                      variant="light"
+                      color="red"
+                      size="sm"
+                      aria-label="Cancel booking"
+                      onClick={async () => {
+                        await cancelReservation({ data: { reservationId: booking.id } });
+                        void router.invalidate();
+                      }}
+                    >
+                      <IconTrash size={14} />
+                    </ActionIcon>
+                  </Tooltip>
                 </Table.Td>
               </Table.Tr>
             ))}

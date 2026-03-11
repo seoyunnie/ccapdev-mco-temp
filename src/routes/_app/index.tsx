@@ -13,7 +13,6 @@ import {
   Badge,
   Stack,
 } from "@mantine/core";
-import { IconCheck, IconArrowRight, IconBook, IconMessageCircle, IconCompass } from "@tabler/icons-react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 
 import ctaPattern from "../../assets/backgrounds/cta-pattern.svg";
@@ -37,10 +36,11 @@ import quietRoomA from "../../assets/study-nook/quiet-room-a.svg";
 import quietRoomB from "../../assets/study-nook/quiet-room-b.svg";
 import readingRoom from "../../assets/study-nook/reading-room.svg";
 import { CardCarousel, CarouselSlide } from "../../components/card-carousel.tsx";
+import { FadeInSection } from "../../components/fade-in-section.tsx";
 import { LinkButton } from "../../components/link-button.tsx";
-import { FEATURES } from "../../data/features.ts";
-import { STATS } from "../../data/stats.ts";
-import { FadeInSection } from "../../hooks/use-fade-in.tsx";
+import { FEATURES } from "../../features/landing/features.ts";
+import { STATS } from "../../features/landing/stats.ts";
+import { IconArrowRight, IconBook, IconCheck, IconCompass, IconMessageCircle } from "../../lib/icons.tsx";
 
 import imgStyles from "../../components/shared-images.module.css";
 import styles from "./index.module.css";
@@ -53,21 +53,21 @@ export const Route = createFileRoute("/_app/")({
 const STEP_IMAGES = [step1Browse, step2Reserve, step3Rate];
 
 const ZONE_SLIDES = [
-  { name: "Main Hall", image: mainHall, desc: "Open study area with plenty of space" },
-  { name: "Quiet Room A", image: quietRoomA, desc: "Silent zone for focused study" },
-  { name: "Quiet Room B", image: quietRoomB, desc: "Additional quiet workspace" },
-  { name: "Group Study Room", image: groupStudy, desc: "Collaborative study space" },
-  { name: "Computer Lab", image: computerLab, desc: "Workstations with PC access" },
-  { name: "Reading Room", image: readingRoom, desc: "Cozy reading environment" },
+  { name: "Main Hall", image: mainHall, desc: "Open study area with plenty of space", cta: "Reserve a slot" },
+  { name: "Quiet Room A", image: quietRoomA, desc: "Silent zone for focused study", cta: "Check availability" },
+  { name: "Quiet Room B", image: quietRoomB, desc: "Additional quiet workspace", cta: "Browse spaces" },
+  { name: "Group Study Room", image: groupStudy, desc: "Collaborative study space", cta: "Plan a session" },
+  { name: "Computer Lab", image: computerLab, desc: "Workstations with PC access", cta: "See the layout" },
+  { name: "Reading Room", image: readingRoom, desc: "Cozy reading environment", cta: "View study nook" },
 ];
 
 const ESTABLISHMENT_SLIDES = [
-  { name: "Café Manila", image: cafeManila, desc: "Specialty coffee & pastries" },
-  { name: "Kuya's Carinderia", image: kuyasCarinderia, desc: "Home-style Filipino meals" },
-  { name: "Quick Prints", image: quickPrints, desc: "Printing & document services" },
-  { name: "Samgyup Corner", image: samgyupCorner, desc: "Korean BBQ near campus" },
-  { name: "Laundry Express", image: laundryExpress, desc: "Self-service laundromat" },
-  { name: "7-Eleven Taft", image: sevenEleven, desc: "24/7 convenience store" },
+  { name: "Café Manila", image: cafeManila, desc: "Specialty coffee & pastries", cta: "Open the guide" },
+  { name: "Kuya's Carinderia", image: kuyasCarinderia, desc: "Home-style Filipino meals", cta: "See nearby spots" },
+  { name: "Quick Prints", image: quickPrints, desc: "Printing & document services", cta: "Browse essentials" },
+  { name: "Samgyup Corner", image: samgyupCorner, desc: "Korean BBQ near campus", cta: "Explore reviews" },
+  { name: "Laundry Express", image: laundryExpress, desc: "Self-service laundromat", cta: "Open directory" },
+  { name: "7-Eleven Taft", image: sevenEleven, desc: "24/7 convenience store", cta: "View the guide" },
 ];
 
 function LandingPage() {
@@ -76,7 +76,7 @@ function LandingPage() {
       <div
         className={styles.heroSection}
         style={{
-          backgroundImage: `linear-gradient(160deg, rgba(255,240,246,0.85) 0%, rgba(250,250,250,0.85) 50%, rgba(243,229,245,0.85) 100%), url(${heroBg})`,
+          backgroundImage: `linear-gradient(155deg, rgba(255,246,250,0.94) 0%, rgba(255,251,253,0.88) 48%, rgba(247,237,248,0.92) 100%), url(${heroBg})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -120,7 +120,7 @@ function LandingPage() {
                   color="pink"
                   className={styles.heroControlButton}
                   to="/login"
-                  search={{ register: "true" }}
+                  search={{ register: true }}
                 >
                   Get Started
                 </LinkButton>
@@ -207,7 +207,11 @@ function LandingPage() {
       <Container size="lg" mt={-40} mb="xl" style={{ position: "relative", zIndex: 1 }}>
         <FadeInSection
           className={styles.statisticsBar}
-          style={{ backgroundImage: `url(${statsTexture})`, backgroundSize: "cover", backgroundBlendMode: "overlay" }}
+          style={{
+            backgroundImage: `linear-gradient(-65deg, rgba(255, 209, 220, 0.96) 0%, rgba(247, 184, 211, 0.94) 42%, rgba(238, 162, 200, 0.96) 100%), url(${statsTexture})`,
+            backgroundSize: "cover",
+            backgroundBlendMode: "soft-light",
+          }}
         >
           {STATS.map((stat) => (
             <div key={stat.label} className={styles.statisticItem}>
@@ -220,7 +224,7 @@ function LandingPage() {
       </Container>
 
       <Box py={80} style={{ backgroundColor: "#f8f9fa" }}>
-        <FadeInSection>
+        <FadeInSection variant="up">
           <Container size="lg">
             <Title className={styles.sectionTitle} ta="center">
               Everything You Need, In 3 Simple Steps
@@ -319,7 +323,13 @@ function LandingPage() {
                 Browse available zones and find your ideal study spot.
               </Text>
             </div>
-            <LinkButton variant="light" color="pink" radius="xl" to="/study-nook" rightSection={<IconArrowRight size={16} />}>
+            <LinkButton
+              variant="light"
+              color="pink"
+              radius="xl"
+              to="/study-nook"
+              rightSection={<IconArrowRight size={16} />}
+            >
               View All
             </LinkButton>
           </Group>
@@ -328,12 +338,15 @@ function LandingPage() {
               <CarouselSlide key={zone.name}>
                 <Card shadow="sm" radius="md" className="content-card" padding="md">
                   <img src={zone.image} alt={zone.name} className={imgStyles.cardImage} />
-                  <Text fw={600} mt="xs">
-                    {zone.name}
-                  </Text>
-                  <Text size="sm" c="dimmed">
-                    {zone.desc}
-                  </Text>
+                  <Stack gap="xs" mt="xs">
+                    <Text fw={600}>{zone.name}</Text>
+                    <Text size="sm" c="dimmed">
+                      {zone.desc}
+                    </Text>
+                    <LinkButton color="pink" variant="light" radius="xl" size="sm" to="/study-nook">
+                      {zone.cta}
+                    </LinkButton>
+                  </Stack>
                 </Card>
               </CarouselSlide>
             ))}
@@ -342,7 +355,7 @@ function LandingPage() {
       </Container>
 
       <Box py={80} style={{ backgroundColor: "#f8f9fa" }}>
-        <FadeInSection>
+        <FadeInSection variant="scale" delayMs={80}>
           <Container size="lg">
             <Group justify="space-between" align="flex-end" mb="xl">
               <div>
@@ -354,7 +367,13 @@ function LandingPage() {
                   Discover restaurants, services, and shops near your dorm.
                 </Text>
               </div>
-              <LinkButton variant="light" color="teal" radius="xl" to="/guide" rightSection={<IconArrowRight size={16} />}>
+              <LinkButton
+                variant="light"
+                color="teal"
+                radius="xl"
+                to="/guide"
+                rightSection={<IconArrowRight size={16} />}
+              >
                 View All
               </LinkButton>
             </Group>
@@ -363,12 +382,15 @@ function LandingPage() {
                 <CarouselSlide key={est.name}>
                   <Card shadow="sm" radius="md" className="content-card" padding="md">
                     <img src={est.image} alt={est.name} className={imgStyles.cardImage} />
-                    <Text fw={600} mt="xs">
-                      {est.name}
-                    </Text>
-                    <Text size="sm" c="dimmed">
-                      {est.desc}
-                    </Text>
+                    <Stack gap="xs" mt="xs">
+                      <Text fw={600}>{est.name}</Text>
+                      <Text size="sm" c="dimmed">
+                        {est.desc}
+                      </Text>
+                      <LinkButton color="teal" variant="light" radius="xl" size="sm" to="/guide">
+                        {est.cta}
+                      </LinkButton>
+                    </Stack>
                   </Card>
                 </CarouselSlide>
               ))}
@@ -414,7 +436,7 @@ function LandingPage() {
               size="md"
               mt={30}
               to="/login"
-              search={{ register: "true" }}
+              search={{ register: true }}
               rightSection={<IconArrowRight size={16} />}
             >
               Join Adormable
@@ -436,7 +458,7 @@ function LandingPage() {
             discover local gems.
           </Text>
           <Group justify="center">
-            <LinkButton size="lg" variant="white" color="pink" radius="xl" to="/login" search={{ register: "true" }}>
+            <LinkButton size="lg" variant="white" color="pink" radius="xl" to="/login" search={{ register: true }}>
               Join Now
             </LinkButton>
             <LinkButton size="lg" variant="outline" radius="xl" color="black" to="/guide">

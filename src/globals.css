@@ -1,5 +1,9 @@
 :root {
   --adormable-pink: #e64980;
+  --adormable-pink-soft: rgba(230, 73, 128, 0.1);
+  --adormable-surface: rgba(255, 252, 254, 0.82);
+  --adormable-surface-strong: rgba(255, 252, 254, 0.94);
+  --adormable-border: rgba(230, 73, 128, 0.12);
 }
 
 *,
@@ -15,16 +19,29 @@ html {
 body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
-  background-color: #fafafa;
+  background:
+    radial-gradient(circle at top left, rgba(230, 73, 128, 0.09), transparent 28%),
+    radial-gradient(circle at top right, rgba(190, 75, 219, 0.07), transparent 30%),
+    linear-gradient(180deg, #fffafc 0%, #fff7fb 42%, #fffdfd 100%);
+  background-attachment: fixed;
+  background-color: #fff9fb;
+  color: #402632;
+}
+
+::selection {
+  background: rgba(230, 73, 128, 0.18);
 }
 
 a {
+  color: inherit;
   transition:
     color 0.2s ease,
     opacity 0.2s ease;
 }
 
 .mantine-Card-root {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 251, 253, 0.9));
+  border: 1px solid var(--adormable-border);
   transition:
     transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -32,10 +49,11 @@ a {
 
 .mantine-Card-root:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 34px -24px rgba(112, 36, 73, 0.48);
 }
 
 .mantine-Button-root {
+  box-shadow: 0 10px 20px -18px rgba(112, 36, 73, 0.5);
   transition:
     background-color 0.2s ease,
     transform 0.15s ease,
@@ -61,6 +79,7 @@ a {
 }
 
 .page-description {
+  color: #6e5560;
   max-width: 600px;
 
   &::after {
@@ -74,37 +93,59 @@ a {
 }
 
 .content-card {
-  border: 1px solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  backdrop-filter: blur(18px) saturate(1.08);
+  background: linear-gradient(180deg, var(--adormable-surface-strong), var(--adormable-surface));
+  border: 1px solid var(--adormable-border);
+  box-shadow: 0 24px 44px -36px rgba(112, 36, 73, 0.45);
 }
 
 /* ── Fade-in on scroll (used by FadeInSection) ── */
 .fadeSection {
+  filter: blur(3px);
   opacity: 0;
-  transform: translateY(30px);
+  transform: translate3d(0, 30px, 0) scale(0.985);
   transition:
+    filter 0.8s cubic-bezier(0.16, 1, 0.3, 1),
     opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--fade-delay, 0ms);
+}
+
+.fadeSection[data-motion="left"] {
+  transform: translate3d(-34px, 0, 0) scale(0.985);
+}
+
+.fadeSection[data-motion="right"] {
+  transform: translate3d(34px, 0, 0) scale(0.985);
+}
+
+.fadeSection[data-motion="scale"] {
+  transform: translate3d(0, 16px, 0) scale(0.94);
 }
 
 .fadeSectionVisible {
+  filter: blur(0);
   opacity: 1;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
 /* ── Page entrance animation ── */
 .pageEnter {
-  animation: pageSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: pageSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes pageSlideUp {
   from {
+    filter: blur(4px);
     opacity: 0;
-    transform: translateY(16px);
+    transform: translate3d(0, 18px, 0) scale(0.99);
   }
 
   to {
+    filter: blur(0);
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 

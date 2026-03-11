@@ -2,6 +2,7 @@ import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
+
 import type { auth as AuthHandler } from "./src/lib/auth.ts";
 
 // Stub server-only local modules in the client bundle.
@@ -46,9 +47,7 @@ function betterAuthVitePlugin(): Plugin {
         }
 
         // oxlint-disable-next-line no-unsafe-type-assertion
-        const { auth } = (await server.ssrLoadModule("/src/lib/auth.ts")) as {
-          auth: typeof AuthHandler;
-        };
+        const { auth } = (await server.ssrLoadModule("/src/lib/auth.ts")) as { auth: typeof AuthHandler };
 
         const proto = req.headers["x-forwarded-proto"]?.toString() ?? "http";
         const host = req.headers.host ?? "localhost:5173";

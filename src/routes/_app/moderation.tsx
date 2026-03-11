@@ -1,23 +1,12 @@
-import {
-  Container,
-  Title,
-  Text,
-  Paper,
-  Group,
-  Stack,
-  Badge,
-  Button,
-  Avatar,
-  ActionIcon,
-  Select,
-  Modal,
-} from "@mantine/core";
+import { Container, Title, Text, Paper, Group, Stack, Badge, Button, Select, Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconTrash, IconBan } from "@tabler/icons-react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { RowActionMenu } from "../../components/row-action-menu.tsx";
 import { SectionHeader } from "../../components/section-header.tsx";
+import { UserAvatar } from "../../components/user-avatar.tsx";
+import { IconTrash, IconBan } from "../../lib/icons.tsx";
 import { getUsers } from "../../server/admin.ts";
 import { getReports, resolveReport, createBan } from "../../server/moderation.ts";
 
@@ -59,9 +48,11 @@ function ForumModerationPage() {
         {reviewTarget && (
           <Stack>
             <Group>
-              <Badge color={reasonColors[reviewTarget.reason]} variant="light">
-                {reviewTarget.reason}
-              </Badge>
+              {reviewTarget.reasons.map((reason) => (
+                <Badge key={reason} color={reasonColors[reason] ?? "gray"} variant="light">
+                  {reason}
+                </Badge>
+              ))}
               <Text size="sm" c="dimmed">
                 {reviewTarget.reports} reports · {reviewTarget.date}
               </Text>
@@ -70,6 +61,7 @@ function ForumModerationPage() {
             <Text size="sm" c="dimmed">
               Posted by {reviewTarget.author}
             </Text>
+            <Text size="sm">{reviewTarget.excerpt}</Text>
             <Group justify="flex-end">
               <Button
                 variant="light"
@@ -108,9 +100,7 @@ function ForumModerationPage() {
             <Paper key={post.id} withBorder p="md" radius="md">
               <Group justify="space-between" wrap="wrap">
                 <Group>
-                  <Avatar color="red" radius="xl" size="sm">
-                    {post.author.slice(0, 2).toUpperCase()}
-                  </Avatar>
+                  <UserAvatar name={post.author} image={post.authorImage} color="red" radius="xl" size="sm" />
                   <Stack gap={2}>
                     <Text fw={600}>{post.title}</Text>
                     <Text size="xs" c="dimmed">
@@ -119,30 +109,30 @@ function ForumModerationPage() {
                   </Stack>
                 </Group>
                 <Group gap="xs">
-                  <Badge color={reasonColors[post.reason]} variant="light">
-                    {post.reason}
+                  <Badge color={reasonColors[post.primaryReason] ?? "gray"} variant="light">
+                    {post.primaryReason}
                   </Badge>
-                  <Button
-                    size="xs"
-                    variant="light"
-                    color="pink"
-                    onClick={() => {
-                      handleReview(post);
-                    }}
-                  >
-                    Review
-                  </Button>
-                  <ActionIcon
-                    variant="light"
-                    color="red"
-                    size="sm"
-                    onClick={async () => {
-                      await resolveReport({ data: { reportId: post.id, action: "delete" } });
-                      void router.invalidate();
-                    }}
-                  >
-                    <IconTrash size={14} />
-                  </ActionIcon>
+                  <RowActionMenu
+                    label="Review"
+                    items={[
+                      {
+                        label: "Open review modal",
+                        leftSection: <IconBan size={14} />,
+                        onClick: () => {
+                          handleReview(post);
+                        },
+                      },
+                      {
+                        label: "Remove flagged content",
+                        color: "red",
+                        leftSection: <IconTrash size={14} />,
+                        onClick: async () => {
+                          await resolveReport({ data: { reportId: post.id, action: "delete" } });
+                          void router.invalidate();
+                        },
+                      },
+                    ]}
+                  />
                 </Group>
               </Group>
             </Paper>
@@ -166,7 +156,17 @@ function ForumModerationPage() {
           <Select
             label="Select User"
             placeholder="Search user..."
-            data={users.map((u) => ({ value: u.id, label: u.name }))}
+            data={users.map((u) => ({
+              value: u.id,
+              label:
+                u.status === "Banned" && u.activeBanExpiresAt != null
+                  ? `${u.name} (banned until ${new Date(u.activeBanExpiresAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })})`
+                  : u.name,
+              disabled: u.status === "Banned",
+            }))}
             searchable
             value={banUser}
             onChange={setBanUser}
@@ -179,6 +179,9 @@ function ForumModerationPage() {
             onChange={setBanDuration}
           />
         </Group>
+        <Text size="xs" c="dimmed" mt="xs">
+          Active bans are enforced automatically and already-banned users are disabled in this picker.
+        </Text>
         <Group justify="flex-end" mt="md" gap="sm">
           {banIssued && (
             <Text size="sm" c="green.6" fw={600}>

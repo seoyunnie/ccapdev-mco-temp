@@ -1,9 +1,9 @@
 import { Container, Text, Paper, Group, Table, Badge, Select, TextInput, Tabs, Pagination, Stack } from "@mantine/core";
-import { IconSearch, IconUser, IconBug } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { SectionHeader } from "../../../components/section-header.tsx";
+import { IconBug, IconSearch, IconUser } from "../../../lib/icons.tsx";
 import { getActivityLogs, getErrorLogs } from "../../../server/admin.ts";
 
 import styles from "./index.module.css";
@@ -79,7 +79,7 @@ function SystemLogsPage() {
                 }}
               />
               <Select
-                placeholder="Filter by type"
+                placeholder="Filter by category"
                 data={["All", "Reservation", "Forum", "Admin", "Review"]}
                 value={activityFilter}
                 onChange={setActivityFilter}
@@ -92,7 +92,8 @@ function SystemLogsPage() {
                   <Table.Th>Timestamp</Table.Th>
                   <Table.Th>User</Table.Th>
                   <Table.Th>Action</Table.Th>
-                  <Table.Th>Type</Table.Th>
+                  <Table.Th>Category</Table.Th>
+                  <Table.Th>Current Role</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -105,12 +106,17 @@ function SystemLogsPage() {
                     </Table.Td>
                     <Table.Td fw={500}>{log.user}</Table.Td>
                     <Table.Td>
-                      <Text size="sm">{log.action}</Text>
+                      <Text size="sm">{log.detail ?? log.action}</Text>
                     </Table.Td>
                     <Table.Td>
                       <Badge color={typeColors[log.type]} variant="light" size="sm">
                         {log.type}
                       </Badge>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed" tt="capitalize">
+                        {log.actorRole}
+                      </Text>
                     </Table.Td>
                   </Table.Tr>
                 ))}

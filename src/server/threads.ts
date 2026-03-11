@@ -1,8 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { prisma } from "../db.ts";
+import { normalizeThreadTag } from "../features/lobby/lobby.taxonomy.ts";
 import { getSessionFn, requireSession } from "./auth.ts";
 import { clampPagination, formatRelative, sanitize } from "./utils.ts";
+
+const MAX_IMAGE_BYTES = 2_000_000;
 
 export const getThreads = createServerFn({ method: "GET" })
   .inputValidator((d: { page?: number; pageSize?: number }) => d)
@@ -22,9 +25,9 @@ export const getThreads = createServerFn({ method: "GET" })
     // Fetch user's votes for these threads
     const threadIds = rows.map((t) => t.id);
     const votes =
-      session?.user?.id != null
-        ? await prisma.vote.findMany({ where: { userId: session.user.id, threadId: { in: threadIds } } })
-        : [];
+      session?.user?.id == null
+        ? []
+        : await prisma.vote.findMany({ where: { userId: session.user.id, threadId: { in: threadIds } } });
     const voteMap = new Map(votes.map((v) => [v.threadId, v.value]));
 
     return {
@@ -32,11 +35,13 @@ export const getThreads = createServerFn({ method: "GET" })
         id: t.id,
         title: t.title,
         author: t.author.name,
+        authorImage: t.author.image,
         snippet: t.content.length > 120 ? `${t.content.slice(0, 120)}…` : t.content,
+        image: t.image,
         upvotes: t.upvotes,
         userVote: voteMap.get(t.id) ?? 0,
         comments: t._count.comments,
-        tag: t.tag ?? "General",
+        tag: normalizeThreadTag(t.tag),
         time: formatRelative(t.createdAt),
       })),
       total,
@@ -67,8 +72,9 @@ export const getThread = createServerFn({ method: "GET" })
     // Fetch user's votes for this thread and all visible comments
     const allCommentIds = thread.comments.flatMap((c) => [c.id, ...c.replies.map((r) => r.id)]);
     const votes =
-      session?.user?.id != null
-        ? await prisma.vote.findMany({
+      session?.user?.id == null
+        ? []
+        : await prisma.vote.findMany({
             where: {
               userId: session.user.id,
               OR: [
@@ -76,8 +82,7 @@ export const getThread = createServerFn({ method: "GET" })
                 ...(allCommentIds.length > 0 ? [{ commentId: { in: allCommentIds } }] : []),
               ],
             },
-          })
-        : [];
+          });
     const voteMap = new Map(votes.map((v) => [v.threadId ?? v.commentId, v.value]));
 
     return {
@@ -86,8 +91,9 @@ export const getThread = createServerFn({ method: "GET" })
       author: thread.author.name,
       authorImage: thread.author.image,
       time: formatRelative(thread.createdAt),
-      tag: thread.tag ?? "General",
+      tag: normalizeThreadTag(thread.tag),
       content: thread.content,
+      image: thread.image,
       upvotes: thread.upvotes,
       userVote: voteMap.get(thread.id) ?? 0,
       isAuthor: session?.user.id === thread.authorId,
@@ -114,10 +120,22 @@ export const getThread = createServerFn({ method: "GET" })
   });
 
 export const createThread = createServerFn({ method: "POST" })
-  .inputValidator((d: { title: string; content: string; tag?: string }) => {
-    if (!d.title.trim()) throw new Error("Title is required");
-    if (!d.content.trim()) throw new Error("Content is required");
-    return { title: sanitize(d.title), content: sanitize(d.content), tag: d.tag ? sanitize(d.tag) : undefined };
+  .inputValidator((d: { title: string; content: string; tag?: string; image?: string }) => {
+    if (!d.title.trim()) {
+      throw new Error("Title is required");
+    }
+    if (!d.content.trim()) {
+      throw new Error("Content is required");
+    }
+    if (d.image != null) {
+      if (!d.image.startsWith("data:image/")) {
+        throw new Error("Invalid image data");
+      }
+      if (d.image.length > MAX_IMAGE_BYTES) {
+        throw new Error("Image must be under 2 MB");
+      }
+    }
+    return { title: sanitize(d.title), content: sanitize(d.content), tag: normalizeThreadTag(d.tag), image: d.image };
   })
   .handler(async ({ data }) => {
     const session = await requireSession();
@@ -127,6 +145,7 @@ export const createThread = createServerFn({ method: "POST" })
         title: data.title,
         content: data.content,
         tag: data.tag,
+        image: data.image ?? null,
         authorId: session.user.id,
       },
     });
@@ -145,7 +164,9 @@ export const createThread = createServerFn({ method: "POST" })
 
 export const createComment = createServerFn({ method: "POST" })
   .inputValidator((d: { threadId: string; content: string; parentId?: string }) => {
-    if (!d.content.trim()) throw new Error("Comment content is required");
+    if (!d.content.trim()) {
+      throw new Error("Comment content is required");
+    }
     return { ...d, content: sanitize(d.content) };
   })
   .handler(async ({ data }) => {
@@ -262,10 +283,22 @@ export const deleteThread = createServerFn({ method: "POST" })
   });
 
 export const updateThread = createServerFn({ method: "POST" })
-  .inputValidator((d: { threadId: string; title: string; content: string; tag?: string }) => {
-    if (!d.title.trim()) throw new Error("Title is required");
-    if (!d.content.trim()) throw new Error("Content is required");
-    return { ...d, title: sanitize(d.title), content: sanitize(d.content), tag: d.tag ? sanitize(d.tag) : undefined };
+  .inputValidator((d: { threadId: string; title: string; content: string; tag?: string; image?: string | null }) => {
+    if (!d.title.trim()) {
+      throw new Error("Title is required");
+    }
+    if (!d.content.trim()) {
+      throw new Error("Content is required");
+    }
+    if (d.image != null && d.image !== "") {
+      if (!d.image.startsWith("data:image/")) {
+        throw new Error("Invalid image data");
+      }
+      if (d.image.length > MAX_IMAGE_BYTES) {
+        throw new Error("Image must be under 2 MB");
+      }
+    }
+    return { ...d, title: sanitize(d.title), content: sanitize(d.content), tag: normalizeThreadTag(d.tag) };
   })
   .handler(async ({ data }) => {
     const session = await requireSession();
@@ -279,7 +312,7 @@ export const updateThread = createServerFn({ method: "POST" })
 
     const updated = await prisma.thread.update({
       where: { id: data.threadId },
-      data: { title: data.title, content: data.content, tag: data.tag },
+      data: { title: data.title, content: data.content, tag: data.tag, image: data.image === "" ? null : data.image },
     });
 
     await prisma.activityLog.create({

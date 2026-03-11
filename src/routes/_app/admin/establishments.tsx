@@ -15,12 +15,12 @@ import {
   FileInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconEdit, IconTrash, IconPlus, IconSearch, IconUpload } from "@tabler/icons-react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 
 import placeholder from "../../../assets/establishments/placeholder.svg";
 import { SectionHeader } from "../../../components/section-header.tsx";
+import { IconEdit, IconPlus, IconSearch, IconTrash, IconUpload } from "../../../lib/icons.tsx";
 import { getUsers } from "../../../server/admin.ts";
 import {
   getEstablishments,
@@ -87,7 +87,11 @@ function EstablishmentManagerPage() {
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => setImageData(reader.result as string);
+    reader.addEventListener("load", () => {
+      if (typeof reader.result === "string") {
+        setImageData(reader.result);
+      }
+    });
     reader.readAsDataURL(file);
   };
 
@@ -300,7 +304,9 @@ function EstablishmentManagerPage() {
                   if (!name || category == null || ownerId == null) {
                     return;
                   }
-                  await createEstablishment({ data: { name, category, description, address, image: imageData ?? undefined, ownerId } });
+                  await createEstablishment({
+                    data: { name, category, description, address, image: imageData ?? undefined, ownerId },
+                  });
                 } else {
                   await updateEstablishment({
                     data: {

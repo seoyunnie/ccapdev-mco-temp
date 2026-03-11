@@ -8,36 +8,25 @@ import {
   Rating,
   Button,
   Textarea,
-  Avatar,
   Badge,
   Divider,
   ActionIcon,
   FileInput,
 } from "@mantine/core";
-import { IconThumbUp, IconPhoto } from "@tabler/icons-react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
-import catCoffeeShop from "../../../assets/establishments/cat-coffee-shop.svg";
-import catConvenienceStore from "../../../assets/establishments/cat-convenience-store.svg";
-import catFilipinoFood from "../../../assets/establishments/cat-filipino-food.svg";
-import catKoreanBbq from "../../../assets/establishments/cat-korean-bbq.svg";
-import catServices from "../../../assets/establishments/cat-services.svg";
 import emptyState from "../../../assets/features/empty-state.svg";
 import { BackButton } from "../../../components/back-button.tsx";
 import { EmptyState } from "../../../components/empty-state.tsx";
 import { DetailSkeleton } from "../../../components/page-skeleton.tsx";
+import { UserAvatar } from "../../../components/user-avatar.tsx";
+import { FALLBACK_GUIDE_CATEGORY_ICON, GUIDE_CATEGORY_ICONS } from "../../../features/guide/guide.constants.ts";
+import { IconPhoto, IconThumbUp } from "../../../lib/icons.tsx";
 import { getEstablishment, createReview, createOwnerReply, toggleHelpful } from "../../../server/establishments.ts";
 
 import imgStyles from "../../../components/shared-images.module.css";
-
-const CATEGORY_ICONS: Record<string, string> = {
-  "Coffee Shop": catCoffeeShop,
-  "Filipino Food": catFilipinoFood,
-  Services: catServices,
-  "Korean BBQ": catKoreanBbq,
-  "Convenience Store": catConvenienceStore,
-};
+import styles from "./$estId.module.css";
 
 export const Route = createFileRoute("/_app/guide/$estId")({
   loader: ({ params }) => getEstablishment({ data: { estId: params.estId } }),
@@ -61,7 +50,7 @@ function EstablishmentDetailsPage() {
   const [reviewImages, setReviewImages] = useState<File[]>([]);
   const [replyText, setReplyText] = useState<Record<string, string>>({});
 
-  const categoryIcon = CATEGORY_ICONS[data.category];
+  const categoryIcon = GUIDE_CATEGORY_ICONS[data.category];
 
   const handleToggleHelpful = async (reviewId: string) => {
     await toggleHelpful({ data: { reviewId } });
@@ -72,13 +61,20 @@ function EstablishmentDetailsPage() {
     <Container size="md" py="xl" className="pageEnter">
       <BackButton to="/guide" label="Back to Directory" color="teal" />
 
-      <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
-        <img src={categoryIcon ?? catServices} alt={data.name} className={imgStyles.cardImageTall} />
+      <Paper shadow="md" p="lg" radius="md" className={`content-card ${styles.heroCard}`} mb="lg">
+        <div className={styles.heroMedia}>
+          <img
+            src={data.image ?? categoryIcon ?? FALLBACK_GUIDE_CATEGORY_ICON}
+            alt={data.name}
+            className={imgStyles.cardImageTall}
+          />
+        </div>
         <Group justify="space-between" wrap="wrap">
           <Stack gap="xs">
-            <Group>
+            <Group className={styles.heroMeta}>
               <Title order={2}>{data.name}</Title>
               <Badge
+                className={styles.heroBadge}
                 variant="light"
                 size="lg"
                 leftSection={categoryIcon ? <img src={categoryIcon} alt="" width={16} height={16} /> : undefined}
@@ -100,7 +96,7 @@ function EstablishmentDetailsPage() {
         </Group>
       </Paper>
 
-      <Paper shadow="md" p="lg" radius="md" className="content-card" mb="lg">
+      <Paper shadow="md" p="lg" radius="md" className={`content-card ${styles.reviewComposer}`} mb="lg">
         <Title order={4} mb="md">
           Write a Review
         </Title>
@@ -167,106 +163,97 @@ function EstablishmentDetailsPage() {
         </Stack>
       </Paper>
 
-      <Title order={4} mb="md">
+      <Title order={4} mb="md" className={styles.reviewsTitle}>
         Reviews ({data.reviews.length})
       </Title>
       <Stack>
         {data.reviews.map((review: (typeof data.reviews)[number]) => (
-            <Paper key={review.id} withBorder p="md" radius="md">
-              <Group justify="space-between" mb="sm">
-                <Group>
-                  <Avatar color="pink" radius="xl">
-                    {review.author
-                      .split(" ")
-                      .map((n: string) => n[0])
-                      .join("")}
-                  </Avatar>
-                  <Stack gap={2}>
-                    <Text fw={600}>{review.author}</Text>
-                    <Text size="xs" c="dimmed">
-                      {review.time}
-                    </Text>
-                  </Stack>
-                </Group>
-                <Rating value={review.rating} readOnly size="sm" />
-              </Group>
-              <Text size="sm" mb="sm">
-                {review.content}
-              </Text>
-              {review.images.length > 0 && (
-                <Group gap="xs" mb="sm">
-                  {review.images.map((img: string, i: number) => (
-                    <img
-                      key={img}
-                      src={img}
-                      alt={`Review ${i + 1}`}
-                      style={{ maxWidth: 120, maxHeight: 90, borderRadius: 8, objectFit: "cover" }}
-                    />
-                  ))}
-                </Group>
-              )}
+          <Paper key={review.id} withBorder p="md" radius="md" className={styles.reviewCard}>
+            <Group justify="space-between" mb="sm">
               <Group>
-                <ActionIcon
-                  variant={review.isHelpful ? "filled" : "subtle"}
+                <UserAvatar name={review.author} image={review.authorImage} color="pink" radius="xl" />
+                <Stack gap={2}>
+                  <Text fw={600}>{review.author}</Text>
+                  <Text size="xs" c="dimmed">
+                    {review.time}
+                  </Text>
+                </Stack>
+              </Group>
+              <Rating value={review.rating} readOnly size="sm" />
+            </Group>
+            <Text size="sm" mb="sm">
+              {review.content}
+            </Text>
+            {review.images.length > 0 && (
+              <div className={styles.reviewGallery}>
+                {review.images.map((img: string, i: number) => (
+                  <img key={img} src={img} alt={`Review ${i + 1}`} className={styles.reviewImage} />
+                ))}
+              </div>
+            )}
+            <Group>
+              <ActionIcon
+                variant={review.isHelpful ? "filled" : "subtle"}
+                color="pink"
+                size="sm"
+                aria-label={review.isHelpful ? "Remove helpful vote" : "Mark review as helpful"}
+                onClick={() => {
+                  void handleToggleHelpful(review.id);
+                }}
+              >
+                <IconThumbUp size={14} />
+              </ActionIcon>
+              <Text size="xs" c="dimmed">
+                {review.helpful} found helpful
+              </Text>
+            </Group>
+            {review.ownerReply !== null && (
+              <>
+                <Divider my="sm" />
+                <Paper bg="pink.0" p="sm" radius="sm">
+                  <Group gap="xs" mb={4}>
+                    <Badge size="xs" color="pink">
+                      Owner
+                    </Badge>
+                    <Text size="xs" c="dimmed">
+                      {data.ownerName}
+                    </Text>
+                  </Group>
+                  <Text size="sm">{review.ownerReply}</Text>
+                </Paper>
+              </>
+            )}
+            {review.ownerReply === null && data.isOwner && (
+              <Group mt="xs" gap="xs">
+                <Textarea
+                  placeholder="Reply as owner..."
+                  size="xs"
+                  style={{ flex: 1 }}
+                  value={replyText[review.id] ?? ""}
+                  onChange={(e) => {
+                    setReplyText((prev) => ({ ...prev, [review.id]: e.currentTarget.value }));
+                  }}
+                />
+                <Button
+                  size="xs"
+                  variant="light"
                   color="pink"
-                  size="sm"
-                  onClick={() => {
-                    void handleToggleHelpful(review.id);
+                  onClick={async () => {
+                    const text = replyText[review.id]?.trim();
+                    if (!text) {
+                      return;
+                    }
+                    await createOwnerReply({ data: { reviewId: review.id, reply: text } });
+                    setReplyText((prev) => ({ ...prev, [review.id]: "" }));
+                    void router.invalidate();
                   }}
                 >
-                  <IconThumbUp size={14} />
-                </ActionIcon>
-                <Text size="xs" c="dimmed">
-                  {review.helpful} found helpful
-                </Text>
+                  Reply
+                </Button>
               </Group>
-              {review.ownerReply !== null && (
-                <>
-                  <Divider my="sm" />
-                  <Paper bg="pink.0" p="sm" radius="sm">
-                    <Group gap="xs" mb={4}>
-                      <Badge size="xs" color="pink">
-                        Owner
-                      </Badge>
-                      <Text size="xs" c="dimmed">
-                        {data.ownerName}
-                      </Text>
-                    </Group>
-                    <Text size="sm">{review.ownerReply}</Text>
-                  </Paper>
-                </>
-              )}
-              {review.ownerReply === null && data.isOwner && (
-                <Group mt="xs" gap="xs">
-                  <Textarea
-                    placeholder="Reply as owner..."
-                    size="xs"
-                    style={{ flex: 1 }}
-                    value={replyText[review.id] ?? ""}
-                    onChange={(e) => {
-                      setReplyText((prev) => ({ ...prev, [review.id]: e.currentTarget.value }));
-                    }}
-                  />
-                  <Button
-                    size="xs"
-                    variant="light"
-                    color="pink"
-                    onClick={async () => {
-                      const text = replyText[review.id]?.trim();
-                      if (!text) {
-                        return;
-                      }
-                      await createOwnerReply({ data: { reviewId: review.id, reply: text } });
-                      setReplyText((prev) => ({ ...prev, [review.id]: "" }));
-                      void router.invalidate();
-                    }}
-                  >
-                    Reply
-                  </Button>
-                </Group>
-              )}
-            </Paper>
-          ))}
+            )}
+          </Paper>
+        ))}
       </Stack>
     </Container>
   );

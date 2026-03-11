@@ -1,5 +1,6 @@
 import { Group, Select, TextInput } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
+
+import { IconSearch } from "../lib/icons.tsx";
 
 interface SearchBarProps {
   readonly searchValue: string;

@@ -1,0 +1,48 @@
+.heroCard {
+  overflow: hidden;
+}
+
+.heroMedia {
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.heroMeta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-sm);
+}
+
+.heroBadge {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(230, 73, 128, 0.1);
+}
+
+.reviewComposer {
+  background: linear-gradient(180deg, rgba(255, 251, 253, 0.96), rgba(255, 246, 250, 0.9));
+  border: 1px solid rgba(230, 73, 128, 0.1);
+}
+
+.reviewsTitle {
+  color: #4d2436;
+}
+
+.reviewCard {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 249, 252, 0.92));
+  border: 1px solid rgba(230, 73, 128, 0.1);
+  box-shadow: 0 20px 34px -30px rgba(112, 36, 73, 0.24);
+}
+
+.reviewGallery {
+  display: grid;
+  gap: var(--mantine-spacing-sm);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  margin-bottom: var(--mantine-spacing-sm);
+}
+
+.reviewImage {
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+  object-fit: cover;
+  width: 100%;
+}

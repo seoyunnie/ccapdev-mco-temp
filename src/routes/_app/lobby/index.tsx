@@ -4,35 +4,51 @@ import {
   Card,
   Group,
   Stack,
-  Avatar,
   Badge,
   Button,
-  ActionIcon,
   Modal,
   Textarea,
   TextInput,
   Select,
-  Chip,
   Tabs,
   Progress,
   Paper,
   Pagination,
+  ThemeIcon,
+  FileInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { IconArrowUp, IconPlus, IconEye } from "@tabler/icons-react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
 import emptyState from "../../../assets/features/empty-state.svg";
+import threadPlaceholder from "../../../assets/lobby/thread-placeholder.svg";
 import { EmptyState } from "../../../components/empty-state.tsx";
 import { PageSkeleton } from "../../../components/page-skeleton.tsx";
 import { SearchBar } from "../../../components/search-bar.tsx";
 import { SectionHeader } from "../../../components/section-header.tsx";
+import { UserAvatar } from "../../../components/user-avatar.tsx";
 import { TAG_COLORS, DEFAULT_TAGS } from "../../../features/lobby/lobby.constants.ts";
+import { useAuth } from "../../../lib/auth-context.tsx";
+import { IconArrowUp, IconEye, IconPhoto, IconPlus } from "../../../lib/icons.tsx";
 import { createThread, getThreads } from "../../../server/threads.ts";
 
+import imgStyles from "../../../components/shared-images.module.css";
+
 const MAX_CONTENT_LENGTH = 2000;
+
+function getVoteColor(vote: number) {
+  if (vote === 1) {
+    return "pink";
+  }
+
+  if (vote === -1) {
+    return "red";
+  }
+
+  return "gray";
+}
 
 export const Route = createFileRoute("/_app/lobby/")({
   loader: () => getThreads({ data: {} }),
@@ -45,6 +61,7 @@ function ForumFeedPage() {
   const result = Route.useLoaderData();
   const posts = result.items;
   const router = useRouter();
+  const { isLoggedIn } = useAuth();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<string | null>("Newest");
   const [activeTag, setActiveTag] = useState<string>("All");
@@ -55,6 +72,7 @@ function ForumFeedPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [newTag, setNewTag] = useState<string | null>(null);
+  const [newImage, setNewImage] = useState<string | null>(null);
 
   const allTags = ["All", ...DEFAULT_TAGS.map((c) => c.name)];
 
@@ -69,13 +87,20 @@ function ForumFeedPage() {
     .sort((a, b) => (sort === "Most Popular" ? b.upvotes - a.upvotes : 0));
 
   const handleCreate = async () => {
+    if (!isLoggedIn) {
+      void router.navigate({ to: "/login" });
+      return;
+    }
     if (!newTitle.trim() || !newContent.trim()) {
       return;
     }
-    await createThread({ data: { title: newTitle, content: newContent, tag: newTag ?? undefined } });
+    await createThread({
+      data: { title: newTitle, content: newContent, tag: newTag ?? undefined, image: newImage ?? undefined },
+    });
     setNewTitle("");
     setNewContent("");
     setNewTag(null);
+    setNewImage(null);
     closeCreate();
     notifications.show({ title: "Post created!", message: "Your post is now live.", color: "green" });
     void router.invalidate();
@@ -109,6 +134,25 @@ function ForumFeedPage() {
                 data={DEFAULT_TAGS.map((c) => c.name)}
                 value={newTag}
                 onChange={setNewTag}
+              />
+              <FileInput
+                label="Thread image"
+                placeholder="Upload an optional thread image"
+                leftSection={<IconPhoto size={16} />}
+                accept="image/*"
+                onChange={(file) => {
+                  if (file == null) {
+                    setNewImage(null);
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.addEventListener("load", () => {
+                    if (typeof reader.result === "string") {
+                      setNewImage(reader.result);
+                    }
+                  });
+                  reader.readAsDataURL(file);
+                }}
               />
               <Textarea
                 label="Content"
@@ -150,6 +194,7 @@ function ForumFeedPage() {
               <Text fw={700} size="lg" mb="xs">
                 {newTitle || "Untitled"}
               </Text>
+              <img src={newImage ?? threadPlaceholder} alt="Thread preview" className={imgStyles.cardImage} />
               {newTag != null && (
                 <Badge color={TAG_COLORS[newTag] ?? "gray"} variant="light" mb="sm">
                   {newTag}
@@ -171,8 +216,19 @@ function ForumFeedPage() {
           mb="xs"
         />
         <Group>
-          <Button leftSection={<IconPlus size={16} />} color="pink" radius="xl" onClick={openCreate}>
-            New Post
+          <Button
+            leftSection={<IconPlus size={16} />}
+            color="pink"
+            radius="xl"
+            onClick={() => {
+              if (!isLoggedIn) {
+                void router.navigate({ to: "/login" });
+                return;
+              }
+              openCreate();
+            }}
+          >
+            {isLoggedIn ? "New Post" : "Sign in to Post"}
           </Button>
         </Group>
       </Group>
@@ -187,28 +243,20 @@ function ForumFeedPage() {
         filterPlaceholder="Sort by"
       />
 
-      <Chip.Group
-        value={activeTag}
-        onChange={(v) => {
-          if (typeof v === "string") {
-            setActiveTag(v);
-          }
-        }}
-      >
-        <Group gap="xs" mb="lg">
-          {allTags.map((tag) => (
-            <Chip
-              key={tag}
-              value={tag}
-              variant="light"
-              color={tag === "All" ? "gray" : (TAG_COLORS[tag] ?? "gray")}
-              size="sm"
-            >
-              {tag}
-            </Chip>
-          ))}
-        </Group>
-      </Chip.Group>
+      <Group mb="lg" justify="space-between" align="flex-end">
+        <Select
+          label="Topic"
+          placeholder="Filter by topic"
+          data={allTags}
+          value={activeTag}
+          onChange={(value) => {
+            if (value != null) {
+              setActiveTag(value);
+            }
+          }}
+          w={{ base: "100%", sm: 240 }}
+        />
+      </Group>
 
       {filtered.length === 0 && <EmptyState image={emptyState} message="No posts match your search." />}
 
@@ -224,14 +272,10 @@ function ForumFeedPage() {
             to={`/lobby/${post.id}`}
             style={{ textDecoration: "none", color: "inherit" }}
           >
+            <img src={post.image ?? threadPlaceholder} alt={post.title} className={imgStyles.cardImage} />
             <Group justify="space-between" wrap="wrap">
               <Group>
-                <Avatar color="pink" radius="xl">
-                  {post.author
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </Avatar>
+                <UserAvatar name={post.author} image={post.authorImage} color="pink" radius="xl" />
                 <Stack gap={2}>
                   <Group gap="xs">
                     <Text fw={600}>{post.title}</Text>
@@ -245,13 +289,9 @@ function ForumFeedPage() {
                 </Stack>
               </Group>
               <Group gap="xs">
-                <ActionIcon
-                  variant="light"
-                  color={post.userVote === 1 ? "pink" : post.userVote === -1 ? "red" : "gray"}
-                  size="sm"
-                >
+                <ThemeIcon variant="light" color={getVoteColor(post.userVote)} size="sm">
                   <IconArrowUp size={14} />
-                </ActionIcon>
+                </ThemeIcon>
                 <Text size="sm" fw={600}>
                   {post.upvotes}
                 </Text>

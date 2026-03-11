@@ -1,10 +1,10 @@
 import { Button, Divider, Drawer, NavLink, Stack } from "@mantine/core";
-import { IconSettings, IconShield } from "@tabler/icons-react";
 import { Link, useLocation } from "@tanstack/react-router";
 
 import adormableLogo from "../../assets/logos/adormable-logo.png";
-import { useAuth, UserRole } from "../../contexts/auth-context.tsx";
-import { NAV_ITEMS } from "../../data/nav-items.ts";
+import { NAV_ITEMS } from "../../features/navigation/nav-items.ts";
+import { useAuth, UserRole } from "../../lib/auth-context.tsx";
+import { IconSettings, IconShield } from "../../lib/icons.tsx";
 import { LinkButton } from "../link-button.tsx";
 
 export interface SidebarProps {
@@ -113,7 +113,7 @@ export function Sidebar({ isOpen, onToggle }: Readonly<SidebarProps>) {
             </Button>
             <LinkButton
               to="/login"
-              search={{ register: "true" }}
+              search={{ register: true }}
               color="pink"
               fullWidth
               mt="xs"

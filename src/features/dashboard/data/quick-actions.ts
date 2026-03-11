@@ -1,15 +1,14 @@
 import type { DefaultMantineColor } from "@mantine/core";
 import type { LinkProps } from "@tanstack/react-router";
-import type { ForwardRefExoticComponent, RefAttributes } from "react";
 
-import { type IconProps, IconBook, IconMessageCircle, IconStar } from "@tabler/icons-react";
+import { IconBook, IconMessageCircle, IconStar, type IconComponent } from "../../../lib/icons.tsx";
 
 export interface QuickAction {
   readonly title: string;
   readonly description: string;
   readonly to: LinkProps["to"];
   readonly color: DefaultMantineColor;
-  readonly iconComponent: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
+  readonly iconComponent: IconComponent;
 }
 
 export const QUICK_ACTIONS: readonly QuickAction[] = [

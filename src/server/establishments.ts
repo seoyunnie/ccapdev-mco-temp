@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { prisma } from "../db.ts";
+import { normalizeEstablishmentCategory } from "../features/guide/guide.taxonomy.ts";
 import { getSessionFn, requireRole, requireSession } from "./auth.ts";
 import { clampPagination, formatRelative, logError, sanitize } from "./utils.ts";
 
@@ -25,9 +26,11 @@ export const getEstablishments = createServerFn({ method: "GET" })
         return {
           id: e.id,
           name: e.name,
-          category: e.category,
+          category: normalizeEstablishmentCategory(e.category),
           description: e.description ?? "",
           address: e.address ?? "",
+          image: e.image,
+          ownerId: e.ownerId,
           rating: Math.round(avg * 10) / 10,
           reviews: e.reviews.length,
           owner: e.owner.name,
@@ -60,16 +63,18 @@ export const getEstablishment = createServerFn({ method: "GET" })
     const avg = est.reviews.length > 0 ? est.reviews.reduce((s, r) => s + r.rating, 0) / est.reviews.length : 0;
 
     // Get user's helpful votes for reviews on this establishment
-    const helpfulVotes = session?.user?.id == null
-      ? []
-      : await prisma.helpfulVote.findMany({
-          where: { userId: session.user.id, reviewId: { in: est.reviews.map((r) => r.id) } },
-        });
+    const helpfulVotes =
+      session?.user?.id == null
+        ? []
+        : await prisma.helpfulVote.findMany({
+            where: { userId: session.user.id, reviewId: { in: est.reviews.map((r) => r.id) } },
+          });
     const helpfulSet = new Set(helpfulVotes.map((v) => v.reviewId));
 
     return {
       name: est.name,
-      category: est.category,
+      category: normalizeEstablishmentCategory(est.category),
+      image: est.image,
       rating: Math.round(avg * 10) / 10,
       totalReviews: est.reviews.length,
       description: est.description ?? "",
@@ -78,6 +83,7 @@ export const getEstablishment = createServerFn({ method: "GET" })
       reviews: est.reviews.map((r) => ({
         id: r.id,
         author: r.author.name,
+        authorImage: r.author.image,
         rating: r.rating,
         time: formatRelative(r.createdAt),
         content: r.content,
@@ -91,10 +97,21 @@ export const getEstablishment = createServerFn({ method: "GET" })
 
 export const createEstablishment = createServerFn({ method: "POST" })
   .inputValidator(
-    (d: { name: string; category: string; description?: string; address?: string; image?: string; ownerId: string }) => {
+    (d: {
+      name: string;
+      category: string;
+      description?: string;
+      address?: string;
+      image?: string;
+      ownerId: string;
+    }) => {
       if (d.image != null) {
-        if (!d.image.startsWith("data:image/")) throw new Error("Invalid image data");
-        if (d.image.length > MAX_IMAGE_BYTES) throw new Error("Image must be under 2 MB");
+        if (!d.image.startsWith("data:image/")) {
+          throw new Error("Invalid image data");
+        }
+        if (d.image.length > MAX_IMAGE_BYTES) {
+          throw new Error("Image must be under 2 MB");
+        }
       }
       return d;
     },
@@ -106,7 +123,7 @@ export const createEstablishment = createServerFn({ method: "POST" })
       data: {
         id: crypto.randomUUID(),
         name: data.name,
-        category: data.category,
+        category: normalizeEstablishmentCategory(data.category),
         description: data.description,
         address: data.address,
         image: data.image ?? null,
@@ -241,8 +258,12 @@ export const updateEstablishment = createServerFn({ method: "POST" })
       ownerId?: string;
     }) => {
       if (d.image != null && d.image !== "") {
-        if (!d.image.startsWith("data:image/")) throw new Error("Invalid image data");
-        if (d.image.length > MAX_IMAGE_BYTES) throw new Error("Image must be under 2 MB");
+        if (!d.image.startsWith("data:image/")) {
+          throw new Error("Invalid image data");
+        }
+        if (d.image.length > MAX_IMAGE_BYTES) {
+          throw new Error("Image must be under 2 MB");
+        }
       }
       return d;
     },
@@ -251,8 +272,14 @@ export const updateEstablishment = createServerFn({ method: "POST" })
     const session = await requireRole(["admin"]);
     const { establishmentId, image, ...updates } = data;
     const updateData: Record<string, unknown> = { ...updates };
-    if (image === "") updateData.image = null;
-    else if (image != null) updateData.image = image;
+    if (updates.category != null) {
+      updateData.category = normalizeEstablishmentCategory(updates.category);
+    }
+    if (image === "") {
+      updateData.image = null;
+    } else if (image != null) {
+      updateData.image = image;
+    }
     const updated = await prisma.establishment.update({ where: { id: establishmentId }, data: updateData });
 
     await prisma.activityLog.create({

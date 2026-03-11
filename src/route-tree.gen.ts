@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuspendedRouteImport } from './routes/suspended'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
@@ -28,6 +29,11 @@ import { Route as AppAdminZonesRouteImport } from './routes/_app/admin/zones'
 import { Route as AppAdminLogsRouteImport } from './routes/_app/admin/logs'
 import { Route as AppAdminEstablishmentsRouteImport } from './routes/_app/admin/establishments'
 
+const SuspendedRoute = SuspendedRouteImport.update({
+  id: '/suspended',
+  path: '/suspended',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -121,6 +127,7 @@ const AppAdminEstablishmentsRoute = AppAdminEstablishmentsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
+  '/suspended': typeof SuspendedRoute
   '/concierge': typeof AppConciergeRoute
   '/dashboard': typeof AppDashboardRoute
   '/moderation': typeof AppModerationRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/suspended': typeof SuspendedRoute
   '/concierge': typeof AppConciergeRoute
   '/dashboard': typeof AppDashboardRoute
   '/moderation': typeof AppModerationRoute
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteRouteWithChildren
   '/login': typeof LoginRoute
+  '/suspended': typeof SuspendedRoute
   '/_app/concierge': typeof AppConciergeRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/moderation': typeof AppModerationRoute
@@ -182,6 +191,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/suspended'
     | '/concierge'
     | '/dashboard'
     | '/moderation'
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/suspended'
     | '/concierge'
     | '/dashboard'
     | '/moderation'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_app'
     | '/login'
+    | '/suspended'
     | '/_app/concierge'
     | '/_app/dashboard'
     | '/_app/moderation'
@@ -241,10 +253,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SuspendedRoute: typeof SuspendedRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/suspended': {
+      id: '/suspended'
+      path: '/suspended'
+      fullPath: '/suspended'
+      preLoaderRoute: typeof SuspendedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -419,6 +439,7 @@ const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
   LoginRoute: LoginRoute,
+  SuspendedRoute: SuspendedRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

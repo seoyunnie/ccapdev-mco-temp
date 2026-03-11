@@ -1,7 +1,7 @@
 import { useRouter } from "@tanstack/react-router";
 import { type ReactNode, useMemo } from "react";
 
-import { authClient } from "../lib/auth-client.ts";
+import { authClient } from "./auth-client.ts";
 import { type UserRole, AuthContext } from "./auth-context.tsx";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // oxlint-disable-next-line no-unsafe-type-assertion -- Better Auth doesn't type custom user fields
       role: ((session?.user as Record<string, unknown>)?.role as UserRole) ?? "guest",
       name: session?.user?.name ?? "",
-      image: (session?.user?.image as string | null) ?? null,
+      image: typeof session?.user?.image === "string" ? session.user.image : null,
       isPending,
       signOut,
     }),

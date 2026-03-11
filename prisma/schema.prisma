@@ -28,6 +28,8 @@ model User {
   votes          Vote[]
   reports        Report[]
   bans           Ban[]
+  appeals        BanAppeal[]     @relation("AppealAuthor")
+  reviewedAppeals BanAppeal[]    @relation("AppealReviewer")
   activityLogs   ActivityLog[]
   helpfulVotes   HelpfulVote[]
 
@@ -177,6 +179,7 @@ model Thread {
   authorId  String
   author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   content   String
+  image     String?
   tag       String?
   upvotes   Int       @default(0)
   comments  Comment[]
@@ -251,9 +254,31 @@ model Ban {
   reason    String
   expiresAt DateTime?
   createdAt DateTime  @default(now())
+  appeals   BanAppeal[]
 
   @@index([userId])
   @@map("ban")
+}
+
+model BanAppeal {
+  id         String   @id @map("_id")
+  userId     String
+  user       User     @relation("AppealAuthor", fields: [userId], references: [id], onDelete: Cascade)
+  banId      String?
+  ban        Ban?     @relation(fields: [banId], references: [id], onDelete: SetNull)
+  reviewerId String?
+  reviewer   User?    @relation("AppealReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  message    String
+  status     String   @default("pending") // pending | approved | rejected
+  staffNote  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  reviewedAt DateTime?
+
+  @@index([userId])
+  @@index([banId])
+  @@index([reviewerId])
+  @@map("ban_appeal")
 }
 
 model ActivityLog {

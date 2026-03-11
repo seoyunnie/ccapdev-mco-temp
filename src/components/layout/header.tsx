@@ -1,14 +1,12 @@
-import { AppShell, Avatar, Burger, Button, Container, Group, Menu } from "@mantine/core";
-import { IconChevronDown, IconLogout, IconSettings, IconShield, IconUser } from "@tabler/icons-react";
+import { AppShell, Burger, Button, Container, Group, Menu } from "@mantine/core";
 import { Link, useLocation } from "@tanstack/react-router";
 
-import defaultAdmin from "../../assets/avatars/default-admin.svg";
-import defaultAvatarFemale from "../../assets/avatars/default-avatar-female.svg";
-import defaultConcierge from "../../assets/avatars/default-concierge.svg";
 import adormableLogo from "../../assets/logos/adormable-logo.png";
-import { useAuth, UserRole } from "../../contexts/auth-context.tsx";
-import { NAV_ITEMS } from "../../data/nav-items.ts";
+import { NAV_ITEMS } from "../../features/navigation/nav-items.ts";
+import { useAuth, UserRole } from "../../lib/auth-context.tsx";
+import { IconChevronDown, IconLogout, IconSettings, IconShield, IconUser } from "../../lib/icons.tsx";
 import { LinkButton } from "../link-button.tsx";
+import { UserAvatar } from "../user-avatar.tsx";
 
 import styles from "./header.module.css";
 
@@ -21,15 +19,6 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
   const { isLoggedIn, role, name, image, signOut } = useAuth();
   const isStaff = role === UserRole.CONCIERGE || role === UserRole.ADMIN;
   const isAdmin = role === UserRole.ADMIN;
-
-  // Use uploaded profile photo if available, otherwise fall back to role-based defaults
-  let fallbackSrc = defaultAvatarFemale;
-  if (role === UserRole.ADMIN) {
-    fallbackSrc = defaultAdmin;
-  } else if (role === UserRole.CONCIERGE) {
-    fallbackSrc = defaultConcierge;
-  }
-  const avatarSrc = image ?? fallbackSrc;
 
   const location = useLocation();
 
@@ -129,7 +118,7 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
             <Menu>
               <Menu.Target>
                 <Button variant="subtle" color="dark" size="sm" radius="xl">
-                  <Avatar src={avatarSrc} alt={name} radius="xl" size="sm" mr={8} />
+                  <UserAvatar name={name} image={image} radius="xl" size="sm" mr={8} />
                   {name}
                   <IconChevronDown size={14} style={{ marginLeft: 4 }} />
                 </Button>
@@ -149,7 +138,7 @@ export function Header({ isBurgerOpen, onSidebarToggle }: Readonly<HeaderProps>)
               <Button variant="default" radius="xl" component={Link} to="/login" size="sm">
                 Log In
               </Button>
-              <LinkButton color="pink" radius="xl" to="/login" search={{ register: "true" }} size="sm">
+              <LinkButton color="pink" radius="xl" to="/login" search={{ register: true }} size="sm">
                 Register
               </LinkButton>
             </>

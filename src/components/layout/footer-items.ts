@@ -1,8 +1,15 @@
-import type { NavItem } from "./nav-items.ts";
+import type { LinkProps } from "@tanstack/react-router";
+
+export interface FooterLinkItem {
+  readonly label: Capitalize<string>;
+  readonly to?: LinkProps["to"];
+  readonly href?: string;
+  readonly disabled?: boolean;
+}
 
 export interface FooterItem {
   readonly title: Capitalize<string>;
-  readonly links: readonly NavItem[];
+  readonly links: readonly FooterLinkItem[];
 }
 
 export const FOOTER_ITEMS: readonly FooterItem[] = [
@@ -25,9 +32,9 @@ export const FOOTER_ITEMS: readonly FooterItem[] = [
   {
     title: "Support",
     links: [
-      { label: "Help Center", to: "/" },
-      { label: "Contact Us", to: "/" },
-      { label: "Privacy Policy", to: "/" },
+      { label: "Terms of Service", to: "/terms" },
+      { label: "Privacy Policy", href: "/terms#privacy" },
+      { label: "Support Channels", href: "/terms#support" },
     ],
   },
 ];

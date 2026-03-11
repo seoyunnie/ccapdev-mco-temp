@@ -3,25 +3,53 @@
   display: flex;
   justify-content: center;
   min-height: 100vh;
+  padding: 24px 0;
+  position: relative;
+}
+
+.page::before {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(230, 73, 128, 0.18), transparent 0 28%),
+    radial-gradient(circle at 85% 12%, rgba(190, 75, 219, 0.12), transparent 0 22%);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
 }
 
 .title {
+  color: #4d2436;
   font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
-  color: var(--mantine-color-dimmed);
+  color: #6e5560;
   font-size: var(--mantine-font-size-sm);
   margin-top: 5px;
   text-align: center;
 }
 
 .formCard {
-  -webkit-backdrop-filter: blur(16px) saturate(1.8);
-  backdrop-filter: blur(16px) saturate(1.8);
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  -webkit-backdrop-filter: blur(22px) saturate(1.55);
+  backdrop-filter: blur(22px) saturate(1.55);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 250, 252, 0.84)),
+    radial-gradient(circle at top left, rgba(230, 73, 128, 0.08), transparent 45%);
+  border: 1px solid rgba(230, 73, 128, 0.14);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.4);
+    0 26px 54px -36px rgba(112, 36, 73, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  position: relative;
+}
+
+.formCard::after {
+  background: linear-gradient(90deg, rgba(230, 73, 128, 0.7), rgba(190, 75, 219, 0.45));
+  border-radius: inherit;
+  content: "";
+  height: 3px;
+  left: 24px;
+  position: absolute;
+  right: 24px;
+  top: 0;
 }

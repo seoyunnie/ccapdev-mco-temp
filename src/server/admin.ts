@@ -18,7 +18,10 @@ export const getAdminStats = createServerFn({ method: "GET" }).handler(async () 
 export const getUsers = createServerFn({ method: "GET" }).handler(async () => {
   await requireRole(["concierge", "admin"]);
   const users = await prisma.user.findMany({
-    include: { bans: { where: { expiresAt: { gt: new Date() } } } },
+    include: {
+      bans: { where: { OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }, orderBy: { createdAt: "desc" } },
+      appeals: { where: { status: "pending" } },
+    },
     orderBy: { name: "asc" },
   });
   return users.map((u) => ({
@@ -27,6 +30,9 @@ export const getUsers = createServerFn({ method: "GET" }).handler(async () => {
     email: u.email,
     role: u.role,
     status: u.bans.length > 0 ? "Banned" : "Active",
+    activeBanReason: u.bans[0]?.reason ?? null,
+    activeBanExpiresAt: u.bans[0]?.expiresAt?.toISOString() ?? null,
+    pendingAppeals: u.appeals.length,
   }));
 });
 
@@ -61,7 +67,7 @@ export const getActivityLogs = createServerFn({ method: "GET" })
     const { page, pageSize } = clampPagination(data.page, data.pageSize);
     const [logs, total] = await Promise.all([
       prisma.activityLog.findMany({
-        include: { user: { select: { name: true } } },
+        include: { user: { select: { name: true, role: true } } },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -75,6 +81,7 @@ export const getActivityLogs = createServerFn({ method: "GET" })
         action: l.action,
         detail: l.detail,
         type: categorizeAction(l.action),
+        actorRole: l.user?.role ?? "system",
         timestamp: l.createdAt.toISOString().replace("T", " ").slice(0, 19),
       })),
       total,

@@ -5,7 +5,7 @@ import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 import { Footer } from "../../components/layout/footer.tsx";
 import { Header } from "../../components/layout/header.tsx";
 import { Sidebar } from "../../components/layout/sidebar.tsx";
-import { getSessionFn } from "../../server/auth.ts";
+import { getSessionStateFn } from "../../server/auth.ts";
 
 // Routes under /_app that don't require authentication
 const PUBLIC_PATHS = new Set(["/", "/study-nook", "/lobby", "/guide"]);
@@ -23,13 +23,16 @@ export const Route = createFileRoute("/_app")({
       return;
     }
 
-    const session = await getSessionFn();
-    if (!session?.user) {
+    const sessionState = await getSessionStateFn();
+    if (!sessionState.session?.user) {
       throw redirect({ to: "/login" });
+    }
+    if (sessionState.activeBan != null) {
+      throw redirect({ to: "/suspended" });
     }
 
     // oxlint-disable-next-line no-unsafe-type-assertion -- Better Auth doesn't type custom user fields
-    const role = (session.user as Record<string, unknown>).role as string;
+    const role = (sessionState.session.user as Record<string, unknown>).role as string;
 
     // Admin routes — only admin
     if (path.startsWith("/admin") && role !== "admin") {

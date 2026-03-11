@@ -1,19 +1,17 @@
 import type { DefaultMantineColor } from "@mantine/core";
 import type { LinkProps } from "@tanstack/react-router";
-import type { ForwardRefExoticComponent, RefAttributes } from "react";
 
-import { IconBook, IconCompass, IconMessageCircle, type IconProps } from "@tabler/icons-react";
-
-import studyNookFeature from "../assets/features/study-nook.svg";
-import survivalGuideFeature from "../assets/features/survival-guide.svg";
-import virtualLobbyFeature from "../assets/features/virtual-lobby.svg";
+import studyNookFeature from "../../assets/features/study-nook.svg";
+import survivalGuideFeature from "../../assets/features/survival-guide.svg";
+import virtualLobbyFeature from "../../assets/features/virtual-lobby.svg";
+import { IconBook, IconCompass, IconMessageCircle, type IconComponent } from "../../lib/icons.tsx";
 
 export interface Feature {
   readonly title: string;
   readonly description: string;
   readonly to: LinkProps["to"];
   readonly color: DefaultMantineColor;
-  readonly iconComponent: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
+  readonly iconComponent: IconComponent;
   readonly image: string;
 }
 

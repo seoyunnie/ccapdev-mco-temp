@@ -180,3 +180,45 @@ Following cosmetic and infrastructure issues resolved:
 - **Admin — Diagnostics**: Real DB ping and record count from `getDiagnostics()`. Shows green/red status badges.
 - **Admin — Error logs**: Hardcoded entries removed. Error Logs tab reads from `ErrorLog` model with "Source" column. Empty state shown when no errors.
 - **Pagination**: Mantine `Pagination` component added to lobby (threads), guide (establishments), and admin logs (activity + error) pages. Shown conditionally when `total > pageSize`.
+
+## Revision Part 2 stabilization
+
+Following the initial backend completion and earlier UI polish, Revision Part 2 focused on post-phase hardening in two passes.
+
+### Phase R2-1 — Functional stabilization
+
+- **Moderation queue grouping**: `getReports()` now groups reports by thread/comment target instead of showing duplicate queue rows for the same content. `resolveReport()` resolves or deletes the entire grouped target, and deleting a reported comment now removes its descendant reply tree safely.
+- **Ban enforcement**: `requireSession()` now checks active bans centrally, so banned users are blocked consistently across authenticated server functions. Creating a new ban also removes any pre-existing active ban for that user.
+- **Reservation editing**: `updateReservation()` was added so users can edit reservation date, time window, and anonymity directly from the profile page instead of navigating away and recreating the booking.
+- **Seat label normalization**: Zone and reservation responses now normalize seat labels into readable alphanumeric display values. Public study nook maps, profile reservations, and staff reservation tables all use the same display layer.
+- **Content model flexibility**: Admin establishment management now supports custom categories without requiring a schema change, matching the existing free-string `category` field in Prisma.
+- **Public image flow**: Establishment and study zone pages now prefer uploaded database images on public cards and detail pages instead of falling back to static assets every time.
+
+### Phase R2-2 — Visual hardening and release readiness
+
+- **Footer/support cleanup**: Footer support links now route to real destinations (`/terms`, privacy anchor, support anchor) instead of placeholder home links.
+- **Social branding polish**: Footer social actions now use lightweight, brand-aware treatments with explicit labels and distinct hover states.
+- **Glass and contrast refinement**: Shared header, footer, auth card, and content surfaces were rebalanced with stronger contrast, clearer borders, and less washed-out translucency.
+- **Background and media pass**: Landing/auth hero gradients were strengthened, shared image components gained consistent framing, and directory/lobby cards now render with more deliberate depth and surface separation.
+- **Documentation refresh**: `changes.md`, `pers/guide.md`, and `pers/suggestions-v1.md` were updated to reflect the revised workflows and final stabilization status.
+- **Quality gates**: Revision Part 2 was validated with `pnpm format:check`, `pnpm lint`, `npx tsc --noEmit`, and `npx vite build`.
+
+## Revision Part 3 recovery
+
+Revision Part 3 closed the remaining product gaps in two passes: model and workflow repair first, then visual finish and release cleanup.
+
+### Phase R3-1 — Workflow, data model, and moderation repair
+
+- **Reservation availability rewrite**: booking conflicts now come from reservation window overlap checks rather than the old global `Seat.isTaken` toggle. Study nook availability, concierge walk-ins, and reservation edits all use the same time-scoped seat logic.
+- **Suspended account flow**: active bans now redirect authenticated users to `/suspended`, where they can review the ban reason, remain signed in, and submit an appeal instead of encountering generic auth failures.
+- **Appeals loop**: `BanAppeal` was added to Prisma, moderation now records appeals, and the admin panel includes an appeals queue for approving or rejecting requests with staff notes.
+- **Taxonomy hardening**: lobby topics and establishment categories now normalize through dedicated taxonomy helpers, keeping filters, seeds, server responses, and admin forms aligned.
+- **Thread media support**: threads can now store optional images, and both lobby feed/detail views render a consistent placeholder-or-uploaded artwork path.
+
+### Phase R3-2 — Visual finish and release cleanup
+
+- **Carousel affordances**: landing-page carousels now expose browse hints, current-slide progress, edge cues, and direct CTA buttons so the featured cards are clearly actionable on desktop and mobile.
+- **Dashboard hero redesign**: the old static resident banner was replaced with a layered dashboard hero that surfaces the next reservation, quick actions, and ambient motion cards.
+- **Staff action menus**: concierge, moderation, admin users, establishments, and study zones now use labeled row-action menus instead of isolated icon-only action clusters.
+- **Motion polish**: the shared reveal system supports directional and scale variants with delays, page-enter transitions are smoother, and the footer logo now uses restrained floating motion.
+- **Guide presentation cohesion**: directory cards and establishment detail pages were refined so taxonomy badges, icons, imagery, and review galleries feel visually consistent.

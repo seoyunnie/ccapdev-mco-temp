@@ -10,19 +10,21 @@ import {
   TextInput,
   NumberInput,
   Badge,
-  ActionIcon,
   Modal,
   FileInput,
   Textarea,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconEdit, IconTrash, IconPlus, IconSearch, IconUpload } from "@tabler/icons-react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
+import placeholder from "../../../assets/establishments/placeholder.svg";
+import { RowActionMenu } from "../../../components/row-action-menu.tsx";
 import { SectionHeader } from "../../../components/section-header.tsx";
+import { IconEdit, IconPlus, IconSearch, IconTrash, IconUpload } from "../../../lib/icons.tsx";
 import { getZonesForAdmin, createZone, updateZone, deleteZone } from "../../../server/zones.ts";
 
+import imgStyles from "../../../components/shared-images.module.css";
 import styles from "./index.module.css";
 
 const FEEDBACK_TIMEOUT_MS = 2000;
@@ -70,7 +72,11 @@ function ZoneManagerPage() {
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => setImageData(reader.result as string);
+    reader.addEventListener("load", () => {
+      if (typeof reader.result === "string") {
+        setImageData(reader.result);
+      }
+    });
     reader.readAsDataURL(file);
   };
 
@@ -90,7 +96,9 @@ function ZoneManagerPage() {
       .filter(Boolean);
 
     if (editId == null) {
-      if (!name.trim()) return;
+      if (!name.trim()) {
+        return;
+      }
       await createZone({
         data: {
           name,
@@ -163,35 +171,30 @@ function ZoneManagerPage() {
                   </Badge>
                 </Table.Td>
                 <Table.Td>
-                  <Group gap={4}>
-                    <ActionIcon
-                      variant="light"
-                      size="sm"
-                      color="pink"
-                      aria-label="Edit zone"
-                      onClick={() => {
-                        setEditId(zone.id);
-                        setName(zone.name);
-                        setCapacity(zone.capacity);
-                        setSeatLabelsText("");
-                        setImageData(null);
-                      }}
-                    >
-                      <IconEdit size={14} />
-                    </ActionIcon>
-                    <ActionIcon
-                      variant="light"
-                      size="sm"
-                      color="red"
-                      aria-label="Delete zone"
-                      onClick={() => {
-                        setSelected(zone);
-                        openDelete();
-                      }}
-                    >
-                      <IconTrash size={14} />
-                    </ActionIcon>
-                  </Group>
+                  <RowActionMenu
+                    items={[
+                      {
+                        label: "Edit zone",
+                        leftSection: <IconEdit size={14} />,
+                        onClick: () => {
+                          setEditId(zone.id);
+                          setName(zone.name);
+                          setCapacity(zone.capacity);
+                          setSeatLabelsText(zone.seatLabels.join(", "));
+                          setImageData(zone.image ?? null);
+                        },
+                      },
+                      {
+                        label: "Delete zone",
+                        color: "red",
+                        leftSection: <IconTrash size={14} />,
+                        onClick: () => {
+                          setSelected(zone);
+                          openDelete();
+                        },
+                      },
+                    ]}
+                  />
                 </Table.Td>
               </Table.Tr>
             ))}
@@ -229,6 +232,7 @@ function ZoneManagerPage() {
         <Title order={4} mb="md">
           {editId == null ? "Add New Study Zone" : "Edit Study Zone"}
         </Title>
+        <img src={imageData ?? placeholder} alt="Zone preview" className={imgStyles.previewImage} />
         <Stack>
           <Group grow>
             <TextInput
@@ -237,7 +241,13 @@ function ZoneManagerPage() {
               value={name}
               onChange={(e) => setName(e.currentTarget.value)}
             />
-            <NumberInput label="Capacity" min={1} max={500} value={capacity} onChange={(v) => setCapacity(typeof v === "number" ? v : 10)} />
+            <NumberInput
+              label="Capacity"
+              min={1}
+              max={500}
+              value={capacity}
+              onChange={(v) => setCapacity(typeof v === "number" ? v : 10)}
+            />
           </Group>
           <Textarea
             label="Seat Labels (comma-separated)"

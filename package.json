@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -b && vite build",
+    "build": "tsc -b --clean && tsc -b && vite build",
     "dev": "vite",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
@@ -17,12 +17,15 @@
     "@better-auth/prisma-adapter": "^1.5.3",
     "@fontsource/nunito": "^5.2.7",
     "@fontsource/quicksand": "^5.2.10",
+    "@fortawesome/fontawesome-svg-core": "^7.2.0",
+    "@fortawesome/free-brands-svg-icons": "^7.2.0",
+    "@fortawesome/free-solid-svg-icons": "^7.2.0",
+    "@fortawesome/react-fontawesome": "^3.2.0",
     "@mantine/core": "^8.3.16",
     "@mantine/form": "^8.3.16",
     "@mantine/hooks": "^8.3.16",
     "@mantine/notifications": "^8.3.16",
     "@prisma/client": "^6.19.2",
-    "@tabler/icons-react": "^3.39.0",
     "@tanstack/react-devtools": "^0.9.9",
     "@tanstack/react-router": "^1.166.2",
     "@tanstack/react-router-devtools": "^1.166.2",
@@ -56,12 +59,12 @@
     "typescript": "~5.9.3",
     "vite": "^7.3.1"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "engines": {
     "node": ">=24.14",
     "pnpm": ">=10.16.0"
   },
-  "packageManager": "pnpm@10.30.3+sha512.c961d1e0a2d8e354ecaa5166b822516668b7f44cb5bd95122d590dd81922f606f5473b6d23ec4a5be05e7fcd18e8488d47d978bbe981872f1145d06e9a740017"
+  "packageManager": "pnpm@10.30.3+sha512.c961d1e0a2d8e354ecaa5166b822516668b7f44cb5bd95122d590dd81922f606f5473b6d23ec4a5be05e7fcd18e8488d47d978bbe981872f1145d06e9a740017",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
 }

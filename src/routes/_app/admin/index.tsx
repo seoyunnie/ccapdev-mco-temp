@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Container,
   Text,
   Paper,
@@ -8,7 +7,6 @@ import {
   Table,
   Badge,
   TextInput,
-  ActionIcon,
   Title,
   Modal,
   Button,
@@ -16,6 +14,15 @@ import {
   NumberInput,
   Textarea,
 } from "@mantine/core";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useState } from "react";
+
+import { RowActionMenu } from "../../../components/row-action-menu.tsx";
+import { SectionHeader } from "../../../components/section-header.tsx";
+import { StatCard } from "../../../components/stat-card.tsx";
+import { UserAvatar } from "../../../components/user-avatar.tsx";
+import { ROLE_COLORS } from "../../../features/admin/admin.constants.ts";
+import { type UserRole, useAuth } from "../../../lib/auth-context.tsx";
 import {
   IconUsers,
   IconBook,
@@ -24,18 +31,10 @@ import {
   IconSearch,
   IconBan,
   IconRefresh,
-} from "@tabler/icons-react";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
-
-import type { UserRole } from "../../../contexts/auth-context.tsx";
-
-import defaultAdmin from "../../../assets/avatars/default-admin.svg";
-import { SectionHeader } from "../../../components/section-header.tsx";
-import { StatCard } from "../../../components/stat-card.tsx";
-import { ROLE_COLORS } from "../../../features/admin/admin.constants.ts";
+  IconMessageCircleExclamation,
+} from "../../../lib/icons.tsx";
 import { getAdminStats, getUsers, updateUserRole, getDiagnostics, unbanUser } from "../../../server/admin.ts";
-import { createBan } from "../../../server/moderation.ts";
+import { createBan, getBanAppeals, reviewBanAppeal } from "../../../server/moderation.ts";
 
 import styles from "./index.module.css";
 
@@ -46,22 +45,42 @@ const STAT_META = [
   { key: "reviews" as const, label: "Reviews", icon: IconStar, color: "yellow" },
 ];
 
+function getAppealStatusColor(status: string) {
+  if (status === "pending") {
+    return "orange";
+  }
+
+  if (status === "approved") {
+    return "green";
+  }
+
+  return "red";
+}
+
 export const Route = createFileRoute("/_app/admin/")({
   loader: async () => {
-    const [stats, users, diagnostics] = await Promise.all([getAdminStats(), getUsers(), getDiagnostics()]);
-    return { stats, users, diagnostics };
+    const [stats, users, diagnostics, appeals] = await Promise.all([
+      getAdminStats(),
+      getUsers(),
+      getDiagnostics(),
+      getBanAppeals(),
+    ]);
+    return { stats, users, diagnostics, appeals };
   },
   head: () => ({ meta: [{ title: "Admin | Adormable" }] }),
   component: AdminControlPanelPage,
 });
 
 function AdminControlPanelPage() {
-  const { stats, users, diagnostics } = Route.useLoaderData();
+  const { stats, users, diagnostics, appeals } = Route.useLoaderData();
+  const { image, name } = useAuth();
   const router = useRouter();
   const [userSearch, setUserSearch] = useState("");
   const [banTarget, setBanTarget] = useState<{ id: string; name: string } | null>(null);
   const [banReason, setBanReason] = useState("Admin action");
   const [banDuration, setBanDuration] = useState<number>(7);
+  const [appealTarget, setAppealTarget] = useState<(typeof appeals)[number] | null>(null);
+  const [staffNote, setStaffNote] = useState("");
 
   const filteredUsers = users.filter(
     (u) =>
@@ -72,7 +91,7 @@ function AdminControlPanelPage() {
   return (
     <Container size="lg" py="xl" className="pageEnter">
       <Group gap="md" mb="xs">
-        <Avatar src={defaultAdmin} alt="Admin" size={48} radius="xl" />
+        <UserAvatar name={name} image={image} alt="Admin" size={48} radius="xl" />
         <SectionHeader title="Admin Control Panel" description="System overview and user management." mb="xs" />
       </Group>
 
@@ -130,56 +149,68 @@ function AdminControlPanelPage() {
                   <Badge color={user.status === "Active" ? "green" : "red"} variant="light" size="sm">
                     {user.status}
                   </Badge>
+                  {user.pendingAppeals > 0 && (
+                    <Badge color="orange" variant="light" size="sm" ml={6}>
+                      {user.pendingAppeals} appeal{user.pendingAppeals > 1 ? "s" : ""}
+                    </Badge>
+                  )}
                 </Table.Td>
                 <Table.Td>
-                  <Group gap={4}>
-                    <ActionIcon
-                      variant="light"
-                      size="sm"
-                      color="pink"
-                      aria-label="Cycle role"
-                      onClick={async () => {
-                        const ROLE_ORDER: Record<string, string> = {
-                          resident: "concierge",
-                          concierge: "admin",
-                          admin: "resident",
-                        };
-                        const nextRole = ROLE_ORDER[user.role] ?? "resident";
-                        await updateUserRole({ data: { userId: user.id, role: nextRole } });
-                        void router.invalidate();
-                      }}
-                    >
-                      <IconRefresh size={14} />
-                    </ActionIcon>
-                    {user.status === "Banned" ? (
-                      <ActionIcon
-                        variant="light"
-                        size="sm"
-                        color="green"
-                        aria-label="Unban user"
-                        onClick={async () => {
-                          await unbanUser({ data: { userId: user.id } });
+                  <RowActionMenu
+                    items={[
+                      {
+                        label: "Cycle role",
+                        leftSection: <IconRefresh size={14} />,
+                        onClick: async () => {
+                          const ROLE_ORDER: Record<string, string> = {
+                            resident: "concierge",
+                            concierge: "admin",
+                            admin: "resident",
+                          };
+                          const nextRole = ROLE_ORDER[user.role] ?? "resident";
+                          await updateUserRole({ data: { userId: user.id, role: nextRole } });
                           void router.invalidate();
-                        }}
-                      >
-                        <IconRefresh size={14} />
-                      </ActionIcon>
-                    ) : (
-                      <ActionIcon
-                        variant="light"
-                        size="sm"
-                        color="red"
-                        aria-label="Ban user"
-                        onClick={() => {
-                          setBanTarget({ id: user.id, name: user.name });
-                          setBanReason("Admin action");
-                          setBanDuration(7);
-                        }}
-                      >
-                        <IconBan size={14} />
-                      </ActionIcon>
-                    )}
-                  </Group>
+                        },
+                      },
+                      ...(user.pendingAppeals > 0
+                        ? [
+                            {
+                              label: "Open appeal queue",
+                              leftSection: <IconMessageCircleExclamation size={14} />,
+                              onClick: () => {
+                                const pendingAppeal = appeals.find(
+                                  (appeal) => appeal.userId === user.id && appeal.status === "pending",
+                                );
+                                if (pendingAppeal != null) {
+                                  setAppealTarget(pendingAppeal);
+                                  setStaffNote(pendingAppeal.staffNote ?? "");
+                                }
+                              },
+                            },
+                          ]
+                        : []),
+                      user.status === "Banned"
+                        ? {
+                            label: "Unban user",
+                            color: "green",
+                            leftSection: <IconRefresh size={14} />,
+                            onClick: async () => {
+                              await unbanUser({ data: { userId: user.id } });
+                              void router.invalidate();
+                            },
+                          }
+                        : {
+                            label: "Ban user",
+                            color: "red",
+                            leftSection: <IconBan size={14} />,
+                            onClick: () => {
+                              setBanTarget({ id: user.id, name: user.name });
+                              setBanReason("Admin action");
+                              setBanDuration(7);
+                            },
+                          },
+                    ]}
+                  />
                 </Table.Td>
               </Table.Tr>
             ))}
@@ -242,6 +273,120 @@ function AdminControlPanelPage() {
           </Group>
         </Stack>
       </Modal>
+
+      <Modal
+        opened={appealTarget != null}
+        onClose={() => {
+          setAppealTarget(null);
+          setStaffNote("");
+        }}
+        title="Review Appeal"
+        centered
+      >
+        {appealTarget != null && (
+          <Stack>
+            <Text size="sm">
+              <b>{appealTarget.userName}</b> appealed the current ban.
+            </Text>
+            <Text size="sm" c="dimmed">
+              Ban reason: {appealTarget.banReason}
+            </Text>
+            <Paper withBorder p="sm" radius="md">
+              <Text size="sm">{appealTarget.message}</Text>
+            </Paper>
+            <Textarea
+              label="Staff note"
+              placeholder="Optional context for the final decision"
+              value={staffNote}
+              onChange={(event) => {
+                setStaffNote(event.currentTarget.value);
+              }}
+            />
+            <Group justify="space-between">
+              <Button
+                variant="light"
+                color="red"
+                onClick={async () => {
+                  await reviewBanAppeal({ data: { appealId: appealTarget.id, decision: "reject", staffNote } });
+                  setAppealTarget(null);
+                  setStaffNote("");
+                  void router.invalidate();
+                }}
+              >
+                Reject Appeal
+              </Button>
+              <Button
+                color="green"
+                onClick={async () => {
+                  await reviewBanAppeal({ data: { appealId: appealTarget.id, decision: "approve", staffNote } });
+                  setAppealTarget(null);
+                  setStaffNote("");
+                  void router.invalidate();
+                }}
+              >
+                Approve and Unban
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
+
+      <Paper shadow="md" p="lg" radius="md" className="content-card" mb="xl">
+        <Group justify="space-between" mb="md">
+          <Title order={4}>Appeals Queue</Title>
+          <Badge color="orange" variant="light">
+            {appeals.filter((appeal) => appeal.status === "pending").length} pending
+          </Badge>
+        </Group>
+        <Table>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Resident</Table.Th>
+              <Table.Th>Reason</Table.Th>
+              <Table.Th>Status</Table.Th>
+              <Table.Th>Submitted</Table.Th>
+              <Table.Th>Action</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {appeals.map((appeal) => (
+              <Table.Tr key={appeal.id}>
+                <Table.Td>
+                  <Text fw={500}>{appeal.userName}</Text>
+                  <Text size="sm" c="dimmed">
+                    {appeal.userEmail}
+                  </Text>
+                </Table.Td>
+                <Table.Td>{appeal.banReason}</Table.Td>
+                <Table.Td>
+                  <Badge color={getAppealStatusColor(appeal.status)} variant="light">
+                    {appeal.status}
+                  </Badge>
+                </Table.Td>
+                <Table.Td>{new Date(appeal.createdAt).toLocaleDateString("en-US")}</Table.Td>
+                <Table.Td>
+                  {appeal.status === "pending" ? (
+                    <Button
+                      size="xs"
+                      variant="light"
+                      onClick={() => {
+                        setAppealTarget(appeal);
+                        setStaffNote(appeal.staffNote ?? "");
+                      }}
+                    >
+                      Review
+                    </Button>
+                  ) : (
+                    <Text size="sm" c="dimmed">
+                      {appeal.reviewerName ?? "Staff"}
+                    </Text>
+                  )}
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </Paper>
 
       <Paper shadow="md" p="lg" radius="md" className="content-card">
         <Title order={4} mb="md">

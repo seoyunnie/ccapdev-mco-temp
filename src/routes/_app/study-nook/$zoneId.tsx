@@ -14,13 +14,14 @@ import {
   Badge,
   Tooltip,
 } from "@mantine/core";
-import { IconCheck } from "@tabler/icons-react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { BackButton } from "../../../components/back-button.tsx";
 import { DetailSkeleton } from "../../../components/page-skeleton.tsx";
 import { TIME_SLOTS, WEEK_DAYS } from "../../../features/study-nook/study-nook.constants.ts";
+import { useAuth } from "../../../lib/auth-context.tsx";
+import { IconCheck } from "../../../lib/icons.tsx";
 import { createReservation } from "../../../server/reservations.ts";
 import { getZone } from "../../../server/zones.ts";
 
@@ -36,6 +37,8 @@ export const Route = createFileRoute("/_app/study-nook/$zoneId")({
 function ReservationPage() {
   const zone = Route.useLoaderData();
   const router = useRouter();
+  const { isLoggedIn } = useAuth();
+  const [availableZoneData, setAvailableZoneData] = useState<typeof zone | null>(null);
   const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
   const [selectedStartTime, setSelectedStartTime] = useState<string | null>(null);
@@ -43,12 +46,64 @@ function ReservationPage() {
   const [anonymous, setAnonymous] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
 
+  const slotSelectionReady = selectedStartTime != null && selectedEndTime != null;
+
+  useEffect(() => {
+    if (!slotSelectionReady) {
+      return;
+    }
+
+    const baseDate = buildReservationDay(selectedDay);
+    const dateStr = baseDate.toISOString().slice(0, 10);
+    let isCancelled = false;
+
+    void (async () => {
+      try {
+        const nextZone = await getZone({
+          data: {
+            zoneId: zone.id,
+            date: `${dateStr}T00:00:00.000Z`,
+            startTime: `${dateStr}T${to24h(selectedStartTime)}:00.000Z`,
+            endTime: `${dateStr}T${to24h(selectedEndTime)}:00.000Z`,
+          },
+        });
+
+        if (isCancelled) {
+          return;
+        }
+
+        setAvailableZoneData(nextZone);
+        setSelectedSeat((currentSeat) =>
+          currentSeat != null && nextZone.seats.some((seat) => seat.id === currentSeat && !seat.taken)
+            ? currentSeat
+            : null,
+        );
+      } catch {
+        if (!isCancelled) {
+          setAvailableZoneData(null);
+        }
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedDay, selectedEndTime, selectedStartTime, slotSelectionReady, zone]);
+
+  const zoneData = availableZoneData ?? zone;
+  let availabilityMessage = "Loading availability for your selected slot...";
+  if (!slotSelectionReady) {
+    availabilityMessage = "Choose a day and time first to load seat availability.";
+  } else if (availableZoneData != null) {
+    availabilityMessage = `${availableZoneData.available} of ${availableZoneData.capacity} seats are open for ${WEEK_DAYS[selectedDay]} ${selectedStartTime} - ${selectedEndTime}.`;
+  }
+
   // Group seats into rows by letter prefix
-  const seatRows: { id: string; label: string; taken: boolean }[][] = [];
+  const seatRows: { id: string; label: string; rowLabel: string; seatNumberLabel: string; taken: boolean }[][] = [];
   let currentRow: (typeof seatRows)[0] = [];
   let currentLetter = "";
-  for (const seat of zone.seats) {
-    const letter = seat.label.charAt(0);
+  for (const seat of zoneData.seats) {
+    const letter = seat.rowLabel;
     if (letter !== currentLetter && currentRow.length > 0) {
       seatRows.push(currentRow);
       currentRow = [];
@@ -65,10 +120,10 @@ function ReservationPage() {
       <BackButton to="/study-nook" label="Back to Zones" />
 
       <Title className="page-title" mb="xs">
-        {zone.name} - Reserve a Seat
+        {zoneData.name} - Reserve a Seat
       </Title>
       <Text c="dimmed" mb="xl">
-        Click on a green seat to select it, then choose your time slot.
+        Pick a study slot first, then choose from the seats that are actually open for that window.
       </Text>
 
       <Grid>
@@ -76,6 +131,9 @@ function ReservationPage() {
           <Paper shadow="md" p="md" radius="md" className="content-card">
             <Text fw={600} mb="sm" ta="center">
               Seat Map
+            </Text>
+            <Text size="sm" c="dimmed" ta="center" mb="md">
+              {availabilityMessage}
             </Text>
             <Group justify="center" mb="md" gap="lg">
               <Group gap={6}>
@@ -93,9 +151,9 @@ function ReservationPage() {
             </Group>
             <Stack gap="xs" align="center">
               {seatRows.map((row) => (
-                <Group key={row[0].label.charAt(0)} gap="xs">
+                <Group key={row[0].rowLabel} gap="xs">
                   <Text size="xs" w={20} fw={600}>
-                    {row[0].label.charAt(0)}
+                    {row[0].rowLabel}
                   </Text>
                   {row.map((seat) => {
                     const isSelected = selectedSeat === seat.id;
@@ -109,17 +167,17 @@ function ReservationPage() {
                           // oxlint-disable-next-line unicorn/no-nested-ternary, no-nested-ternary
                           color={isSelected ? "pink" : seat.taken ? "gray" : "green"}
                           onClick={() => {
-                            if (!seat.taken) {
+                            if (!seat.taken && slotSelectionReady) {
                               setSelectedSeat(seat.id);
                               setConfirmed(false);
                             }
                           }}
-                          disabled={seat.taken}
+                          disabled={seat.taken || !slotSelectionReady || availableZoneData == null}
                           aria-label={`Seat ${seat.label} — ${status}`}
                           className={styles.seatButton}
                         >
                           <Text size="xs" fw={600}>
-                            {seat.label.slice(1)}
+                            {seat.seatNumberLabel}
                           </Text>
                         </ActionIcon>
                       </Tooltip>
@@ -135,6 +193,9 @@ function ReservationPage() {
           <Paper shadow="md" p="md" radius="md" className="content-card">
             <Stack>
               <Text fw={600}>Booking Options</Text>
+              <Text size="sm" c="dimmed">
+                Logged out users can browse the map, but only signed-in residents can submit a reservation.
+              </Text>
               <SimpleGrid cols={7} spacing="xs">
                 {WEEK_DAYS.map((day, idx) => (
                   <Button
@@ -143,6 +204,9 @@ function ReservationPage() {
                     variant={selectedDay === idx ? "filled" : "light"}
                     onClick={() => {
                       setSelectedDay(idx);
+                      setSelectedSeat(null);
+                      setConfirmed(false);
+                      setAvailableZoneData(null);
                     }}
                   >
                     {day}
@@ -154,14 +218,24 @@ function ReservationPage() {
                 placeholder="Select time"
                 data={[...TIME_SLOTS]}
                 value={selectedStartTime}
-                onChange={setSelectedStartTime}
+                onChange={(value) => {
+                  setSelectedStartTime(value);
+                  setSelectedSeat(null);
+                  setConfirmed(false);
+                  setAvailableZoneData(null);
+                }}
               />
               <Select
                 label="End Time"
                 placeholder="Select time"
                 data={[...TIME_SLOTS]}
                 value={selectedEndTime}
-                onChange={setSelectedEndTime}
+                onChange={(value) => {
+                  setSelectedEndTime(value);
+                  setSelectedSeat(null);
+                  setConfirmed(false);
+                  setAvailableZoneData(null);
+                }}
               />
               <Switch
                 label="Anonymous Reservation"
@@ -174,8 +248,10 @@ function ReservationPage() {
               {selectedSeat != null && (
                 <Paper bg="pink.0" p="sm" radius="md">
                   <Group gap="xs" align="center">
-                    <Text size="sm" component="span">Selected seat:</Text>
-                    <Badge>{zone.seats.find((s) => s.id === selectedSeat)?.label ?? selectedSeat}</Badge>
+                    <Text size="sm" component="span">
+                      Selected seat:
+                    </Text>
+                    <Badge>{zoneData.seats.find((s) => s.id === selectedSeat)?.label ?? selectedSeat}</Badge>
                     {selectedStartTime != null && selectedEndTime != null && (
                       <Text size="sm" component="span">
                         · {WEEK_DAYS[selectedDay]} · {selectedStartTime} – {selectedEndTime}
@@ -190,26 +266,34 @@ function ReservationPage() {
                     <IconCheck size={16} color="var(--mantine-color-green-6)" />
                     <Text size="sm" c="green.7" fw={600}>
                       Reservation confirmed for seat{" "}
-                      {zone.seats.find((s) => s.id === selectedSeat)?.label ?? selectedSeat}!
+                      {zoneData.seats.find((s) => s.id === selectedSeat)?.label ?? selectedSeat}!
                     </Text>
                   </Group>
                 </Paper>
               )}
               <Button
                 fullWidth
-                disabled={selectedSeat == null || selectedStartTime == null || selectedEndTime == null}
+                disabled={
+                  availableZoneData == null ||
+                  selectedSeat == null ||
+                  selectedStartTime == null ||
+                  selectedEndTime == null
+                }
                 color="pink"
                 radius="xl"
                 onClick={async () => {
+                  if (!isLoggedIn) {
+                    void router.navigate({ to: "/login" });
+                    return;
+                  }
                   if (selectedSeat == null || selectedStartTime == null || selectedEndTime == null) {
                     return;
                   }
-                  const baseDate = new Date();
-                  baseDate.setDate(baseDate.getDate() + ((selectedDay - baseDate.getDay() + 7) % 7 || 7));
+                  const baseDate = buildReservationDay(selectedDay);
                   const dateStr = baseDate.toISOString().slice(0, 10);
                   await createReservation({
                     data: {
-                      zoneId: zone.id,
+                      zoneId: zoneData.id,
                       seatId: selectedSeat,
                       date: `${dateStr}T00:00:00.000Z`,
                       startTime: `${dateStr}T${to24h(selectedStartTime)}:00.000Z`,
@@ -221,7 +305,7 @@ function ReservationPage() {
                   void router.invalidate();
                 }}
               >
-                Confirm Reservation
+                {isLoggedIn ? "Confirm Reservation" : "Sign in to Reserve"}
               </Button>
             </Stack>
           </Paper>
@@ -229,6 +313,13 @@ function ReservationPage() {
       </Grid>
     </Container>
   );
+}
+
+function buildReservationDay(selectedDay: number): Date {
+  const baseDate = new Date();
+  const offset = (selectedDay - baseDate.getDay() + 7) % 7;
+  baseDate.setDate(baseDate.getDate() + offset);
+  return baseDate;
 }
 
 function to24h(time: string): string {
