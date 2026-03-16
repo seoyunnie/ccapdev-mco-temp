@@ -1,9 +1,9 @@
 :root {
   --adormable-pink: #e64980;
-  --adormable-pink-soft: rgba(230, 73, 128, 0.1);
-  --adormable-surface: rgba(255, 252, 254, 0.82);
-  --adormable-surface-strong: rgba(255, 252, 254, 0.94);
-  --adormable-border: rgba(230, 73, 128, 0.12);
+  --adormable-pink-soft: rgb(230 73 128 / 10%);
+  --adormable-surface: rgb(255 252 254 / 82%);
+  --adormable-surface-strong: rgb(255 252 254 / 94%);
+  --adormable-border: rgb(230 73 128 / 12%);
 }
 
 *,
@@ -20,8 +20,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   background:
-    radial-gradient(circle at top left, rgba(230, 73, 128, 0.09), transparent 28%),
-    radial-gradient(circle at top right, rgba(190, 75, 219, 0.07), transparent 30%),
+    radial-gradient(circle at top left, rgb(230 73 128 / 9%), transparent 28%),
+    radial-gradient(circle at top right, rgb(190 75 219 / 7%), transparent 30%),
     linear-gradient(180deg, #fffafc 0%, #fff7fb 42%, #fffdfd 100%);
   background-attachment: fixed;
   background-color: #fff9fb;
@@ -29,7 +29,7 @@ body {
 }
 
 ::selection {
-  background: rgba(230, 73, 128, 0.18);
+  background: rgb(230 73 128 / 18%);
 }
 
 a {
@@ -40,7 +40,7 @@ a {
 }
 
 .mantine-Card-root {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 251, 253, 0.9));
+  background: linear-gradient(180deg, rgb(255 255 255 / 92%), rgb(255 251 253 / 90%));
   border: 1px solid var(--adormable-border);
   transition:
     transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
@@ -49,11 +49,11 @@ a {
 
 .mantine-Card-root:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 34px -24px rgba(112, 36, 73, 0.48);
+  box-shadow: 0 20px 34px -24px rgb(112 36 73 / 48%);
 }
 
 .mantine-Button-root {
-  box-shadow: 0 10px 20px -18px rgba(112, 36, 73, 0.5);
+  box-shadow: 0 10px 20px -18px rgb(112 36 73 / 50%);
   transition:
     background-color 0.2s ease,
     transform 0.15s ease,
@@ -93,11 +93,10 @@ a {
 }
 
 .content-card {
-  -webkit-backdrop-filter: blur(18px) saturate(1.08);
   backdrop-filter: blur(18px) saturate(1.08);
   background: linear-gradient(180deg, var(--adormable-surface-strong), var(--adormable-surface));
   border: 1px solid var(--adormable-border);
-  box-shadow: 0 24px 44px -36px rgba(112, 36, 73, 0.45);
+  box-shadow: 0 24px 44px -36px rgb(112 36 73 / 45%);
 }
 
 /* ── Fade-in on scroll (used by FadeInSection) ── */
@@ -132,10 +131,10 @@ a {
 
 /* ── Page entrance animation ── */
 .pageEnter {
-  animation: pageSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: page-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@keyframes pageSlideUp {
+@keyframes page-slide-up {
   from {
     filter: blur(4px);
     opacity: 0;
