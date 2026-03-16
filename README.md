@@ -1,13 +1,5 @@
 # Adormable
 
-> [!IMPORTANT]
-> **DO NOT DIRECTLY TOUCH THE FOLLOWING:**
->
-> - [./src/route-tree.gen.ts](./src/route-tree.gen.ts)
-> - All root files.
->
-> Sincerely, 강서윤
-
 ## Setup
 
 ### Install Node.js
