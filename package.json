@@ -10,6 +10,7 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "lint": "oxlint && stylelint \"**/*.css\"",
+    "lint:ci": "oxlint --format=github && stylelint \"**/*.css\"",
     "lint:fix": "oxlint --fix",
     "postinstall": "prisma generate",
     "preview": "vite preview"
