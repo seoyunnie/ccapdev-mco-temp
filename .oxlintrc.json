@@ -1,9 +1,13 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
 
-  "ignorePatterns": ["dist/**", "generated/prisma/**", "node_modules/**", "prisma/seed.ts", "src/route-tree.gen.ts"],
+  "ignorePatterns": ["prisma/seed.ts", "src/route-tree.gen.ts"],
+  "options": {
+    "reportUnusedDisableDirectives": "warn",
 
-  "options": { "typeAware": true },
+    "typeAware": true,
+    "typeCheck": true
+  },
 
   "env": { "builtin": true, "browser": true, "node": true, "es2022": true },
 
@@ -92,7 +96,7 @@
     { "files": ["vite.config.ts"], "env": { "es2023": true } },
 
     {
-      "files": ["**/*.[jt]sx"],
+      "files": ["**/*.tsx"],
       "jsPlugins": [
         { "name": "tanstack-router", "specifier": "@tanstack/eslint-plugin-router" },
         { "name": "react-compiler", "specifier": "eslint-plugin-react-hooks" }
@@ -148,7 +152,7 @@
       }
     },
     {
-      "files": ["src/routes/**/*.[jt]sx"],
+      "files": ["src/routes/**/*.tsx"],
       "rules": {
         /* Style */
         "unicorn/filename-case": "off",
