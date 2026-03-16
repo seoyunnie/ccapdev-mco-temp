@@ -10,7 +10,7 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "lint": "oxlint && stylelint \"**/*.css\"",
-    "lint:ci": "oxlint --format=github && stylelint \"**/*.css\"",
+    "lint:ci": "oxlint --format=github && stylelint \"**/*.css\" --formatter github",
     "lint:fix": "oxlint --fix",
     "postinstall": "prisma generate",
     "preview": "vite preview"
@@ -40,6 +40,7 @@
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
+    "@csstools/stylelint-formatter-github": "^2.0.0",
     "@tanstack/devtools-vite": "^0.5.5",
     "@tanstack/eslint-plugin-router": "^1.161.4",
     "@tanstack/router-plugin": "^1.166.9",
