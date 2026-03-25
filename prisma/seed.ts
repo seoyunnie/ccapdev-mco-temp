@@ -4,6 +4,7 @@
 /* oxlint-disable no-magic-numbers */
 
 import { PrismaClient } from "@prisma/client";
+
 import { normalizeEstablishmentCategory } from "../src/features/guide/guide.taxonomy.ts";
 import { normalizeThreadTag } from "../src/features/lobby/lobby.taxonomy.ts";
 

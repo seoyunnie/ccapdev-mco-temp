@@ -29,14 +29,7 @@ interface LoginSearch {
   register?: boolean | undefined;
 }
 
-type AuthClientError =
-  | {
-      message?: string;
-      status?: number;
-      statusText?: string;
-    }
-  | null
-  | undefined;
+type AuthClientError = { message?: string; status?: number; statusText?: string } | null | undefined;
 
 function formatAuthError(error: unknown, fallbackMessage: string): string {
   if (typeof error === "string" && error.trim().length > 0) {
