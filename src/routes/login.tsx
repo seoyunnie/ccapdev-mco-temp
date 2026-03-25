@@ -29,6 +29,47 @@ interface LoginSearch {
   register?: boolean | undefined;
 }
 
+type AuthClientError =
+  | {
+      message?: string;
+      status?: number;
+      statusText?: string;
+    }
+  | null
+  | undefined;
+
+function formatAuthError(error: unknown, fallbackMessage: string): string {
+  if (typeof error === "string" && error.trim().length > 0) {
+    return error;
+  }
+
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+
+  return fallbackMessage;
+}
+
+function getAuthClientErrorMessage(authError: AuthClientError, fallbackMessage: string): string {
+  if (authError == null) {
+    return fallbackMessage;
+  }
+
+  if (typeof authError.message === "string" && authError.message.trim().length > 0) {
+    return authError.message;
+  }
+
+  if (typeof authError.statusText === "string" && authError.statusText.trim().length > 0) {
+    return authError.statusText;
+  }
+
+  if (typeof authError.status === "number") {
+    return `Request failed (${authError.status}). Please try again.`;
+  }
+
+  return fallbackMessage;
+}
+
 export const Route = createFileRoute("/login")({
   validateSearch: (search): LoginSearch => ({
     register: typeof search.register === "boolean" ? search.register : undefined,
@@ -73,33 +114,47 @@ function LoginRegisterPage() {
   const handleLogin = async (values: typeof loginForm.values) => {
     setError("");
     setLoading(true);
-    const { error: authError } = await authClient.signIn.email({
-      email: values.email,
-      password: values.password,
-      rememberMe,
-    });
-    setLoading(false);
-    if (authError) {
-      setError(authError.message ?? "Login failed. Please try again.");
-      return;
+    try {
+      const { error: authError } = await authClient.signIn.email({
+        email: values.email,
+        password: values.password,
+        rememberMe,
+      });
+
+      if (authError) {
+        setError(getAuthClientErrorMessage(authError, "Login failed. Please try again."));
+        return;
+      }
+
+      globalThis.location.assign("/dashboard");
+    } catch (error) {
+      setError(formatAuthError(error, "Login failed. Please try again."));
+    } finally {
+      setLoading(false);
     }
-    globalThis.location.assign("/dashboard");
   };
 
   const handleRegister = async (values: typeof registerForm.values) => {
     setError("");
     setLoading(true);
-    const { error: authError } = await authClient.signUp.email({
-      name: `${values.firstName.trim()} ${values.lastName.trim()}`,
-      email: values.email,
-      password: values.password,
-    });
-    setLoading(false);
-    if (authError) {
-      setError(authError.message ?? "Registration failed. Please try again.");
-      return;
+    try {
+      const { error: authError } = await authClient.signUp.email({
+        name: `${values.firstName.trim()} ${values.lastName.trim()}`,
+        email: values.email,
+        password: values.password,
+      });
+
+      if (authError) {
+        setError(getAuthClientErrorMessage(authError, "Registration failed. Please try again."));
+        return;
+      }
+
+      globalThis.location.assign("/dashboard");
+    } catch (error) {
+      setError(formatAuthError(error, "Registration failed. Please try again."));
+    } finally {
+      setLoading(false);
     }
-    globalThis.location.assign("/dashboard");
   };
 
   return (
