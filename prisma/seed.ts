@@ -3,7 +3,8 @@
 // Wipes existing data and creates a fully-furnished demo database.
 /* oxlint-disable no-magic-numbers */
 
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
+
 import { normalizeEstablishmentCategory } from "../src/features/guide/guide.taxonomy.ts";
 import { normalizeThreadTag } from "../src/features/lobby/lobby.taxonomy.ts";
 
