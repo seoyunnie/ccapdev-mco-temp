@@ -3,6 +3,12 @@
   "name": "adormable",
   "version": "1.0.0",
   "private": true,
+  "author": "Raphael Panaligan",
+  "contributors": [
+    "Ken Borbe",
+    "Neil Gutang, Jr.",
+    "Allisha Wong"
+  ],
   "type": "module",
   "scripts": {
     "build": "prisma generate && tsc -b && vite build",
